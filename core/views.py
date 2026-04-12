@@ -1,16 +1,19 @@
 from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticated
 
 from .services.student_service import StudentService
 from .models import Student
 from .serializers import StudentSerializer
-
+from .permissions import IsCounselor, IsSameSchoolStudent
 
 class StudentViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated, IsCounselor, IsSameSchoolStudent]
     serializer_class = StudentSerializer
 
     def get_queryset(self):
-        return Student.objects.for_user(self.request.user)
+        user = self.request.user
+        return Student.objects.for_user(user)
 
     def perform_create(self, serializer):
         student = StudentService.create_student(

@@ -36,7 +36,8 @@ class BaseManager(models.Manager):
 
     def for_user(self, user):
         if not hasattr(user, "counselor"):
-            return self.none()
+            raise PermissionError("User is not a counselor")
+        
         return self.get_queryset().for_school(user.counselor.school)
 
 

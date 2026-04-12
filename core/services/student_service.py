@@ -7,7 +7,9 @@ class StudentService:
     @staticmethod
     def create_student(user, data):
         
-        # here should be business logic
+        if not hasattr(user, "counselor"):
+            raise ValueError("Not a counselor")
+            
         school = user.counselor.school
         return StudentRepository.create(school = school, **data)
     
