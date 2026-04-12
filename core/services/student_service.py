@@ -1,49 +1,24 @@
 from core.models import Student
+from core.repositories.student_repository import StudentRepository
 
 
 class StudentService:
 
     @staticmethod
-    def create_student(user, validated_data):
-        school = user.counselor.school
-
-        student = Student.objects.create(
-            school = school,
-            **validated_data
-        )
-
-        return student
-    
-    @staticmethod
-    def get_students(user):
-        return Student.objects.for_user(user)
-    
-
-    @staticmethod
-    def get_student(user, student_id):
-        return Student.objects.for_user(user).filter(id=student_id).first()
-    
-    @staticmethod
-    def update_student(user, student_id, validated_data):
-        student = StudentService.get_student(user,student_id)
-
-        if not student:
-            return None
+    def create_student(user, data):
         
-        for attr, value in validated_data.items():
-            setattr(student, attr, value)
-
-        student.save()
-        return student
+        # here should be business logic
+        school = user.counselor.school
+        return StudentRepository.create(school = school, **data)
+    
+    
+    @staticmethod
+    def update_student(user, student, data): 
+        return StudentRepository.update(student, **data)
     
 
     @staticmethod
     def delete_student(user, student_id):
-        student = StudentService.get_student(user, student_id)
-
-        if not student:
-            return False
-        
-        student.delete()
-        return True
+        student = StudentRepository.get_by_id(user, student_id)
+        StudentRepository.delete(student)
 

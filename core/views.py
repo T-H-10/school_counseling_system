@@ -15,15 +15,15 @@ class StudentViewSet(ModelViewSet):
     def perform_create(self, serializer):
         student = StudentService.create_student(
             self.request.user,
-            serializer.validate_data
+            serializer.validated_data
         )
         serializer.instance = student
 
     def perform_update(self, serializer):
         student = StudentService.update_student(
             self.request.user,
-            self.get_object().id,
-            serializer.validate_data
+            self.get_object(),
+            serializer.validated_data
         )
         serializer.instance = student
 
