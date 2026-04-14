@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import School, ClassLevel, SchoolYear, Counselor, Student, StudentEnrollment, ClassSession
+from core.models import School, ClassLevel, SchoolYear, Counselor, Student, StudentEnrollment, ClassSession, StudentEvent
 from core.validators import validate_phone, validate_id_number, validate_name
 
 
@@ -65,6 +65,14 @@ class StudentEnrollmentSerializer(serializers.ModelSerializer):
         model = StudentEnrollment
         fields = "__all__"
         read_only_fields = ["school", "created_at"]
+
+
+class StudentEventSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StudentEvent
+        fields = "__all__"
+        read_only_fields = ["counselor", "created_at"]
 
 
 class ClassSessionSerializer(serializers.ModelSerializer):
