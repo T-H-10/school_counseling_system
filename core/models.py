@@ -149,6 +149,7 @@ class StudentEnrollment(BaseModel):
             )
         ]
 
+
 class StudentEvent(BaseModel):
     EVENT_TYPES = [
         ('meeting', 'פגישה'),
