@@ -15,7 +15,12 @@ class StudentService:
     
     
     @staticmethod
-    def update_student(user, student, data): 
+    def update_student(user, student_id, data): 
+
+        if not hasattr(user, "counselor"):
+            raise ValueError("User is not a counselor")
+        
+        student = StudentRepository.get_by_id(user, student_id)
         return StudentRepository.update(student, **data)
     
 
