@@ -6,10 +6,7 @@ class StudentEnrollmentService:
 
     @staticmethod
     def create_enrollment(user, data):
-        
-        if not hasattr(user, "counselor"):
-            raise ValueError("User is not a counselor")
-        
+                
         school = user.counselor.school        
         student = Student.objects.for_user(user).get(id=data["student"])
         school_year = SchoolYear.objects.get(id=data["school_year"])
@@ -28,9 +25,6 @@ class StudentEnrollmentService:
 
     @staticmethod
     def update_enrollment(user, enrollment_id, data):
-
-        if not hasattr(user, "counselor"):
-            raise ValueError("User is not a counselor")
         
         enrollment = StudentEnrollmentRepository.get_by_id(user, enrollment_id)
         return StudentEnrollmentRepository.update(enrollment, data)
@@ -38,8 +32,5 @@ class StudentEnrollmentService:
     @staticmethod
     def delete_enrollment(user, enrollment_id):
 
-        if not hasattr(user, "counselor"):
-            raise ValueError("User is not a counselor")
-        
         enrollment = StudentEnrollmentRepository.get_by_id(user, enrollment_id)
         StudentEnrollmentRepository.delete(enrollment)

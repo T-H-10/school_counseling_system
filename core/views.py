@@ -13,10 +13,10 @@ from .services.counselor_service import CounselorService
 
 from .models import Student, StudentEnrollment, StudentEvent, ClassSession, School, ClassLevel, SchoolYear, Counselor
 from .serializers import StudentSerializer, StudentEnrollmentSerializer, StudentEventSerializer, ClassSessionSerializer, SchoolSerializer, ClassLevelSerializer, SchoolYearSerializer, CounselorSerializer
-from .permissions import IsCounselor, IsSameSchoolStudent
+from .permissions import IsCounselor, IsOwnerSchool
 
 class StudentViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated, IsCounselor, IsSameSchoolStudent]
+    permission_classes = [IsCounselor, IsOwnerSchool]
     serializer_class = StudentSerializer
 
     def get_queryset(self):
@@ -46,6 +46,7 @@ class StudentViewSet(ModelViewSet):
 
 
 class StudentEnrollmentViewSet(ModelViewSet):
+    permission_classes = [IsCounselor, IsOwnerSchool]
     serializer_class = StudentEnrollmentSerializer
 
     def get_queryset(self):
@@ -74,6 +75,7 @@ class StudentEnrollmentViewSet(ModelViewSet):
 
 
 class StudentEventViewSet(ModelViewSet):
+    permission_classes = [IsCounselor, IsOwnerSchool]
     serializer_class = StudentEventSerializer
 
     def get_queryset(self):
@@ -102,6 +104,7 @@ class StudentEventViewSet(ModelViewSet):
 
 
 class ClassSessionViewSet(ModelViewSet):
+    permission_classes = [IsCounselor, IsOwnerSchool]
     serializer_class = ClassSessionSerializer
 
     def get_queryset(self):
@@ -130,6 +133,7 @@ class ClassSessionViewSet(ModelViewSet):
 
 
 class SchoolViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = School.objects.all()
     serializer_class = SchoolSerializer
 
@@ -149,6 +153,7 @@ class SchoolViewSet(ModelViewSet):
 
 
 class ClassLevelViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = ClassLevel.objects.all()
     serializer_class = ClassLevelSerializer
 
@@ -168,6 +173,7 @@ class ClassLevelViewSet(ModelViewSet):
 
 
 class SchoolYearViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = SchoolYear.objects.all()
     serializer_class = SchoolYearSerializer
 
@@ -187,6 +193,7 @@ class SchoolYearViewSet(ModelViewSet):
 
 
 class CounselorViewSet(ModelViewSet):
+    permission_classes = [IsCounselor]
     queryset = Counselor.objects.all()
     serializer_class = CounselorSerializer
 

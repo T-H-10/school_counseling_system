@@ -7,9 +7,6 @@ class ClassSessionService:
     @staticmethod
     def create_session(user, data):
 
-        if not hasattr(user, "counselor"):
-            raise ValueError("User is not a counselor")
-
         counselor = user.counselor
         school = counselor.school
 
@@ -29,18 +26,12 @@ class ClassSessionService:
     @staticmethod
     def update_session(user, session_id, data):
 
-        if not hasattr(user, "counselor"):
-            raise ValueError("User is not a counselor")
-
         session = ClassSessionRepository.get_by_id(user, session_id)
 
         return ClassSessionRepository.update(session, data)
 
     @staticmethod
     def delete_session(user, session_id):
-
-        if not hasattr(user, "counselor"):
-            raise ValueError("User is not a counselor")
 
         session = ClassSessionRepository.get_by_id(user, session_id)
 

@@ -7,9 +7,6 @@ class StudentService:
     @staticmethod
     def create_student(user, data):
         
-        if not hasattr(user, "counselor"):
-            raise ValueError("Not a counselor")
-            
         school = user.counselor.school
         return StudentRepository.create(school = school, **data)
     
@@ -17,9 +14,6 @@ class StudentService:
     @staticmethod
     def update_student(user, student_id, data): 
 
-        if not hasattr(user, "counselor"):
-            raise ValueError("User is not a counselor")
-        
         student = StudentRepository.get_by_id(user, student_id)
         return StudentRepository.update(student, **data)
     
