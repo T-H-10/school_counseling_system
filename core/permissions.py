@@ -6,9 +6,16 @@ class IsCounselor(BasePermission):
             request.user.is_authenticated and
             hasattr(request.user, "counselor")
         )
-    
 
-class IsSameSchoolStudent(BasePermission):
+
+class IsOwnerSchool(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return obj.school == request.user.counselor.school
+        if hasattr(obj, "school"):
+            return obj.school == request.user.counselor.school
+
+        if hasattr(obj, "student"):
+            return obj.student.school == request.user.counselor.school
+
+        return False
+     
