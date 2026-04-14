@@ -134,6 +134,7 @@ class StudentEnrollment(BaseModel):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="enrollments")
     school_year = models.ForeignKey(SchoolYear, on_delete=models.CASCADE, related_name="enrollments")
 
+    school = models.ForeignKey(School, on_delete=models.CASCADE)
     class_level = models.ForeignKey(ClassLevel, on_delete=models.SET_NULL, null=True)
     class_number = models.PositiveIntegerField()
 
@@ -159,6 +160,7 @@ class StudentEvent(BaseModel):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="events")
     counselor = models.ForeignKey(Counselor, on_delete=models.CASCADE, related_name="events")
 
+    school = models.ForeignKey(School, on_delete=models.CASCADE)
     event_type = models.CharField(max_length=30, choices=EVENT_TYPES)
 
     title = models.CharField(max_length=200)
