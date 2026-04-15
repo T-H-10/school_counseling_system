@@ -1,39 +1,39 @@
-from core.models import Counselor
-from core.repositories.baseRepository import BaseRepository
+# from core.models import Counselor
+# from core.repositories.baseRepository import BaseRepository
 
 
-class CounselorRepository(BaseRepository):
+# class CounselorRepository(BaseRepository):
 
 
-    model = Counselor
+#     model = Counselor
 
-    @staticmethod
-    def get_by_user(user):
-        return Counselor.objects.filter(user=user).first()
+#     @staticmethod
+#     def get_by_user(user):
+#         return Counselor.objects.filter(user=user).first()
     
-    # @staticmethod
-    # def create(**data):
-    #     return Counselor.objects.create(**data)
+#     # @staticmethod
+#     # def create(**data):
+#     #     return Counselor.objects.create(**data)
 
-    # @staticmethod
-    # def get_by_user(user):
-    #     return Counselor.objects.filter(user=user).first()
+#     # @staticmethod
+#     # def get_by_user(user):
+#     #     return Counselor.objects.filter(user=user).first()
     
-    # @staticmethod
-    # def get_all():
-    #     return Counselor.objects.all()
+#     # @staticmethod
+#     # def get_all():
+#     #     return Counselor.objects.all()
 
-    # @staticmethod
-    # def get_by_id(counselor_id):
-    #     return Counselor.objects.filter(id=counselor_id).first()
+#     # @staticmethod
+#     # def get_by_id(counselor_id):
+#     #     return Counselor.objects.filter(id=counselor_id).first()
 
-    # @staticmethod
-    # def update(counselor, **data):
-    #     for attr, value in data.items():
-    #         setattr(counselor, attr, value)
-    #     counselor.save()
-    #     return counselor
+#     # @staticmethod
+#     # def update(counselor, **data):
+#     #     for attr, value in data.items():
+#     #         setattr(counselor, attr, value)
+#     #     counselor.save()
+#     #     return counselor
 
-    # @staticmethod
-    # def delete(counselor):
-    #     counselor.delete()
+#     # @staticmethod
+#     # def delete(counselor):
+#     #     counselor.delete()

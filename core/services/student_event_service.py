@@ -1,5 +1,5 @@
 from core.helpers import ensure_same_school
-from core.repositories.student_event_repository import StudentEventRepository
+from core.models import StudentEvent
 
 
 class StudentEventService:
@@ -12,7 +12,10 @@ class StudentEventService:
 
         ensure_same_school(user, student)
         
-        return StudentEventRepository.create(
+        data.pop("school", None)
+        data.pop("counselor", None)
+        
+        return StudentEvent.objects.create(
             student=student,
             counselor=counselor,
             event_type=data["event_type"],
@@ -29,12 +32,16 @@ class StudentEventService:
         data.pop("school", None)
         data.pop("counselor", None)
         data.pop("student", None)
+        data.pop("id", None)
 
-        return StudentEventRepository.update(event, **data)
-
+        for attr, value in data.items():
+            setattr(event, attr, value)
+        event.save()
+        return event
+    
     @staticmethod
     def delete_event(user, event):
 
         ensure_same_school(user, event)
 
-        return StudentEventRepository.delete(event)
+        event.delete()

@@ -1,19 +1,22 @@
-from core.repositories.school_repository import SchoolRepository
+
+from core.models import School
 
 
 class SchoolService:
 
     @staticmethod
     def create_school(data):
-
-        return SchoolRepository.create(**data)
+        return School.objects.create(**data)
 
     @staticmethod
     def update_school(school, data):
 
-        return SchoolRepository.update(school, **data)
+        for attr, value in data.items():
+            setattr(school, attr, value)
+        school.save()
+        return school
 
     @staticmethod
     def delete_school(school):
         
-        return SchoolRepository.delete(school)
+        school.delete()

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import transaction
 
-from core.repositories.counselor_repository import CounselorRepository
+from core.models import Counselor
 
 
 class CounselorService:
@@ -22,7 +22,7 @@ class CounselorService:
             password=password
         )
 
-        return CounselorRepository.create(
+        return Counselor.objects.create(
             user=user,
             school = school,
             full_name = data["full_name"]
@@ -36,14 +36,18 @@ class CounselorService:
         data.pop("school", None)
         data.pop("id", None)
 
-        return CounselorRepository.update(counselor, **data)
+        for attr, value in data.items():
+            setattr(counselor, attr, value)
+
+        counselor.save()
+        return counselor
 
     @staticmethod
     @transaction.atomic
     def delete_counselor(counselor):
 
         user = counselor.user
-        CounselorRepository.delete(counselor)
+        counselor.delete()
         user.delete()
 
     @staticmethod

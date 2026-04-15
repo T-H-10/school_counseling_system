@@ -1,16 +1,19 @@
-from core.repositories.class_level_repository import ClassLevelRepository
+from core.models import ClassLevel
 
 
 class ClassLevelService:
 
     @staticmethod
     def create_class_level(data):
-        return ClassLevelRepository.create(**data)
+        return ClassLevel.objects.create(**data)
 
     @staticmethod
     def update_class_level(level, data):
-        return ClassLevelRepository.update(level, **data)
-
+        for attr, value in data.items():
+            setattr(level, attr, value)
+        level.save()
+        return level
+    
     @staticmethod
     def delete_class_level(level):
-        return ClassLevelRepository.delete(level)
+        level.delete()

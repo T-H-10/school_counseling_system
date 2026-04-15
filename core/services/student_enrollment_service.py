@@ -1,4 +1,4 @@
-from core.repositories.student_enrollment_repository import StudentEnrollmentRepository
+from core.models import StudentEnrollment
 from core.helpers import ensure_same_school
 
 class StudentEnrollmentService:
@@ -8,12 +8,13 @@ class StudentEnrollmentService:
                 
         school = user.counselor.school        
         student = data["student"]
+
         ensure_same_school(user, student)
 
         data.pop("school", None)
 
 
-        return StudentEnrollmentRepository.create(
+        return StudentEnrollment.objects.create(
             student=student,
             school_year=data["school_year"],
             class_level=data.get("class_level"),
@@ -29,11 +30,16 @@ class StudentEnrollmentService:
         data.pop("school", None)
         data.pop("student", None)
         data.pop("school_year", None)
+        data.pop("id", None)
 
-        return StudentEnrollmentRepository.update(enrollment, **data)
+        for attr, value in data.items():
+            setattr(enrollment, attr, value)
 
+        enrollment.save()
+        return enrollment
+    
     @staticmethod
     def delete_enrollment(user, enrollment):
 
         ensure_same_school(user, enrollment)
-        return StudentEnrollmentRepository.delete(enrollment)
+        enrollment.delete()

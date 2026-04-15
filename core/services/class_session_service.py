@@ -1,5 +1,5 @@
 from core.helpers import ensure_same_school
-from core.repositories.class_session_repository import ClassSessionRepository
+from core.models import ClassSession
 
 
 class ClassSessionService:
@@ -9,7 +9,10 @@ class ClassSessionService:
 
         counselor = user.counselor
 
-        return ClassSessionRepository.create(
+        data.pop("school", None)
+        data.pop("counselor", None)
+
+        return ClassSession.objects.create(
             school=counselor.school,
             counselor=counselor,
             school_year=data["school_year"],
@@ -24,13 +27,17 @@ class ClassSessionService:
 
         ensure_same_school(user, session)
         
+        data.pop("id", None)
         data.pop("school", None)
         data.pop("counselor", None)
         
-        return ClassSessionRepository.update(session, **data)
+        for attr, value in data.items():
+            setattr(session, attr, value)
+        session.save()
+        return session
 
     @staticmethod
     def delete_session(user, session):
 
         ensure_same_school(user, session)
-        return ClassSessionRepository.delete(session)
+        session.delete()
