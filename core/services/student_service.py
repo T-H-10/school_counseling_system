@@ -1,3 +1,4 @@
+from core.models import Student
 from core.repositories.student_repository import StudentRepository
 from core.helpers import ensure_same_school
 
@@ -9,7 +10,7 @@ class StudentService:
         school = user.counselor.school
         data.pop("school", None)
 
-        return StudentRepository.create(school = school, **data)
+        return Student.objects.create(school = school, **data)
     
     
     @staticmethod
@@ -20,12 +21,16 @@ class StudentService:
         data.pop("school", None)
         data.pop("id", None)
 
-        return StudentRepository.update(student, **data)
+        for attr, value in data.items():
+                setattr(student, attr, value)
+
+        student.save()
+        return student
     
 
     @staticmethod
     def delete_student(user, student):
 
         ensure_same_school(user, student)
-        return StudentRepository.delete(student)
+        student.delete()
 
