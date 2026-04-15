@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from .services.student_service import StudentService
 from .services.student_enrollment_service import StudentEnrollmentService
@@ -16,11 +18,13 @@ from .serializers import StudentSerializer, StudentEnrollmentSerializer, Student
 from .permissions import IsCounselor, IsOwnerSchool
 
 class StudentViewSet(ModelViewSet):
-    permission_classes = [IsCounselor, IsOwnerSchool]
+    permission_classes = [IsCounselor]
     serializer_class = StudentSerializer
 
     def get_queryset(self):
-        return Student.objects.for_user(self.request.user)
+        return Student.objects.filter(
+            school = self.request.user.counselor.school
+        )
 
     def perform_create(self, serializer):
         student = StudentService.create_student(
@@ -45,11 +49,13 @@ class StudentViewSet(ModelViewSet):
 
 
 class StudentEnrollmentViewSet(ModelViewSet):
-    permission_classes = [IsCounselor, IsOwnerSchool]
+    permission_classes = [IsCounselor]
     serializer_class = StudentEnrollmentSerializer
 
     def get_queryset(self):
-        return StudentEnrollment.objects.for_user(self.request.user)
+        return StudentEnrollment.objects.filter(
+            school = self.request.user.counselor.school
+        )
 
     def perform_create(self, serializer):
         enrollment = StudentEnrollmentService.create_enrollment(
@@ -61,7 +67,7 @@ class StudentEnrollmentViewSet(ModelViewSet):
     def perform_update(self, serializer):
         enrollment = StudentEnrollmentService.update_enrollment(
             self.request.user,
-            self.get_object().id,
+            self.get_object(),
             serializer.validated_data
         )
         serializer.instance = enrollment
@@ -69,16 +75,18 @@ class StudentEnrollmentViewSet(ModelViewSet):
     def perform_destroy(self, instance):
         StudentEnrollmentService.delete_enrollment(
             self.request.user,
-            instance.id
+            instance
         ) 
 
 
 class StudentEventViewSet(ModelViewSet):
-    permission_classes = [IsCounselor, IsOwnerSchool]
+    permission_classes = [IsCounselor]
     serializer_class = StudentEventSerializer
 
     def get_queryset(self):
-        return StudentEvent.objects.for_user(self.request.user)
+        return StudentEvent.objects.filter(
+            school = self.request.user.counselor.school
+        )
 
     def perform_create(self, serializer):
         event = StudentEventService.create_event(
@@ -90,7 +98,7 @@ class StudentEventViewSet(ModelViewSet):
     def perform_update(self, serializer):
         event = StudentEventService.update_event(
             self.request.user,
-            self.get_object().id,
+            self.get_object(),
             serializer.validated_data
         )
         serializer.instance = event
@@ -98,16 +106,18 @@ class StudentEventViewSet(ModelViewSet):
     def perform_destroy(self, instance):
         StudentEventService.delete_event(
             self.request.user,
-            instance.id
+            instance
         )        
 
 
 class ClassSessionViewSet(ModelViewSet):
-    permission_classes = [IsCounselor, IsOwnerSchool]
+    permission_classes = [IsCounselor]
     serializer_class = ClassSessionSerializer
 
     def get_queryset(self):
-        return ClassSession.objects.for_user(self.request.user)
+        return ClassSession.objects.filter(
+            school = self.request.user.counselor.school
+        )
 
     def perform_create(self, serializer):
         session = ClassSessionService.create_session(
@@ -119,7 +129,7 @@ class ClassSessionViewSet(ModelViewSet):
     def perform_update(self, serializer):
         session = ClassSessionService.update_session(
             self.request.user,
-            self.get_object().id,
+            self.get_object(),
             serializer.validated_data
         )
         serializer.instance = session
@@ -127,12 +137,12 @@ class ClassSessionViewSet(ModelViewSet):
     def perform_destroy(self, instance):
         ClassSessionService.delete_session(
             self.request.user,
-            instance.id
+            instance
         )
 
 
 class SchoolViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     queryset = School.objects.all()
     serializer_class = SchoolSerializer
 
@@ -142,17 +152,17 @@ class SchoolViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         school = SchoolService.update_school(
-            self.get_object().id,
+            self.get_object(),
             serializer.validated_data
         )
         serializer.instance = school
 
     def perform_destroy(self, instance):
-        SchoolService.delete_school(instance.id)        
+        SchoolService.delete_school(instance)        
 
 
 class ClassLevelViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     queryset = ClassLevel.objects.all()
     serializer_class = ClassLevelSerializer
 
@@ -162,17 +172,17 @@ class ClassLevelViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         level = ClassLevelService.update_class_level(
-            self.get_object().id,
+            self.get_object(),
             serializer.validated_data
         )
         serializer.instance = level
 
     def perform_destroy(self, instance):
-        ClassLevelService.delete_class_level(instance.id)
+        ClassLevelService.delete_class_level(instance)
 
 
 class SchoolYearViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     queryset = SchoolYear.objects.all()
     serializer_class = SchoolYearSerializer
 
@@ -182,30 +192,47 @@ class SchoolYearViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         year = SchoolYearService.update_school_year(
-            self.get_object().id,
+            self.get_object(),
             serializer.validated_data
         )
         serializer.instance = year
 
     def perform_destroy(self, instance):
-        SchoolYearService.delete_school_year(instance.id)
+        SchoolYearService.delete_school_year(
+            instance
+            )
 
 
 class CounselorViewSet(ModelViewSet):
-    permission_classes = [IsCounselor]
+    permission_classes = [IsAdminUser]
     queryset = Counselor.objects.all()
     serializer_class = CounselorSerializer
 
     def perform_create(self, serializer):
-        counselor = CounselorService.create_counselor(serializer.validated_data)
+        counselor = CounselorService.create_counselor(
+            serializer.validated_data
+            )
         serializer.instance = counselor
 
     def perform_update(self, serializer):
         counselor = CounselorService.update_counselor(
-            self.get_object().id,
+            self.get_object(),
             serializer.validated_data
         )
         serializer.instance = counselor
 
     def perform_destroy(self, instance):
-        CounselorService.delete_counselor(instance.id)
+        CounselorService.delete_counselor(
+            instance
+        )
+    
+    @action(detail=True, methods=["post"], permission_classes=[IsAdminUser])
+    def reset_password(self, request, pk = None):
+        counselor = self.get_object()
+
+        CounselorService.reset_password(
+            counselor,
+            request.data["new_password"]
+        )
+
+        return Response({"status": "password updated"})

@@ -4,27 +4,25 @@ from core.repositories.school_repository import SchoolRepository
 class SchoolService:
 
     @staticmethod
-    def create_school(request_user, data):
+    def create_school(data):
 
-        if not request_user.is_superuser:
-            raise PermissionError("Only admin allowed")
+        # if not request_user.is_superuser:
+        #     raise PermissionError("Only admin allowed")
         
         return SchoolRepository.create(**data)
 
     @staticmethod
-    def update_school(request_user, school_id, data):
+    def update_school(school, data):
 
-        if not request_user.is_superuser:
-            raise PermissionError("Only admin allowed")
+        # if not request_user.is_superuser:
+        #     raise PermissionError("Only admin allowed")
         
-        school = SchoolRepository.get_by_id(school_id)
         return SchoolRepository.update(school, **data)
 
     @staticmethod
-    def delete_school(request_user, school_id):
+    def delete_school(school):
         
-        if not request_user.is_superuser:
-            raise PermissionError("Only admin allowed")
+        # if not request_user.is_superuser:
+        #     raise PermissionError("Only admin allowed")
         
-        school = SchoolRepository.get_by_id(school_id)
         return SchoolRepository.delete(school)

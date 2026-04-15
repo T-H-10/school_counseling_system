@@ -21,9 +21,8 @@ class StudentEnrollmentService:
         )
 
     @staticmethod
-    def update_enrollment(user, enrollment_id, data):
+    def update_enrollment(user, enrollment, data):
         
-        enrollment = StudentEnrollmentRepository.get_by_id(user, enrollment_id)
         if enrollment.school != user.counselor.school:
             raise PermissionError("Not allowed")
         
@@ -34,9 +33,7 @@ class StudentEnrollmentService:
         return StudentEnrollmentRepository.update(enrollment, **data)
 
     @staticmethod
-    def delete_enrollment(user, enrollment_id):
-
-        enrollment = StudentEnrollmentRepository.get_by_id(user, enrollment_id)
+    def delete_enrollment(user, enrollment):
 
         if enrollment.school != user.counselor.school:
             raise PermissionError("Not allowed")

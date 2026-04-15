@@ -18,4 +18,7 @@ class IsOwnerSchool(BasePermission):
             return obj.student.school == request.user.counselor.school
 
         return False
-     
+
+# class IsAdminUser(BasePermission):
+#     def has_permission(self, request, view):
+#         return request.user and request.user.is_superuser

@@ -10,8 +10,10 @@ class SoftDeleteModel(models.Model):
         abstract = True
 
     def delete(self, *args, **kwargs):
+        if self.deleted_at:
+            return
         self.deleted_at = timezone.now()
-        self.save()
+        self.save(update_fields=["deleted_at"])
 
     def hard_delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
@@ -22,8 +24,8 @@ class BaseQuerySet(models.QuerySet):
     def alive(self):
         return self.filter(deleted_at__isnull=True)
 
-    def for_school(self, school):
-        return self.filter(school=school, deleted_at__isnull=True)
+    # def for_school(self, school):
+    #     return self.filter(school=school)
     
 
 class BaseManager(models.Manager):
@@ -31,14 +33,9 @@ class BaseManager(models.Manager):
     def get_queryset(self):
         return BaseQuerySet(self.model, using=self._db).alive()
 
-    def alive(self):
-        return self.get_queryset().alive()
 
-    def for_school(self, school):
-        # if not hasattr(user, "counselor"):
-        #     raise PermissionError("User is not a counselor")
-        
-        return self.get_queryset().for_school(school)
+    # def for_school(self, school):        
+    #     return self.get_queryset().for_school(school)
 
 
 class BaseModel(SoftDeleteModel):
