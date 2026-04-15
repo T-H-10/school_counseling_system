@@ -16,7 +16,7 @@ class CounselorRepository:
         return Counselor.objects.get(id=counselor_id)
 
     @staticmethod
-    def update(counselor, data):
+    def update(counselor, **data):
         for attr, value in data.items():
             setattr(counselor, attr, value)
         counselor.save()

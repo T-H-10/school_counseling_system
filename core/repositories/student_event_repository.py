@@ -9,10 +9,10 @@ class StudentEventRepository:
 
     @staticmethod
     def get_by_id(user, event_id):
-        return StudentEvent.objects.for_user(user).get(id=event_id)
+        return StudentEvent.objects.get(id=event_id)
 
     @staticmethod
-    def update(event, data):
+    def update(event, **data):
         for attr, value in data.items():
             setattr(event, attr, value)
         event.save()

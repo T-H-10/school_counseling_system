@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from core import models
 from core.models import School, ClassLevel, SchoolYear, Counselor, Student, StudentEnrollment, ClassSession, StudentEvent
 from core.validators import validate_phone, validate_id_number, validate_name
 
@@ -29,7 +30,7 @@ class CounselorSerializer(serializers.ModelSerializer):
 
     username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
-    school = serializers.PrimaryKeyRelatedField(read_only=True)
+    school = serializers.PrimaryKeyRelatedField(queryset=School.objects.all())
 
     class Meta:
         model = Counselor

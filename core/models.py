@@ -93,7 +93,7 @@ class ClassLevel(models.Model):
         ('ח', 'ח'),
     ]
         
-    name = models.CharField(max_length=1, choices=LEVEL_CHOICES)  
+    name = models.CharField(max_length=1, choices=LEVEL_CHOICES, unique=True)  
 
     def __str__(self):
         return self.name

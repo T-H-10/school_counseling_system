@@ -12,7 +12,7 @@ class SchoolRepository:
         return School.objects.get(id=school_id)
 
     @staticmethod
-    def update(school, data):
+    def update(school, **data):
         for attr, value in data.items():
             setattr(school, attr, value)
         school.save()

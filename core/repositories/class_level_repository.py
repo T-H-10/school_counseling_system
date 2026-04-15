@@ -12,7 +12,7 @@ class ClassLevelRepository:
         return ClassLevel.objects.get(id=level_id)
 
     @staticmethod
-    def update(level, data):
+    def update(level, **data):
         for attr, value in data.items():
             setattr(level, attr, value)
         level.save()
