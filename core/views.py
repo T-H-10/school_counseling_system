@@ -15,7 +15,7 @@ from .services.counselor_service import CounselorService
 
 from .models import Student, StudentEnrollment, StudentEvent, ClassSession, School, ClassLevel, SchoolYear, Counselor
 from .serializers import StudentSerializer, StudentEnrollmentSerializer, StudentEventSerializer, ClassSessionSerializer, SchoolSerializer, ClassLevelSerializer, SchoolYearSerializer, CounselorSerializer
-from .permissions import IsCounselor, IsOwnerSchool
+from .permissions import IsCounselor
 
 class StudentViewSet(ModelViewSet):
     permission_classes = [IsCounselor]

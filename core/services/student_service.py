@@ -1,5 +1,4 @@
 from core.models import Student
-from core.repositories.student_repository import StudentRepository
 from core.helpers import ensure_same_school
 
 class StudentService:
