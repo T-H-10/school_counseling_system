@@ -23,13 +23,22 @@ class ClassSessionService:
     @staticmethod
     def update_session(user, session_id, data):
 
-        session = ClassSessionRepository.get_by_id(user, session_id)
+        session = ClassSessionRepository.get_by_id(session_id)
 
-        return ClassSessionRepository.update(session, data)
+        if session.school != user.counselor.school:
+            raise PermissionError("Not allowed")
+        
+        data.pop("school", None)
+        data.pop("counselor", None)
+        
+        return ClassSessionRepository.update(session, **data)
 
     @staticmethod
     def delete_session(user, session_id):
 
         session = ClassSessionRepository.get_by_id(user, session_id)
+
+        if session.school != user.counselor.school:
+            raise PermissionError("Not allowed")
 
         ClassSessionRepository.delete(session)

@@ -8,11 +8,11 @@ class ClassSessionRepository:
         return ClassSession.objects.create(**data)
 
     @staticmethod
-    def get_by_id(user, session_id):
-        return ClassSession.objects.for_user(user).get(id=session_id)
+    def get_by_id(session_id):
+        return ClassSession.objects.get(id=session_id)
 
     @staticmethod
-    def update(session, data):
+    def update(session, **data):
         for attr, value in data.items():
             setattr(session, attr, value)
         session.save()
