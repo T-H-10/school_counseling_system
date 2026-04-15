@@ -1,4 +1,4 @@
-from core.models import Student, Counselor
+from core.helpers import ensure_same_school
 from core.repositories.student_event_repository import StudentEventRepository
 
 
@@ -8,11 +8,9 @@ class StudentEventService:
     def create_event(user, data):
 
         counselor = user.counselor
-        school = counselor.school
         student = data["student"]
 
-        if student.school != school:
-            raise PermissionError("Student does not belong to your school")
+        ensure_same_school(user, student)
         
         return StudentEventRepository.create(
             student=student,
@@ -20,25 +18,23 @@ class StudentEventService:
             event_type=data["event_type"],
             title=data["title"],
             description=data["description"],
-            school = school
+            school = counselor.school
         )
 
     @staticmethod
     def update_event(user, event, data):
 
-        if event.school != user.counselor.school:
-            raise PermissionError("Not allowed")
+        ensure_same_school(user, event)
         
-        # data.pop("school", None)
-        # data.pop("counselor", None)
-        # data.pop("student", None)
+        data.pop("school", None)
+        data.pop("counselor", None)
+        data.pop("student", None)
 
         return StudentEventRepository.update(event, **data)
 
     @staticmethod
     def delete_event(user, event):
 
-        if event.school != user.counselor.school:
-            raise PermissionError("Not allowed")
+        ensure_same_school(user, event)
 
-        StudentEventRepository.delete(event)
+        return StudentEventRepository.delete(event)

@@ -9,7 +9,11 @@ class StudentEnrollmentRepository:
 
     @staticmethod
     def get_by_id(enrollment_id):
-        return StudentEnrollment.objects.get(id=enrollment_id)
+        return StudentEnrollment.objects.filter(id=enrollment_id).first()
+    
+    @staticmethod
+    def get_all():
+        return StudentEnrollment.objects.all()
 
     @staticmethod
     def update(enrollment, **data):

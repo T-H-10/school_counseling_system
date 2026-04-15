@@ -9,7 +9,7 @@ class StudentRepository:
     
     @staticmethod
     def get_by_id(student_id):
-        return Student.objects.get(id = student_id)
+        return Student.objects.filter(id = student_id).first()
     
     @staticmethod
     def create(**data):

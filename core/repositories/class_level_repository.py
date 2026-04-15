@@ -9,7 +9,11 @@ class ClassLevelRepository:
 
     @staticmethod
     def get_by_id(level_id):
-        return ClassLevel.objects.get(id=level_id)
+        return ClassLevel.objects.filter(id=level_id).first()
+    
+    @staticmethod
+    def get_all():
+        return ClassLevel.objects.all()
 
     @staticmethod
     def update(level, **data):

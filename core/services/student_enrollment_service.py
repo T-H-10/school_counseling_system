@@ -1,5 +1,5 @@
 from core.repositories.student_enrollment_repository import StudentEnrollmentRepository
-
+from core.helpers import ensure_same_school
 
 class StudentEnrollmentService:
 
@@ -8,9 +8,10 @@ class StudentEnrollmentService:
                 
         school = user.counselor.school        
         student = data["student"]
+        ensure_same_school(user, student)
 
-        if student.school != school:
-            raise PermissionError("Student does not belong to your school")
+        data.pop("school", None)
+
 
         return StudentEnrollmentRepository.create(
             student=student,
@@ -23,8 +24,7 @@ class StudentEnrollmentService:
     @staticmethod
     def update_enrollment(user, enrollment, data):
         
-        if enrollment.school != user.counselor.school:
-            raise PermissionError("Not allowed")
+        ensure_same_school(user, enrollment)
         
         data.pop("school", None)
         data.pop("student", None)
@@ -35,7 +35,5 @@ class StudentEnrollmentService:
     @staticmethod
     def delete_enrollment(user, enrollment):
 
-        if enrollment.school != user.counselor.school:
-            raise PermissionError("Not allowed")
-        
-        StudentEnrollmentRepository.delete(enrollment)
+        ensure_same_school(user, enrollment)
+        return StudentEnrollmentRepository.delete(enrollment)

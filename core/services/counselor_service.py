@@ -1,11 +1,13 @@
 from django.contrib.auth.models import User
-from core.models import School
+from django.db import transaction
+
 from core.repositories.counselor_repository import CounselorRepository
 
 
 class CounselorService:
 
     @staticmethod
+    @transaction.atomic
     def create_counselor(data):
 
         username = data["username"]
@@ -29,28 +31,23 @@ class CounselorService:
 
     @staticmethod
     def update_counselor(counselor, data):
-
-        # if not request_user.is_superuser:
-        #     raise PermissionError("Only admin can update counselors")
         
         data.pop("user", None)
         data.pop("school", None)
+        data.pop("id", None)
 
         return CounselorRepository.update(counselor, **data)
 
     @staticmethod
+    @transaction.atomic
     def delete_counselor(counselor):
 
-        # if not request_user.is_superuser:
-        #     raise PermissionError("Only admin can delete counselors")
-
+        user = counselor.user
         CounselorRepository.delete(counselor)
+        user.delete()
 
     @staticmethod
     def reset_password(counselor, new_password):
-
-        # if not request_user.is_superuser:
-        #     raise PermissionError("Only admin can reset passwords")
 
         user = counselor.user
         user.set_password(new_password)

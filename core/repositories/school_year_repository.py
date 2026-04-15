@@ -9,7 +9,11 @@ class SchoolYearRepository:
 
     @staticmethod
     def get_by_id(year_id):
-        return SchoolYear.objects.get(id=year_id)
+        return SchoolYear.objects.filter(id=year_id).first()
+    
+    @staticmethod
+    def get_all():
+        return SchoolYear.objects.all()
 
     @staticmethod
     def update(year, **data):

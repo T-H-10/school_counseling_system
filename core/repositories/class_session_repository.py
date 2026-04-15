@@ -9,7 +9,11 @@ class ClassSessionRepository:
 
     @staticmethod
     def get_by_id(session_id):
-        return ClassSession.objects.get(id=session_id)
+        return ClassSession.objects.filter(id=session_id).first()
+    
+    @staticmethod
+    def get_all():
+        return ClassSession.objects.all()
 
     @staticmethod
     def update(session, **data):

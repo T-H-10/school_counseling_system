@@ -8,16 +8,16 @@ class IsCounselor(BasePermission):
         )
 
 
-class IsOwnerSchool(BasePermission):
+# class IsOwnerSchool(BasePermission):
 
-    def has_object_permission(self, request, view, obj):
-        if hasattr(obj, "school"):
-            return obj.school == request.user.counselor.school
+#     def has_object_permission(self, request, view, obj):
+#         if hasattr(obj, "school"):
+#             return obj.school == request.user.counselor.school
 
-        if hasattr(obj, "student"):
-            return obj.student.school == request.user.counselor.school
+#         if hasattr(obj, "student"):
+#             return obj.student.school == request.user.counselor.school
 
-        return False
+#         return False
 
 # class IsAdminUser(BasePermission):
 #     def has_permission(self, request, view):
