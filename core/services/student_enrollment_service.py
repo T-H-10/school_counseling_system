@@ -11,14 +11,16 @@ class StudentEnrollmentService:
 
         ensure_same_school(user, student)
 
-        data.pop("school", None)
-
+        clean_data = {
+            k: v for k, v in data.items()
+            if k not in ["school"]
+        }
 
         return StudentEnrollment.objects.create(
             student=student,
-            school_year=data["school_year"],
-            class_level=data.get("class_level"),
-            class_number=data["class_number"],
+            school_year=clean_data["school_year"],
+            class_level=clean_data.get("class_level"),
+            class_number=clean_data["class_number"],
             school=school 
         )
 
@@ -27,12 +29,12 @@ class StudentEnrollmentService:
         
         ensure_same_school(user, enrollment)
         
-        data.pop("school", None)
-        data.pop("student", None)
-        data.pop("school_year", None)
-        data.pop("id", None)
-
-        for attr, value in data.items():
+        clean_data = {
+            k: v for k, v in data.items()
+            if k not in ["school", "student", "school_year", "id"]
+        }
+            
+        for attr, value in clean_data.items():
             setattr(enrollment, attr, value)
 
         enrollment.save()

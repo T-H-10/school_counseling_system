@@ -10,18 +10,18 @@ class StudentEventService:
         counselor = user.counselor
         student = data["student"]
 
+        clean_data = {
+            k: v for k, v in data.items()
+            if k not in ["school", "counselor"]
+        }
+
         ensure_same_school(user, student)
         
-        data.pop("school", None)
-        data.pop("counselor", None)
         
         return StudentEvent.objects.create(
-            student=student,
             counselor=counselor,
-            event_type=data["event_type"],
-            title=data["title"],
-            description=data["description"],
-            school = counselor.school
+            school = counselor.school,
+            **clean_data
         )
 
     @staticmethod
@@ -29,12 +29,12 @@ class StudentEventService:
 
         ensure_same_school(user, event)
         
-        data.pop("school", None)
-        data.pop("counselor", None)
-        data.pop("student", None)
-        data.pop("id", None)
+        clean_data = {
+            k: v for k, v in data.items()
+            if k not in ["school", "counselor", "student", "id"]
+        }
 
-        for attr, value in data.items():
+        for attr, value in clean_data.items():
             setattr(event, attr, value)
         event.save()
         return event

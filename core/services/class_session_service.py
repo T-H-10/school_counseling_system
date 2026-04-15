@@ -9,17 +9,15 @@ class ClassSessionService:
 
         counselor = user.counselor
 
-        data.pop("school", None)
-        data.pop("counselor", None)
+        clean_data = {
+            k: v for k, v in data.items()
+            if k not in ["school", "counselor"]
+        }
 
         return ClassSession.objects.create(
             school=counselor.school,
             counselor=counselor,
-            school_year=data["school_year"],
-            class_level=data["class_level"],
-            title=data["title"],
-            summary=data["summary"],
-            date=data["date"]
+            **clean_data
         )
 
     @staticmethod
@@ -27,11 +25,12 @@ class ClassSessionService:
 
         ensure_same_school(user, session)
         
-        data.pop("id", None)
-        data.pop("school", None)
-        data.pop("counselor", None)
+        clean_data = {
+            k: v for k, v in data.items()
+            if k not in ["id", "school", "counselor"]
+        }
         
-        for attr, value in data.items():
+        for attr, value in clean_data.items():
             setattr(session, attr, value)
         session.save()
         return session

@@ -7,9 +7,12 @@ class StudentService:
     def create_student(user, data):
         
         school = user.counselor.school
-        data.pop("school", None)
-
-        return Student.objects.create(school = school, **data)
+        clean_data = {
+            k: v for k, v in data.items()
+            if k != "school"
+        }
+        
+        return Student.objects.create(school = school, **clean_data)
     
     
     @staticmethod
@@ -17,10 +20,12 @@ class StudentService:
 
         ensure_same_school(user, student)
 
-        data.pop("school", None)
-        data.pop("id", None)
+        clean_data = {
+            k: v for k, v in data.items()
+            if k not in ["school", "id"]
+        }
 
-        for attr, value in data.items():
+        for attr, value in clean_data.items():
                 setattr(student, attr, value)
 
         student.save()
