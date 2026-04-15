@@ -12,9 +12,8 @@ class StudentService:
     
     
     @staticmethod
-    def update_student(user, student_id, data): 
+    def update_student(user, student, data): 
 
-        student = StudentRepository.get_by_id(user, student_id)
         if student.school != user.counselor.school:
             raise PermissionError("No access to this student")
         
@@ -22,8 +21,7 @@ class StudentService:
     
 
     @staticmethod
-    def delete_student(user, student_id):
-        student = StudentRepository.get_by_id(student_id)
+    def delete_student(user, student):
 
         if student.school != user.counselor.school:
             raise PermissionError("No access to this student")

@@ -20,28 +20,27 @@ class StudentViewSet(ModelViewSet):
     serializer_class = StudentSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        return Student.objects.for_user(user)
+        return Student.objects.for_user(self.request.user)
 
     def perform_create(self, serializer):
         student = StudentService.create_student(
             self.request.user,
-            serializer.validated_data
+            serializer.validated_data.copy()
         )
         serializer.instance = student
 
     def perform_update(self, serializer):
         student = StudentService.update_student(
             self.request.user,
-            self.get_object().id,
-            serializer.validated_data
+            self.get_object(),
+            serializer.validated_data.copy()
         )
         serializer.instance = student
 
     def perform_destroy(self, instance):
         StudentService.delete_student(
             self.request.user,
-            instance.id
+            instance
         )
 
 
