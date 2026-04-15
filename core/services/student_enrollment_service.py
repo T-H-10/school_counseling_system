@@ -1,5 +1,4 @@
 from core.repositories.student_enrollment_repository import StudentEnrollmentRepository
-from core.models import ClassLevel, SchoolYear, Student
 
 
 class StudentEnrollmentService:
