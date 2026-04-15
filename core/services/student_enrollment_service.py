@@ -8,9 +8,13 @@ class StudentEnrollmentService:
     def create_enrollment(user, data):
                 
         school = user.counselor.school        
+        student=data["student"]
+
+        if student.school != school:
+            raise PermissionError("Student does not belong to your school")
 
         return StudentEnrollmentRepository.create(
-            student=data["student"],
+            student=student,
             school_year=data["school_year"],
             class_level=data.get("class_level"),
             class_number=data["class_number"],
@@ -28,7 +32,7 @@ class StudentEnrollmentService:
         data.pop("student", None)
         data.pop("school_year", None)
 
-        return StudentEnrollmentRepository.update(enrollment, data)
+        return StudentEnrollmentRepository.update(enrollment, **data)
 
     @staticmethod
     def delete_enrollment(user, enrollment_id):
