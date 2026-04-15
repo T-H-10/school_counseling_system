@@ -7,7 +7,7 @@ class StudentEnrollmentService:
     def create_enrollment(user, data):
                 
         school = user.counselor.school        
-        student=data["student"]
+        student = data["student"]
 
         if student.school != school:
             raise PermissionError("Student does not belong to your school")

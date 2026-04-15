@@ -32,7 +32,7 @@ class StudentViewSet(ModelViewSet):
     def perform_update(self, serializer):
         student = StudentService.update_student(
             self.request.user,
-            self.get_object().id,
+            self.get_object(),
             serializer.validated_data
         )
         serializer.instance = student
@@ -40,7 +40,7 @@ class StudentViewSet(ModelViewSet):
     def perform_destroy(self, instance):
         StudentService.delete_student(
             self.request.user,
-            instance.id
+            instance
         )
 
 
