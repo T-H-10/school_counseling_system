@@ -83,6 +83,17 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,  
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    }
+}
+
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
