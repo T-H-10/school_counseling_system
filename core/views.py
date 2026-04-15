@@ -17,14 +17,28 @@ from .models import Student, StudentEnrollment, StudentEvent, ClassSession, Scho
 from .serializers import StudentSerializer, StudentEnrollmentSerializer, StudentEventSerializer, ClassSessionSerializer, SchoolSerializer, ClassLevelSerializer, SchoolYearSerializer, CounselorSerializer
 from .permissions import IsCounselor
 
-class StudentViewSet(ModelViewSet):
+class BaseSchoolViewSet(ModelViewSet):
+    model = None
+    
+    def get_queryset(self):
+
+        if getattr(self, "swagger_fake_view", False):
+            return self.model.objects.none()
+        
+        user = self.request.user
+
+        if not user.is_authenticated or not hasattr(user, "counselor"):
+            return self.model.objects.none()
+        
+        school = user.counselor.school
+
+        return self.model.objects.filter(school=school)
+
+class StudentViewSet(BaseSchoolViewSet):
     permission_classes = [IsCounselor]
+    model = Student
     serializer_class = StudentSerializer
 
-    def get_queryset(self):
-        return Student.objects.filter(
-            school = self.request.user.counselor.school
-        )
 
     def perform_create(self, serializer):
         student = StudentService.create_student(
@@ -48,14 +62,10 @@ class StudentViewSet(ModelViewSet):
         )
 
 
-class StudentEnrollmentViewSet(ModelViewSet):
+class StudentEnrollmentViewSet(BaseSchoolViewSet):
     permission_classes = [IsCounselor]
+    model = StudentEnrollment
     serializer_class = StudentEnrollmentSerializer
-
-    def get_queryset(self):
-        return StudentEnrollment.objects.filter(
-            school = self.request.user.counselor.school
-        )
 
     def perform_create(self, serializer):
         enrollment = StudentEnrollmentService.create_enrollment(
@@ -79,14 +89,10 @@ class StudentEnrollmentViewSet(ModelViewSet):
         ) 
 
 
-class StudentEventViewSet(ModelViewSet):
+class StudentEventViewSet(BaseSchoolViewSet):
     permission_classes = [IsCounselor]
+    model = StudentEvent
     serializer_class = StudentEventSerializer
-
-    def get_queryset(self):
-        return StudentEvent.objects.filter(
-            school = self.request.user.counselor.school
-        )
 
     def perform_create(self, serializer):
         event = StudentEventService.create_event(
@@ -110,14 +116,10 @@ class StudentEventViewSet(ModelViewSet):
         )        
 
 
-class ClassSessionViewSet(ModelViewSet):
+class ClassSessionViewSet(BaseSchoolViewSet):
     permission_classes = [IsCounselor]
+    model = ClassSession
     serializer_class = ClassSessionSerializer
-
-    def get_queryset(self):
-        return ClassSession.objects.filter(
-            school = self.request.user.counselor.school
-        )
 
     def perform_create(self, serializer):
         session = ClassSessionService.create_session(

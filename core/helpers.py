@@ -10,3 +10,4 @@ def ensure_same_school(user, obj):
 
     if obj_school != school:
         raise PermissionError("No access")
+    
