@@ -30,7 +30,7 @@ class CounselorSerializer(serializers.ModelSerializer):
 
     username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
-    school = serializers.PrimaryKeyRelatedField(queryset=School.objects.all())
+    # school = serializers.PrimaryKeyRelatedField(queryset=School.objects.all())
 
     class Meta:
         model = Counselor
@@ -88,8 +88,21 @@ class StudentEnrollmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentEnrollment
-        fields = "__all__"
-        read_only_fields = ["created_at"]
+        fields = [
+            "id", "student", "school_year", "class_level", "class_number", "school", "created_at"
+        ]
+        read_only_fields = ["school", "created_at"]
+    
+    def validate(self, data):
+        request = self.context.get("request")
+        user = request.user
+
+        student = data.get("student")
+
+        if student and student.school != user.counselor.school:
+            raise serializers.ValidationError("Student bust belong to your school")
+        
+        return data
 
 
 class StudentEventSerializer(serializers.ModelSerializer):
@@ -99,8 +112,28 @@ class StudentEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentEvent
-        fields = "__all__"
-        read_only_fields = ["created_at"]
+        fields = [
+            "id",
+            "student",
+            "counselor",
+            "event_type",
+            "title",
+            "description",
+            "school",
+            "created_at"
+        ]
+        read_only_fields = ["counseslor", "school", "created_at"]
+
+    def validate(self, data):
+        request = self.context.get("request")
+        user = request.user
+
+        student = data.get("student")
+
+        if student and student.school != user.counselor.school:
+            raise serializers.ValidationError("Student must belong to your school")
+
+        return data
 
 
 class ClassSessionSerializer(serializers.ModelSerializer):
@@ -114,11 +147,18 @@ class ClassSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ClassSession
-        fields = "__all__"
-        read_only_fields = ["created_at"]
-
-
-
+        fields = [
+            "id",
+            "school",
+            "counselor",
+            "school_year",
+            "class_level",
+            "title",
+            "summary",
+            "date",
+            "created_at"
+        ]
+        read_only_fields = ["school", "counselor", "created_at"]
 
 
 
