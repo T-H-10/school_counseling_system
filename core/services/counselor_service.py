@@ -7,13 +7,13 @@ class CounselorService:
 
     @staticmethod
     def create_counselor(data):
-
+        
         user = User.objects.create_user(
             username=data["username"],
             password=data["password"]
         )
 
-        school = School.objects.get(id=data["school"])
+        school = data["school"]
 
         return CounselorRepository.create(
             user=user,

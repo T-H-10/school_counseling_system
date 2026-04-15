@@ -27,9 +27,13 @@ class SchoolYearSerializer(serializers.ModelSerializer):
 
 class CounselorSerializer(serializers.ModelSerializer):
 
+    username = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True)
+    school = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Counselor
-        fields = ["id", "full_name", "school", "created_at"]
+        fields = ["id","username", "password", "full_name", "school", "created_at"]
         read_only_fields = ["created_at"]
 
 
@@ -55,32 +59,62 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = "__all__"
+        fields = [
+            "id",
+            "full_name",
+            "id_number",
+            "address",
+            "mother_name",
+            "mother_phone",
+            "father_name",
+            "father_phone",
+            "school",
+            "created_at"
+        ]
         read_only_fields = ["school", "created_at"]
         
 
 class StudentEnrollmentSerializer(serializers.ModelSerializer):
 
+    school = serializers.PrimaryKeyRelatedField(read_only=True)
+    student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())
+    school_year = serializers.PrimaryKeyRelatedField(queryset=SchoolYear.objects.all())
+    class_level = serializers.PrimaryKeyRelatedField(
+        queryset=ClassLevel.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
     class Meta:
         model = StudentEnrollment
         fields = "__all__"
-        read_only_fields = ["school", "created_at"]
+        read_only_fields = ["created_at"]
 
 
 class StudentEventSerializer(serializers.ModelSerializer):
 
+    counselor = serializers.PrimaryKeyRelatedField(read_only=True)
+    student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())
+
     class Meta:
         model = StudentEvent
         fields = "__all__"
-        read_only_fields = ["counselor", "created_at"]
+        read_only_fields = ["created_at"]
 
 
 class ClassSessionSerializer(serializers.ModelSerializer):
 
+    school = serializers.PrimaryKeyRelatedField(read_only=True)
+    counselor = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    school_year = serializers.PrimaryKeyRelatedField(queryset=SchoolYear.objects.all())
+    class_level = serializers.PrimaryKeyRelatedField(queryset=ClassLevel.objects.all())
+
+
     class Meta:
         model = ClassSession
         fields = "__all__"
-        read_only_fields = ["school", "counselor", "created_at"]
+        read_only_fields = ["created_at"]
 
 
 

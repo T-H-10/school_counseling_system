@@ -4,12 +4,12 @@ from ..models import Student
 class StudentRepository:
 
     @staticmethod
-    def get_for_user(user):
-        return Student.objects.filter(user)
+    def get_all():
+        return Student.objects.all()
     
     @staticmethod
-    def get_by_id(user, student_id):
-        return Student.objects.get(student_id, user)
+    def get_by_id(student_id):
+        return Student.objects.get(id = student_id)
     
     @staticmethod
     def create(**data):

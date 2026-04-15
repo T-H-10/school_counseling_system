@@ -10,14 +10,11 @@ class ClassSessionService:
         counselor = user.counselor
         school = counselor.school
 
-        school_year = SchoolYear.objects.get(id=data["school_year"])
-        class_level = ClassLevel.objects.get(id=data["class_level"])
-
         return ClassSessionRepository.create(
             school=school,
             counselor=counselor,
-            school_year=school_year,
-            class_level=class_level,
+            school_year=data["school_year"],
+            class_level=data["class_level"],
             title=data["title"],
             summary=data["summary"],
             date=data["date"]

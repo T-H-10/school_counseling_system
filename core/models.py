@@ -29,16 +29,16 @@ class BaseQuerySet(models.QuerySet):
 class BaseManager(models.Manager):
 
     def get_queryset(self):
-        return BaseQuerySet(self.model, using=self._db)
+        return BaseQuerySet(self.model, using=self._db).alive()
 
     def alive(self):
         return self.get_queryset().alive()
 
-    def for_user(self, user):
-        if not hasattr(user, "counselor"):
-            raise PermissionError("User is not a counselor")
+    def for_school(self, school):
+        # if not hasattr(user, "counselor"):
+        #     raise PermissionError("User is not a counselor")
         
-        return self.get_queryset().for_school(user.counselor.school)
+        return self.get_queryset().for_school(school)
 
 
 class BaseModel(SoftDeleteModel):
@@ -81,7 +81,19 @@ class Counselor(models.Model):
 
 
 class ClassLevel(models.Model):
-    name = models.CharField(max_length=1)  # א-ח
+
+    LEVEL_CHOICES = [
+        ('א', 'א'),
+        ('ב', 'ב'),
+        ('ג', 'ג'),
+        ('ד', 'ד'),
+        ('ה', 'ה'),
+        ('ו', 'ו'),
+        ('ז', 'ז'),
+        ('ח', 'ח'),
+    ]
+        
+    name = models.CharField(max_length=1, choices=LEVEL_CHOICES)  
 
     def __str__(self):
         return self.name
