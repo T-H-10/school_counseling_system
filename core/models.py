@@ -112,7 +112,7 @@ class Student(BaseModel):
     )
 
     full_name = models.CharField(max_length=150)
-    id_number = models.CharField(max_length=20)
+    id_number = models.CharField(max_length=9, unique=True)
 
     address = models.CharField(max_length=255, blank=True, null=True)
 
@@ -130,12 +130,6 @@ class Student(BaseModel):
         indexes = [
             models.Index(fields=["school"]),
             models.Index(fields=["id_number"]),
-        ]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["school", "id_number"],
-                name="unique_student_per_school"
-            )
         ]
         
 
