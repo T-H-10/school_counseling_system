@@ -122,7 +122,7 @@ class StudentEventSerializer(serializers.ModelSerializer):
             "school",
             "created_at"
         ]
-        read_only_fields = ["counseslor", "school", "created_at"]
+        read_only_fields = ["counselor", "school", "created_at"]
 
     def validate(self, data):
         request = self.context.get("request")
