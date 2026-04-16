@@ -3,6 +3,8 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .services.student_service import StudentService
 from .services.student_enrollment_service import StudentEnrollmentService
@@ -39,6 +41,11 @@ class StudentViewSet(BaseSchoolViewSet):
     model = Student
     serializer_class = StudentSerializer
 
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
+    search_fields = ["full_name", "id_number"]
+    ordering_fields = ["full_name", "id_number", "created_at"]
+    ordering = ["full_name"]
 
     def perform_create(self, serializer):
         student = StudentService.create_student(
