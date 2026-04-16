@@ -74,6 +74,9 @@ class StudentEnrollmentViewSet(BaseSchoolViewSet):
     model = StudentEnrollment
     serializer_class = StudentEnrollmentSerializer
 
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['student']
+
     def perform_create(self, serializer):
         enrollment = StudentEnrollmentService.create_enrollment(
             self.request.user,
@@ -100,6 +103,9 @@ class StudentEventViewSet(BaseSchoolViewSet):
     permission_classes = [IsCounselor]
     model = StudentEvent
     serializer_class = StudentEventSerializer
+   
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['student']
 
     def perform_create(self, serializer):
         event = StudentEventService.create_event(
@@ -127,6 +133,9 @@ class ClassSessionViewSet(BaseSchoolViewSet):
     permission_classes = [IsCounselor]
     model = ClassSession
     serializer_class = ClassSessionSerializer
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['student']
 
     def perform_create(self, serializer):
         session = ClassSessionService.create_session(
