@@ -141,6 +141,9 @@ class StudentEnrollment(BaseModel):
     class_level = models.ForeignKey(ClassLevel, on_delete=models.SET_NULL, null=True)
     class_number = models.PositiveIntegerField()
 
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField(null=True, blank=True
+                                    )
     def __str__(self):
         return f"{self.student.full_name} - {self.school_year}"
 

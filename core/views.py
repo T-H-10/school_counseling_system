@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
+from .services.student_timeline_service import StudentTimelineService
 from .services.student_service import StudentService
 from .services.student_enrollment_service import StudentEnrollmentService
 from .services.student_event_service import StudentEventService
@@ -46,6 +47,17 @@ class StudentViewSet(BaseSchoolViewSet):
     search_fields = ["full_name", "id_number"]
     ordering_fields = ["full_name", "id_number", "created_at"]
     ordering = ["full_name"]
+
+    @action(detail=True, methods=["get"])
+    def timeline(self, request, pk=None):
+        student = self.get_object()
+        data = StudentTimelineService.get_timeline(student)
+        return Response(
+            {
+                "student_id": student.id,
+                "timeline": data
+            }
+        )
 
     def perform_create(self, serializer):
         student = StudentService.create_student(
