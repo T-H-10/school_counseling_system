@@ -4,11 +4,11 @@ from .views import StudentViewSet, StudentEnrollmentViewSet, StudentEventViewSet
 router = DefaultRouter()
 router.register(r"students", StudentViewSet, basename="students")
 router.register(r"enrollments", StudentEnrollmentViewSet, basename="enrollments")
-router.register(r"studentEvent", StudentEventViewSet, basename="studentEvent")
-router.register(r"classSession", ClassSessionViewSet, basename="classSession")
-router.register(r"school", SchoolViewSet, basename="school")
-router.register(r"classLevel", ClassLevelViewSet, basename="classLevel")
-router.register(r"schoolYear", SchoolYearViewSet, basename="schoolYear")
-router.register(r"counselor", CounselorViewSet, basename="counselor")
+router.register(r"studentEvents", StudentEventViewSet, basename="studentEvent")
+router.register(r"classSessions", ClassSessionViewSet, basename="classSession")
+router.register(r"schools", SchoolViewSet, basename="school")
+router.register(r"classLevels", ClassLevelViewSet, basename="classLevel")
+router.register(r"schoolYears", SchoolYearViewSet, basename="schoolYear")
+router.register(r"counselors", CounselorViewSet, basename="counselor")
                 
 urlpatterns = router.urls
