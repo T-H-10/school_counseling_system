@@ -146,9 +146,6 @@ class ClassSessionViewSet(BaseSchoolViewSet):
     model = ClassSession
     serializer_class = ClassSessionSerializer
 
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['student']
-
     def perform_create(self, serializer):
         session = ClassSessionService.create_session(
             self.request.user,
