@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
+from core.services.dashboard_service import DashboardService
+
 from .services.student_timeline_service import StudentTimelineService
 from .services.student_service import StudentService
 from .services.student_enrollment_service import StudentEnrollmentService

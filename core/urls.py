@@ -10,5 +10,5 @@ router.register(r"schools", SchoolViewSet, basename="school")
 router.register(r"classLevels", ClassLevelViewSet, basename="classLevel")
 router.register(r"schoolYears", SchoolYearViewSet, basename="schoolYear")
 router.register(r"counselors", CounselorViewSet, basename="counselor")
-                
+
 urlpatterns = router.urls
