@@ -172,6 +172,8 @@ class StudentEvent(BaseModel):
     title = models.CharField(max_length=200)
     description = models.TextField()
 
+    date = models.DateTimeField(default=timezone.now())
+
 
     def __str__(self):
         return f"{self.student.full_name} - {self.event_type}"
