@@ -173,7 +173,7 @@ class StudentEvent(BaseModel):
     description = models.TextField()
 
     date = models.DateTimeField(default=timezone.now())
-
+    end_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.student.full_name} - {self.event_type}"
@@ -189,8 +189,8 @@ class ClassSession(BaseModel):
     title = models.CharField(max_length=200)
     summary = models.TextField()
 
-    date = models.DateTimeField()
-
+    date = models.DateTimeField(default=timezone.now())
+    end_date =  models.DateTimeField(null = True, blank=True)
     def __str__(self):
         return self.title
     

@@ -167,6 +167,15 @@ class ClassSessionViewSet(BaseSchoolViewSet):
             instance
         )
 
+    @action(detail=False, methods=["get"])
+    def calendar(self, request):
+        start = request.query_params.get("start")
+        end = request.query_params.get("end")
+
+        data = ClassSessionService.get_calendar(
+            request.user, start, end
+        )
+        return Response(data)
 
 class SchoolViewSet(ModelViewSet):
     permission_classes = [IsAdminUser]
