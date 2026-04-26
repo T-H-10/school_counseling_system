@@ -1,6 +1,6 @@
 from datetime import timedelta
 from core.helpers import ensure_same_school
-from core.models import ClassSession
+from core.models import ClassSession, StudentEvent
 from django.utils.dateparse import parse_datetime
 
 class ClassSessionService:
@@ -52,24 +52,44 @@ class ClassSessionService:
     def get_calendar(user, start, end):
         counselor = user.counselor
 
-        queryset = ClassSession.objects.filter(
+        sessions = ClassSession.objects.filter(
             counselor = counselor
         ).select_related("class_level", "counselor")
 
+        meetings = StudentEvent.objects.filter(
+            counselor=counselor
+        )
         if start:
-            queryset = queryset.filter(date__gte = parse_datetime(start))
+            sessions = sessions.filter(date__gte = parse_datetime(start))
+            meetings = meetings.filter(date__gte = parse_datetime(start))
 
         if end:
             queryset = queryset.filter(date__lte = parse_datetime(end))
+            meetings = meetings.filter(date__lte = parse_datetime(end))
 
-        return [
+        result = []
+
+        for s in sessions:
+            result.append(
             {
                 "id": s.id,
+                "type": "class_session",
                 "title": s.title,
                 "start": s.date,
                 "end": s.end_date,
-                "class_level": s.class_level.name,
-                "created_by": s.counselor.full_name,
+                "with": s.class_level.name,
             }
-            for s in queryset
-        ]
+        )
+        
+        for m in meetings:
+            result.append({
+                "id": m.id,
+                "type": "student_event",
+                "title": m.title,
+                "start": m.date,
+                "end": m.end_date,
+                "with": m.class_level.name,
+            })
+
+        result.sort(key=lambda x: x["start"], reverse=True)
+        return result
