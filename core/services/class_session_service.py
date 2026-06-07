@@ -64,7 +64,7 @@ class ClassSessionService:
             meetings = meetings.filter(date__gte = parse_datetime(start))
 
         if end:
-            queryset = queryset.filter(date__lte = parse_datetime(end))
+            sessions = sessions.filter(date__lte = parse_datetime(end))
             meetings = meetings.filter(date__lte = parse_datetime(end))
 
         result = []
@@ -88,7 +88,7 @@ class ClassSessionService:
                 "title": m.title,
                 "start": m.date,
                 "end": m.end_date,
-                "with": m.class_level.name,
+                "with": m.student.full_name,
             })
 
         result.sort(key=lambda x: x["start"], reverse=True)

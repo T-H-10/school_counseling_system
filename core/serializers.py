@@ -100,7 +100,7 @@ class StudentEnrollmentSerializer(serializers.ModelSerializer):
         student = data.get("student")
 
         if student and student.school != user.counselor.school:
-            raise serializers.ValidationError("Student bust belong to your school")
+            raise serializers.ValidationError("Student must belong to your school")
         
         return data
 
