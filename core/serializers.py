@@ -132,6 +132,7 @@ class StudentEventSerializer(serializers.ModelSerializer):
             "event_type",
             "title",
             "description",
+            "date",
             "school",
             "created_at"
         ]
