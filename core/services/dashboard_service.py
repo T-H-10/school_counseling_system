@@ -32,7 +32,8 @@ class DashboardService:
 
         recent_events = StudentEvent.objects.filter(
             counselor=counselor,
-            date__gte=week_ago
+            date__gte=week_ago,
+            date__lte=now,
         ).order_by("-date").select_related("student")[:5]
 
         students_count = Student.objects.filter(
