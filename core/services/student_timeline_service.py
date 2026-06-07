@@ -15,6 +15,7 @@ class StudentTimelineService:
                 "date": e.date,
                 "display_date": e.date.strftime("%d/%m/%Y %H:%M"),
                 "title": e.title,
+                "agenda": e.agenda,
                 "description": e.description,
                 "event_type": e.event_type,
             }

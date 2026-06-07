@@ -161,8 +161,10 @@ class StudentEventSerializer(serializers.ModelSerializer):
             "counselor",
             "event_type",
             "title",
+            "agenda",
             "description",
             "date",
+            "end_date",
             "school",
             "created_at"
         ]

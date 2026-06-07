@@ -170,7 +170,8 @@ class StudentEvent(BaseModel):
     event_type = models.CharField(max_length=30, choices=EVENT_TYPES)
 
     title = models.CharField(max_length=200)
-    description = models.TextField()
+    agenda = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
 
     date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(null=True, blank=True)
