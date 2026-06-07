@@ -202,6 +202,7 @@ class ClassSessionSerializer(serializers.ModelSerializer):
             "title",
             "summary",
             "date",
+            "end_date",
             "created_at"
         ]
         read_only_fields = ["school", "counselor", "created_at"]

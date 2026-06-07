@@ -188,7 +188,7 @@ class ClassSession(BaseModel):
     class_level = models.ForeignKey(ClassLevel, on_delete=models.CASCADE)
 
     title = models.CharField(max_length=200)
-    summary = models.TextField()
+    summary = models.TextField(blank=True, null=True)
 
     date = models.DateTimeField(default=timezone.now)
     end_date =  models.DateTimeField(null = True, blank=True)
