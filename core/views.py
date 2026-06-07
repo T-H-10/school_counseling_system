@@ -226,9 +226,13 @@ class ClassLevelViewSet(ModelViewSet):
 
 
 class SchoolYearViewSet(ModelViewSet):
-    permission_classes = [IsAdminUser]
     queryset = SchoolYear.objects.all()
     serializer_class = SchoolYearSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [IsAuthenticated()]
+        return [IsAdminUser()]
 
     def perform_create(self, serializer):
         year = SchoolYearService.create_school_year(serializer.validated_data)

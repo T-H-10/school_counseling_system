@@ -42,6 +42,23 @@ class StudentSerializer(serializers.ModelSerializer):
 
     current_class_level = serializers.SerializerMethodField()
 
+    # Write-only enrollment fields — required on creation, ignored on update
+    school_year = serializers.PrimaryKeyRelatedField(
+        queryset=SchoolYear.objects.all(),
+        write_only=True,
+        required=False,
+    )
+    class_level = serializers.PrimaryKeyRelatedField(
+        queryset=ClassLevel.objects.all(),
+        write_only=True,
+        required=False,
+    )
+    class_number = serializers.IntegerField(
+        write_only=True,
+        required=False,
+        min_value=1,
+    )
+
     def get_current_class_level(self, obj):
         enrollment = (
             obj.enrollments
@@ -70,6 +87,16 @@ class StudentSerializer(serializers.ModelSerializer):
             validate_phone(value)
         return value
 
+    def validate(self, data):
+        if not self.instance:  # creation — enrollment fields are mandatory
+            errors = {}
+            for field in ['school_year', 'class_level', 'class_number']:
+                if data.get(field) is None:
+                    errors[field] = ['שדה זה הוא חובה']
+            if errors:
+                raise serializers.ValidationError(errors)
+        return data
+
     class Meta:
         model = Student
         fields = [
@@ -84,6 +111,9 @@ class StudentSerializer(serializers.ModelSerializer):
             "school",
             "created_at",
             "current_class_level",
+            "school_year",
+            "class_level",
+            "class_number",
         ]
         read_only_fields = ["school", "created_at", "current_class_level"]
         
