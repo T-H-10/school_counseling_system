@@ -59,3 +59,32 @@ class StudentService:
         ensure_same_school(user, student)
         student.delete()
 
+    @staticmethod
+    def bulk_create_students(user, rows):
+        created = 0
+        errors = []
+        for row_num, data in rows:
+            try:
+                StudentService.create_student(user, data)
+                created += 1
+            except ValidationError as e:
+                errors.append({'row': row_num, 'message': StudentService._flatten_error(e)})
+            except Exception as e:
+                errors.append({'row': row_num, 'message': str(e)})
+        return {'created': created, 'errors': errors}
+
+    @staticmethod
+    def _flatten_error(e):
+        detail = e.detail
+        if isinstance(detail, dict):
+            parts = []
+            for msgs in detail.values():
+                if isinstance(msgs, list):
+                    parts.extend(str(m) for m in msgs)
+                else:
+                    parts.append(str(msgs))
+            return ' | '.join(parts)
+        if isinstance(detail, list):
+            return ' | '.join(str(m) for m in detail)
+        return str(detail)
+
