@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -7,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
+import io
 import openpyxl
 
 from core.services.dashboard_service import DashboardService
@@ -182,6 +184,47 @@ class StudentViewSet(BaseSchoolViewSet):
         result = StudentService.bulk_create_students(request.user, parsed)
         result['errors'] = pre_errors + result['errors']
         return Response(result)
+
+    @action(detail=False, methods=['get'], url_path='export')
+    def export_students(self, request):
+        students = (
+            self.get_queryset()
+            .prefetch_related('enrollments__class_level', 'enrollments__school_year')
+            .order_by('full_name')
+        )
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = 'תלמידים'
+        ws.sheet_view.rightToLeft = True
+        ws.append(['שם מלא', 'מספר זהות', 'כיתה', 'מספר כיתה', 'שנת לימודים',
+                   'שם אם', 'טלפון אם', 'שם אב', 'טלפון אב', 'כתובת'])
+
+        for student in students:
+            enrollment = student.enrollments.order_by('-created_at').first()
+            ws.append([
+                student.full_name,
+                student.id_number,
+                enrollment.class_level.name if enrollment and enrollment.class_level else '',
+                enrollment.class_number if enrollment else '',
+                enrollment.school_year.name if enrollment and enrollment.school_year else '',
+                student.mother_name or '',
+                student.mother_phone or '',
+                student.father_name or '',
+                student.father_phone or '',
+                student.address or '',
+            ])
+
+        buf = io.BytesIO()
+        wb.save(buf)
+        buf.seek(0)
+
+        response = HttpResponse(
+            buf.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = 'attachment; filename="students.xlsx"'
+        return response
 
     def perform_create(self, serializer):
         student = StudentService.create_student(
