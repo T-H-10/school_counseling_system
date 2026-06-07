@@ -8,6 +8,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.services.dashboard_service import DashboardService
+from core.filters import StudentFilter
 
 from .services.student_timeline_service import StudentTimelineService
 from .services.student_service import StudentService
@@ -46,10 +47,14 @@ class StudentViewSet(BaseSchoolViewSet):
     serializer_class = StudentSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = StudentFilter
 
     search_fields = ["full_name", "id_number"]
     ordering_fields = ["full_name", "id_number", "created_at"]
     ordering = ["full_name"]
+
+    def get_queryset(self):
+        return super().get_queryset().distinct()
 
     @action(detail=True, methods=["get"])
     def timeline(self, request, pk=None):
@@ -201,7 +206,7 @@ class SchoolViewSet(ModelViewSet):
 
 
 class ClassLevelViewSet(ModelViewSet):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
     queryset = ClassLevel.objects.all()
     serializer_class = ClassLevelSerializer
 

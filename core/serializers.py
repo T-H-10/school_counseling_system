@@ -40,6 +40,18 @@ class CounselorSerializer(serializers.ModelSerializer):
 
 class StudentSerializer(serializers.ModelSerializer):
 
+    current_class_level = serializers.SerializerMethodField()
+
+    def get_current_class_level(self, obj):
+        enrollment = (
+            obj.enrollments
+               .select_related('class_level', 'school_year')
+               .filter(class_level__isnull=False)
+               .order_by('-school_year__is_active', '-created_at')
+               .first()
+        )
+        return enrollment.class_level.name if enrollment else None
+
     def validate_full_name(self, value):
         validate_name(value)
         return value
@@ -70,9 +82,10 @@ class StudentSerializer(serializers.ModelSerializer):
             "father_name",
             "father_phone",
             "school",
-            "created_at"
+            "created_at",
+            "current_class_level",
         ]
-        read_only_fields = ["school", "created_at"]
+        read_only_fields = ["school", "created_at", "current_class_level"]
         
 
 class StudentEnrollmentSerializer(serializers.ModelSerializer):
