@@ -175,6 +175,7 @@ class StudentEvent(BaseModel):
 
     date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(null=True, blank=True)
+    reminder_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.student.full_name} - {self.event_type}"
