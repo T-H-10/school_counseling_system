@@ -50,6 +50,13 @@ class DashboardService:
             date__range=(today_start, today_end),
         ).select_related('student').order_by('date')
 
+        next_7_days = now + timedelta(days=7)
+        upcoming_future_events = StudentEvent.objects.filter(
+            counselor=counselor,
+            date__gt=today_end,
+            date__lte=next_7_days,
+        ).select_related('student').order_by('date')[:5]
+
         missing_summaries = StudentEvent.objects.filter(
             counselor=counselor,
             date__lt=now,
@@ -91,13 +98,26 @@ class DashboardService:
             "alerts": {
                 "upcoming_today": [
                     {
-                        "id": str(e.id),
-                        "title": e.title,
-                        "date": e.date,
-                        "student_id": str(e.student.id),
+                        "id":           str(e.id),
+                        "title":        e.title,
+                        "date":         e.date,
+                        "student_id":   str(e.student.id),
                         "student_name": e.student.full_name,
+                        "event_type":   e.event_type,
+                        "status":       e.status,
                     }
                     for e in upcoming_today_events
+                ],
+                "upcoming_future": [
+                    {
+                        "id":           str(e.id),
+                        "title":        e.title,
+                        "date":         e.date,
+                        "student_id":   str(e.student.id),
+                        "student_name": e.student.full_name,
+                        "event_type":   e.event_type,
+                    }
+                    for e in upcoming_future_events
                 ],
                 "missing_summaries": [
                     {

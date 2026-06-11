@@ -173,9 +173,15 @@ class StudentEvent(BaseModel):
     agenda = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
 
+    STATUS_CHOICES = [
+        ('pending',   'ממתין'),
+        ('completed', 'הושלם'),
+    ]
+
     date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(null=True, blank=True)
     reminder_sent = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
         return f"{self.student.full_name} - {self.event_type}"
