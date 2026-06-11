@@ -41,6 +41,8 @@ class CounselorSerializer(serializers.ModelSerializer):
 class StudentSerializer(serializers.ModelSerializer):
 
     current_class_level = serializers.SerializerMethodField()
+    current_class_number = serializers.SerializerMethodField()
+    last_event_date = serializers.SerializerMethodField()
 
     # Write-only enrollment fields — required on creation, ignored on update
     school_year = serializers.PrimaryKeyRelatedField(
@@ -59,15 +61,25 @@ class StudentSerializer(serializers.ModelSerializer):
         min_value=1,
     )
 
-    def get_current_class_level(self, obj):
-        enrollment = (
+    def _get_current_enrollment(self, obj):
+        return (
             obj.enrollments
                .select_related('class_level', 'school_year')
                .filter(class_level__isnull=False)
                .order_by('-school_year__is_active', '-created_at')
                .first()
         )
+
+    def get_current_class_level(self, obj):
+        enrollment = self._get_current_enrollment(obj)
         return enrollment.class_level.name if enrollment else None
+
+    def get_current_class_number(self, obj):
+        enrollment = self._get_current_enrollment(obj)
+        return enrollment.class_number if enrollment else None
+
+    def get_last_event_date(self, obj):
+        return obj.events.order_by('-date').values_list('date', flat=True).first()
 
     def validate_full_name(self, value):
         validate_name(value)
@@ -111,11 +123,13 @@ class StudentSerializer(serializers.ModelSerializer):
             "school",
             "created_at",
             "current_class_level",
+            "current_class_number",
+            "last_event_date",
             "school_year",
             "class_level",
             "class_number",
         ]
-        read_only_fields = ["school", "created_at", "current_class_level"]
+        read_only_fields = ["school", "created_at", "current_class_level", "current_class_number", "last_event_date"]
         
 
 class StudentEnrollmentSerializer(serializers.ModelSerializer):
