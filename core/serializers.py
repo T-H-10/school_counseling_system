@@ -62,13 +62,15 @@ class StudentSerializer(serializers.ModelSerializer):
     )
 
     def _get_current_enrollment(self, obj):
-        return (
-            obj.enrollments
-               .select_related('class_level', 'school_year')
-               .filter(class_level__isnull=False)
-               .order_by('-school_year__is_active', '-created_at')
-               .first()
-        )
+        if not hasattr(obj, '_cached_enrollment'):
+            obj._cached_enrollment = (
+                obj.enrollments
+                   .select_related('class_level', 'school_year')
+                   .filter(class_level__isnull=False)
+                   .order_by('-school_year__is_active', '-created_at')
+                   .first()
+            )
+        return obj._cached_enrollment
 
     def get_current_class_level(self, obj):
         enrollment = self._get_current_enrollment(obj)
