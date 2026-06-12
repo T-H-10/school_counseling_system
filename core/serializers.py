@@ -42,6 +42,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
     current_class_level = serializers.SerializerMethodField()
     current_class_number = serializers.SerializerMethodField()
+    current_teacher = serializers.SerializerMethodField()
     last_event_date = serializers.SerializerMethodField()
 
     # Write-only enrollment fields — required on creation, ignored on update
@@ -79,6 +80,10 @@ class StudentSerializer(serializers.ModelSerializer):
     def get_current_class_number(self, obj):
         enrollment = self._get_current_enrollment(obj)
         return enrollment.class_number if enrollment else None
+
+    def get_current_teacher(self, obj):
+        enrollment = self._get_current_enrollment(obj)
+        return enrollment.teacher_name if enrollment else None
 
     def get_last_event_date(self, obj):
         return obj.events.order_by('-date').values_list('date', flat=True).first()
@@ -126,12 +131,13 @@ class StudentSerializer(serializers.ModelSerializer):
             "created_at",
             "current_class_level",
             "current_class_number",
+            "current_teacher",
             "last_event_date",
             "school_year",
             "class_level",
             "class_number",
         ]
-        read_only_fields = ["school", "created_at", "current_class_level", "current_class_number", "last_event_date"]
+        read_only_fields = ["school", "created_at", "current_class_level", "current_class_number", "current_teacher", "last_event_date"]
         
 
 class StudentEnrollmentSerializer(serializers.ModelSerializer):
@@ -148,7 +154,8 @@ class StudentEnrollmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentEnrollment
         fields = [
-            "id", "student", "school_year", "class_level", "class_number", "school", "created_at"
+            "id", "student", "school_year", "class_level", "class_number",
+            "teacher_name", "school", "created_at"
         ]
         read_only_fields = ["school", "created_at"]
     
@@ -197,6 +204,7 @@ class StudentEventSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Student must belong to your school")
 
         return data
+
 
 
 class ClassSessionSerializer(serializers.ModelSerializer):

@@ -140,6 +140,7 @@ class StudentEnrollment(BaseModel):
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     class_level = models.ForeignKey(ClassLevel, on_delete=models.SET_NULL, null=True)
     class_number = models.PositiveIntegerField()
+    teacher_name = models.CharField(max_length=150, blank=True, default='')
 
     start_date = models.DateTimeField(default=timezone.now)
     end_date = models.DateTimeField(null=True, blank=True)
@@ -185,6 +186,7 @@ class StudentEvent(BaseModel):
 
     def __str__(self):
         return f"{self.student.full_name} - {self.event_type}"
+
 
 
 class ClassSession(BaseModel):

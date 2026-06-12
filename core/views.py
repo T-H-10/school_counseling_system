@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -275,7 +274,33 @@ class StudentEnrollmentViewSet(BaseSchoolViewSet):
         StudentEnrollmentService.delete_enrollment(
             self.request.user,
             instance
-        ) 
+        )
+
+    @action(detail=False, methods=['get'], url_path='classes')
+    def classes(self, request):
+        data = StudentEnrollmentService.get_classes(request.user)
+        return Response(data)
+
+    @action(detail=False, methods=['post'], url_path='set-class-teacher')
+    def set_class_teacher(self, request):
+        required = ['school_year', 'class_level', 'class_number']
+        missing = [f for f in required if request.data.get(f) is None]
+        if missing:
+            return Response({'error': f'שדות חסרים: {", ".join(missing)}'}, status=400)
+        updated = StudentEnrollmentService.set_class_teacher(request.user, request.data)
+        return Response({'updated': updated})
+
+    @action(detail=False, methods=['post'], url_path='promote')
+    def promote(self, request):
+        from_year = request.data.get('from_year')
+        to_year = request.data.get('to_year')
+        if not from_year or not to_year:
+            return Response({'error': 'נדרשים from_year ו-to_year'}, status=400)
+        try:
+            result = StudentEnrollmentService.promote_students(request.user, request.data)
+        except SchoolYear.DoesNotExist:
+            return Response({'error': 'שנת לימודים לא נמצאה'}, status=400)
+        return Response(result)
 
 
 class StudentEventViewSet(BaseSchoolViewSet):

@@ -3,18 +3,8 @@ def ensure_same_school(user, obj):
 
     from core.models import Student, StudentEnrollment, StudentEvent, ClassSession
 
-    if isinstance(obj, Student):
+    if isinstance(obj, (Student, StudentEnrollment, StudentEvent, ClassSession)):
         obj_school = obj.school
-
-    elif isinstance(obj, StudentEnrollment):
-        obj_school = obj.school
-
-    elif isinstance(obj, StudentEvent):
-        obj_school = obj.school
-
-    elif isinstance(obj, ClassSession):
-        obj_school = obj.school
-
     else:
         raise PermissionError("Unsupported object type")
 
