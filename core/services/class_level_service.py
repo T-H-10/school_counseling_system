@@ -1,30 +1,17 @@
 from core.models import ClassLevel
+from core.services.base import apply_fields, create_excluding
 
 
 class ClassLevelService:
 
     @staticmethod
     def create_class_level(data):
-        clean_data = {
-            k: v for k, v in data.items()
-            if k != "id"
-        }
-
-        return ClassLevel.objects.create(**clean_data)
+        return create_excluding(ClassLevel, data)
 
     @staticmethod
     def update_class_level(level, data):
-        
-        clean_data = {
-            k: v for k, v in data.items()
-            if k != "id"
-        }
+        return apply_fields(level, data)
 
-        for attr, value in clean_data.items():
-            setattr(level, attr, value)
-        level.save()
-        return level
-    
     @staticmethod
     def delete_class_level(level):
         level.delete()

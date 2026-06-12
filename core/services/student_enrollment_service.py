@@ -1,6 +1,7 @@
 from django.db.models import Count, Max
 from core.models import StudentEnrollment, SchoolYear, ClassLevel
 from core.helpers import ensure_same_school
+from core.services.base import apply_fields
 
 
 class StudentEnrollmentService:
@@ -22,12 +23,7 @@ class StudentEnrollmentService:
     @staticmethod
     def update_enrollment(user, enrollment, data):
         ensure_same_school(user, enrollment)
-        excluded = {'school', 'student', 'school_year', 'id'}
-        for attr, value in data.items():
-            if attr not in excluded:
-                setattr(enrollment, attr, value)
-        enrollment.save()
-        return enrollment
+        return apply_fields(enrollment, data, exclude={'school', 'student', 'school_year', 'id'})
 
     @staticmethod
     def delete_enrollment(user, enrollment):

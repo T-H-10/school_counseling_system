@@ -30,7 +30,6 @@ class CounselorSerializer(serializers.ModelSerializer):
 
     username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
-    # school = serializers.PrimaryKeyRelatedField(queryset=School.objects.all())
 
     class Meta:
         model = Counselor

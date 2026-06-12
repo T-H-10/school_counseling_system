@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 
 from core.models import Counselor
+from core.services.base import apply_fields
 
 
 class CounselorService:
@@ -36,17 +37,7 @@ class CounselorService:
 
     @staticmethod
     def update_counselor(counselor, data):
-        
-        clean_data = {
-            k: v for k, v in data.items()
-            if k not in ["user", "school", "id"]
-        }
-
-        for attr, value in clean_data.items():
-            setattr(counselor, attr, value)
-
-        counselor.save()
-        return counselor
+        return apply_fields(counselor, data, exclude=["user", "school", "id"])
 
     @staticmethod
     @transaction.atomic

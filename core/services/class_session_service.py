@@ -1,6 +1,7 @@
 from datetime import timedelta
 from core.helpers import ensure_same_school
 from core.models import ClassSession, StudentEvent
+from core.services.base import apply_fields
 from django.utils.dateparse import parse_datetime
 
 class ClassSessionService:
@@ -31,16 +32,8 @@ class ClassSessionService:
     def update_session(user, session, data):
 
         ensure_same_school(user, session)
-        
-        clean_data = {
-            k: v for k, v in data.items()
-            if k not in ["id", "school", "counselor"]
-        }
-        
-        for attr, value in clean_data.items():
-            setattr(session, attr, value)
-        session.save()
-        return session
+
+        return apply_fields(session, data, exclude=["id", "school", "counselor"])
 
     @staticmethod
     def delete_session(user, session):

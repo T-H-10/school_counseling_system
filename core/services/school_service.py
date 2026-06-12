@@ -1,30 +1,16 @@
-
 from core.models import School
+from core.services.base import apply_fields, create_excluding
 
 
 class SchoolService:
 
     @staticmethod
     def create_school(data):
-        clean_data = {
-            k: v for k, v in data.items()
-            if k != "id"
-        }
-
-        return School.objects.create(**clean_data)
+        return create_excluding(School, data)
 
     @staticmethod
     def update_school(school, data):
-
-        clean_data = {
-            k: v for k, v in data.items()
-            if k != "id"
-        }
-
-        for attr, value in clean_data.items():
-            setattr(school, attr, value)
-        school.save()
-        return school
+        return apply_fields(school, data)
 
     @staticmethod
     def delete_school(school):

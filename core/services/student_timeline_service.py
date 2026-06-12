@@ -1,13 +1,10 @@
-from core.models import StudentEvent, ClassSession
+from core.models import StudentEvent
 
 class StudentTimelineService:
 
     @staticmethod
     def get_timeline(student):
         events = StudentEvent.objects.filter(student=student)
-        # sessions = ClassSession.objects.filter(
-        #     school=student.school
-        # )
 
         timeline = [{
                 "id": e.id,

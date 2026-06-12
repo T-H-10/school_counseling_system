@@ -24,18 +24,11 @@ class BaseQuerySet(models.QuerySet):
     def alive(self):
         return self.filter(deleted_at__isnull=True)
 
-    # def for_school(self, school):
-    #     return self.filter(school=school)
-    
 
 class BaseManager(models.Manager):
 
     def get_queryset(self):
         return BaseQuerySet(self.model, using=self._db).alive()
-
-
-    # def for_school(self, school):        
-    #     return self.get_queryset().for_school(school)
 
 
 class BaseModel(SoftDeleteModel):

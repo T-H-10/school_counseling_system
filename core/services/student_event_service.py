@@ -1,5 +1,6 @@
 from core.helpers import ensure_same_school
 from core.models import StudentEvent
+from core.services.base import apply_fields
 
 
 class StudentEventService:
@@ -28,16 +29,8 @@ class StudentEventService:
     def update_event(user, event, data):
 
         ensure_same_school(user, event)
-        
-        clean_data = {
-            k: v for k, v in data.items()
-            if k not in ["school", "counselor", "student", "id"]
-        }
 
-        for attr, value in clean_data.items():
-            setattr(event, attr, value)
-        event.save()
-        return event
+        return apply_fields(event, data, exclude=["school", "counselor", "student", "id"])
     
     @staticmethod
     def delete_event(user, event):

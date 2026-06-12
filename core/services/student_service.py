@@ -1,6 +1,7 @@
 from django.db import IntegrityError, transaction
 from core.models import Student, StudentEnrollment
 from core.helpers import ensure_same_school
+from core.services.base import apply_fields
 from rest_framework.exceptions import ValidationError
 
 class StudentService:
@@ -37,20 +38,11 @@ class StudentService:
             
     
     @staticmethod
-    def update_student(user, student, data): 
+    def update_student(user, student, data):
 
         ensure_same_school(user, student)
 
-        clean_data = {
-            k: v for k, v in data.items()
-            if k not in ["school", "id"]
-        }
-
-        for attr, value in clean_data.items():
-                setattr(student, attr, value)
-
-        student.save()
-        return student
+        return apply_fields(student, data, exclude=["school", "id"])
     
 
     @staticmethod
