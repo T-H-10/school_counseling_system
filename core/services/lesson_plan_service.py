@@ -68,7 +68,7 @@ class LessonPlanService:
             result.append({
                 "id": a.id,
                 "lesson_id": a.lesson.id,
-                "type": "class_session",
+                "type": "lesson",
                 "title": a.lesson.title,
                 "start": a.planned_date,
                 "end": a.completed_date,

@@ -17,7 +17,7 @@ class DashboardService:
         week_ago = now - timedelta(days=7)
         cutoff_90 = now - timedelta(days=90)
 
-        today_sessions = LessonClassAssignment.objects.filter(
+        today_lessons = LessonClassAssignment.objects.filter(
             lesson__counselor=counselor,
             planned_date__range=(today_start, today_end)
         ).select_related("lesson").order_by("planned_date")
@@ -64,9 +64,9 @@ class DashboardService:
         )
 
         return {
-            "today_sessions": [
+            "today_lessons": [
                 {"id": s.id, "title": s.lesson.title, "date": s.planned_date}
-                for s in today_sessions
+                for s in today_lessons
             ],
             "recent_events": [
                 {
