@@ -17,14 +17,15 @@ from .services.student_timeline_service import StudentTimelineService
 from .services.student_service import StudentService
 from .services.student_enrollment_service import StudentEnrollmentService
 from .services.student_event_service import StudentEventService
-from .services.class_session_service import ClassSessionService
+from .services.lesson_plan_service import LessonPlanService
+from .services.lesson_class_assignment_service import LessonClassAssignmentService
 from .services.school_service import SchoolService
 from .services.class_level_service import ClassLevelService
 from .services.school_year_service import SchoolYearService
 from .services.counselor_service import CounselorService
 
-from .models import Student, StudentEnrollment, StudentEvent, ClassSession, School, ClassLevel, SchoolYear, Counselor
-from .serializers import StudentSerializer, StudentEnrollmentSerializer, StudentEventSerializer, ClassSessionSerializer, SchoolSerializer, ClassLevelSerializer, SchoolYearSerializer, CounselorSerializer
+from .models import Student, StudentEnrollment, StudentEvent, LessonPlan, LessonClassAssignment, School, ClassLevel, SchoolYear, Counselor
+from .serializers import StudentSerializer, StudentEnrollmentSerializer, StudentEventSerializer, LessonPlanSerializer, LessonClassAssignmentSerializer, SchoolSerializer, ClassLevelSerializer, SchoolYearSerializer, CounselorSerializer
 from .permissions import IsCounselor
 
 class BaseSchoolViewSet(ModelViewSet):
@@ -333,28 +334,35 @@ class StudentEventViewSet(BaseSchoolViewSet):
         )        
 
 
-class ClassSessionViewSet(BaseSchoolViewSet):
+class LessonPlanViewSet(BaseSchoolViewSet):
     permission_classes = [IsCounselor]
-    model = ClassSession
-    serializer_class = ClassSessionSerializer
+    model = LessonPlan
+    serializer_class = LessonPlanSerializer
+
+    def get_queryset(self):
+        return (
+            super().get_queryset()
+            .prefetch_related("assignments__class_level")
+            .order_by("-created_at")
+        )
 
     def perform_create(self, serializer):
-        session = ClassSessionService.create_session(
+        lesson = LessonPlanService.create_lesson(
             self.request.user,
             serializer.validated_data
         )
-        serializer.instance = session
+        serializer.instance = lesson
 
     def perform_update(self, serializer):
-        session = ClassSessionService.update_session(
+        lesson = LessonPlanService.update_lesson(
             self.request.user,
             self.get_object(),
             serializer.validated_data
         )
-        serializer.instance = session
+        serializer.instance = lesson
 
     def perform_destroy(self, instance):
-        ClassSessionService.delete_session(
+        LessonPlanService.delete_lesson(
             self.request.user,
             instance
         )
@@ -364,10 +372,51 @@ class ClassSessionViewSet(BaseSchoolViewSet):
         start = request.query_params.get("start")
         end = request.query_params.get("end")
 
-        data = ClassSessionService.get_calendar(
+        data = LessonPlanService.get_calendar(
             request.user, start, end
         )
         return Response(data)
+
+
+class LessonClassAssignmentViewSet(BaseSchoolViewSet):
+    permission_classes = [IsCounselor]
+    model = LessonClassAssignment
+    serializer_class = LessonClassAssignmentSerializer
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['lesson']
+
+    def perform_create(self, serializer):
+        assignment = LessonClassAssignmentService.assign_class(
+            self.request.user,
+            serializer.validated_data
+        )
+        serializer.instance = assignment
+
+    def perform_update(self, serializer):
+        assignment = LessonClassAssignmentService.update_assignment(
+            self.request.user,
+            self.get_object(),
+            serializer.validated_data
+        )
+        serializer.instance = assignment
+
+    def perform_destroy(self, instance):
+        LessonClassAssignmentService.delete_assignment(
+            self.request.user,
+            instance
+        )
+
+    @action(detail=True, methods=["post"])
+    def complete(self, request, pk=None):
+        assignment = self.get_object()
+        assignment = LessonClassAssignmentService.complete_assignment(
+            request.user,
+            assignment,
+            request.data
+        )
+        serializer = self.get_serializer(assignment)
+        return Response(serializer.data)
 
 class SchoolViewSet(ModelViewSet):
     permission_classes = [IsAdminUser]

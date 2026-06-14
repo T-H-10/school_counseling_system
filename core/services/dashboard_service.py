@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.db.models import Max, Q
 from django.utils import timezone
 
-from core.models import ClassSession, Student, StudentEvent
+from core.models import LessonClassAssignment, Student, StudentEvent
 
 class DashboardService:
 
@@ -14,21 +14,13 @@ class DashboardService:
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         today_end = now.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-        tomorrow_start = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
-        tomorrow_end = (now + timedelta(days=1)).replace(hour=23, minute=59, second=59, microsecond=999999)
-
         week_ago = now - timedelta(days=7)
         cutoff_90 = now - timedelta(days=90)
 
-        today_sessions = ClassSession.objects.filter(
-            counselor=counselor,
-            date__range=(today_start, today_end)
-        ).order_by("date")
-
-        tomorrow_sessions = ClassSession.objects.filter(
-            counselor=counselor,
-            date__range=(tomorrow_start, tomorrow_end)
-        ).order_by("date")
+        today_sessions = LessonClassAssignment.objects.filter(
+            lesson__counselor=counselor,
+            planned_date__range=(today_start, today_end)
+        ).select_related("lesson").order_by("planned_date")
 
         recent_events = StudentEvent.objects.filter(
             counselor=counselor,
@@ -73,12 +65,8 @@ class DashboardService:
 
         return {
             "today_sessions": [
-                {"id": s.id, "title": s.title, "date": s.date}
+                {"id": s.id, "title": s.lesson.title, "date": s.planned_date}
                 for s in today_sessions
-            ],
-            "tomorrow_sessions": [
-                {"id": s.id, "title": s.title, "date": s.date}
-                for s in tomorrow_sessions
             ],
             "recent_events": [
                 {
