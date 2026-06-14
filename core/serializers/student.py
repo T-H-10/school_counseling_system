@@ -1,40 +1,7 @@
 from rest_framework import serializers
-from core import models
-from core.models import School, ClassLevel, SchoolYear, Counselor, Student, StudentEnrollment, LessonPlan, LessonClassAssignment, StudentEvent
+
+from core.models import ClassLevel, SchoolYear, Student, StudentEnrollment, StudentEvent
 from core.validators import validate_phone, validate_id_number, validate_name
-
-
-class SchoolSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = School
-        fields = "__all__"
-        read_only_fields = ["created_at"]
-
-
-class ClassLevelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = ClassLevel
-        fields = "__all__"
-
-
-class SchoolYearSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = SchoolYear
-        fields = "__all__"
-
-
-class CounselorSerializer(serializers.ModelSerializer):
-
-    username = serializers.CharField(write_only=True)
-    password = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = Counselor
-        fields = ["id","username", "password", "full_name", "school", "created_at"]
-        read_only_fields = ["created_at"]
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -137,7 +104,7 @@ class StudentSerializer(serializers.ModelSerializer):
             "class_number",
         ]
         read_only_fields = ["school", "created_at", "current_class_level", "current_class_number", "current_teacher", "last_event_date"]
-        
+
 
 class StudentEnrollmentSerializer(serializers.ModelSerializer):
 
@@ -157,7 +124,7 @@ class StudentEnrollmentSerializer(serializers.ModelSerializer):
             "teacher_name", "school", "created_at"
         ]
         read_only_fields = ["school", "created_at"]
-    
+
     def validate(self, data):
         request = self.context.get("request")
         user = request.user
@@ -166,7 +133,7 @@ class StudentEnrollmentSerializer(serializers.ModelSerializer):
 
         if student and student.school != user.counselor.school:
             raise serializers.ValidationError("Student must belong to your school")
-        
+
         return data
 
 
@@ -203,56 +170,3 @@ class StudentEventSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Student must belong to your school")
 
         return data
-
-
-
-class LessonClassAssignmentSerializer(serializers.ModelSerializer):
-
-    school = serializers.PrimaryKeyRelatedField(read_only=True)
-    lesson = serializers.PrimaryKeyRelatedField(queryset=LessonPlan.objects.all())
-    class_level = serializers.PrimaryKeyRelatedField(queryset=ClassLevel.objects.all())
-    class_level_name = serializers.CharField(source="class_level.name", read_only=True)
-
-    class Meta:
-        model = LessonClassAssignment
-        fields = [
-            "id",
-            "lesson",
-            "school",
-            "class_level",
-            "class_level_name",
-            "class_number",
-            "status",
-            "planned_date",
-            "completed_date",
-            "summary",
-            "created_at",
-        ]
-        read_only_fields = ["school", "created_at"]
-
-
-class LessonPlanSerializer(serializers.ModelSerializer):
-
-    school = serializers.PrimaryKeyRelatedField(read_only=True)
-    counselor = serializers.PrimaryKeyRelatedField(read_only=True)
-
-    school_year = serializers.PrimaryKeyRelatedField(queryset=SchoolYear.objects.all())
-    assignments = LessonClassAssignmentSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = LessonPlan
-        fields = [
-            "id",
-            "school",
-            "counselor",
-            "school_year",
-            "title",
-            "description",
-            "presentation_url",
-            "assignments",
-            "created_at",
-        ]
-        read_only_fields = ["school", "counselor", "created_at"]
-
-
-
