@@ -25,6 +25,16 @@ def _use_locmem_email(settings):
     settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
 
+@pytest.fixture(autouse=True)
+def _fast_password_hashing(settings):
+    """Use a cheap hasher so the many factory-built users don't dominate runtime.
+
+    Applied before factories create users; /token/ login still works because
+    check_password reads the algorithm from the stored hash.
+    """
+    settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+
+
 # --- Unauthenticated client ------------------------------------------------
 
 @pytest.fixture
