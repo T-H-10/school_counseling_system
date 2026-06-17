@@ -1,0 +1,9 @@
+# Test + schema tooling for the API test suite.
+# Install with:  pip install -r requirements-test.txt
+pytest==9.1.0
+pytest-django==4.12.0
+factory-boy==3.3.3
+Faker==40.23.0
+
+# OpenAPI schema snapshot validation (manage.py generate_swagger -> openapi.yaml)
+openapi-spec-validator==0.9.0

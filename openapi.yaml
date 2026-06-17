@@ -1,0 +1,1858 @@
+swagger: '2.0'
+info:
+  title: School API
+  description: API documentation
+  version: v1
+basePath: /
+consumes:
+- application/json
+produces:
+- application/json
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+security:
+- Bearer: []
+paths:
+  /classLevels/:
+    get:
+      operationId: classLevels_list
+      description: ''
+      parameters:
+      - name: search
+        in: query
+        description: A search term.
+        required: false
+        type: string
+      - name: ordering
+        in: query
+        description: Which field to use when ordering the results.
+        required: false
+        type: string
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/ClassLevel'
+      tags:
+      - classLevels
+    post:
+      operationId: classLevels_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/ClassLevel'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/ClassLevel'
+      tags:
+      - classLevels
+    parameters: []
+  /classLevels/{id}/:
+    get:
+      operationId: classLevels_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ClassLevel'
+      tags:
+      - classLevels
+    put:
+      operationId: classLevels_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/ClassLevel'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ClassLevel'
+      tags:
+      - classLevels
+    patch:
+      operationId: classLevels_partial_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/ClassLevel'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ClassLevel'
+      tags:
+      - classLevels
+    delete:
+      operationId: classLevels_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - classLevels
+    parameters:
+    - name: id
+      in: path
+      description: A unique integer value identifying this class level.
+      required: true
+      type: integer
+  /counselors/:
+    get:
+      operationId: counselors_list
+      description: ''
+      parameters:
+      - name: search
+        in: query
+        description: A search term.
+        required: false
+        type: string
+      - name: ordering
+        in: query
+        description: Which field to use when ordering the results.
+        required: false
+        type: string
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Counselor'
+      tags:
+      - counselors
+    post:
+      operationId: counselors_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Counselor'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Counselor'
+      tags:
+      - counselors
+    parameters: []
+  /counselors/{id}/:
+    get:
+      operationId: counselors_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Counselor'
+      tags:
+      - counselors
+    put:
+      operationId: counselors_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Counselor'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Counselor'
+      tags:
+      - counselors
+    patch:
+      operationId: counselors_partial_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Counselor'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Counselor'
+      tags:
+      - counselors
+    delete:
+      operationId: counselors_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - counselors
+    parameters:
+    - name: id
+      in: path
+      description: A unique integer value identifying this counselor.
+      required: true
+      type: integer
+  /counselors/{id}/reset_password/:
+    post:
+      operationId: counselors_reset_password
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Counselor'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Counselor'
+      tags:
+      - counselors
+    parameters:
+    - name: id
+      in: path
+      description: A unique integer value identifying this counselor.
+      required: true
+      type: integer
+  /dashboard/:
+    get:
+      operationId: dashboard_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - dashboard
+    parameters: []
+  /enrollments/:
+    get:
+      operationId: enrollments_list
+      description: ''
+      parameters:
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/StudentEnrollment'
+      tags:
+      - enrollments
+    post:
+      operationId: enrollments_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/StudentEnrollment'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/StudentEnrollment'
+      tags:
+      - enrollments
+    parameters: []
+  /enrollments/classes/:
+    get:
+      operationId: enrollments_classes
+      description: ''
+      parameters:
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/StudentEnrollment'
+      tags:
+      - enrollments
+    parameters: []
+  /enrollments/promote/:
+    post:
+      operationId: enrollments_promote
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/StudentEnrollment'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/StudentEnrollment'
+      tags:
+      - enrollments
+    parameters: []
+  /enrollments/set-class-teacher/:
+    post:
+      operationId: enrollments_set_class_teacher
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/StudentEnrollment'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/StudentEnrollment'
+      tags:
+      - enrollments
+    parameters: []
+  /enrollments/{id}/:
+    get:
+      operationId: enrollments_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/StudentEnrollment'
+      tags:
+      - enrollments
+    put:
+      operationId: enrollments_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/StudentEnrollment'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/StudentEnrollment'
+      tags:
+      - enrollments
+    patch:
+      operationId: enrollments_partial_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/StudentEnrollment'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/StudentEnrollment'
+      tags:
+      - enrollments
+    delete:
+      operationId: enrollments_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - enrollments
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /lessonAssignments/:
+    get:
+      operationId: lessonAssignments_list
+      description: ''
+      parameters:
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/LessonClassAssignment'
+      tags:
+      - lessonAssignments
+    post:
+      operationId: lessonAssignments_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/LessonClassAssignment'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/LessonClassAssignment'
+      tags:
+      - lessonAssignments
+    parameters: []
+  /lessonAssignments/{id}/:
+    get:
+      operationId: lessonAssignments_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LessonClassAssignment'
+      tags:
+      - lessonAssignments
+    put:
+      operationId: lessonAssignments_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/LessonClassAssignment'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LessonClassAssignment'
+      tags:
+      - lessonAssignments
+    patch:
+      operationId: lessonAssignments_partial_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/LessonClassAssignment'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LessonClassAssignment'
+      tags:
+      - lessonAssignments
+    delete:
+      operationId: lessonAssignments_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - lessonAssignments
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /lessonAssignments/{id}/complete/:
+    post:
+      operationId: lessonAssignments_complete
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/LessonClassAssignment'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/LessonClassAssignment'
+      tags:
+      - lessonAssignments
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /lessons/:
+    get:
+      operationId: lessons_list
+      description: ''
+      parameters:
+      - name: search
+        in: query
+        description: A search term.
+        required: false
+        type: string
+      - name: ordering
+        in: query
+        description: Which field to use when ordering the results.
+        required: false
+        type: string
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/LessonPlan'
+      tags:
+      - lessons
+    post:
+      operationId: lessons_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/LessonPlan'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/LessonPlan'
+      tags:
+      - lessons
+    parameters: []
+  /lessons/calendar/:
+    get:
+      operationId: lessons_calendar
+      description: ''
+      parameters:
+      - name: search
+        in: query
+        description: A search term.
+        required: false
+        type: string
+      - name: ordering
+        in: query
+        description: Which field to use when ordering the results.
+        required: false
+        type: string
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/LessonPlan'
+      tags:
+      - lessons
+    parameters: []
+  /lessons/{id}/:
+    get:
+      operationId: lessons_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LessonPlan'
+      tags:
+      - lessons
+    put:
+      operationId: lessons_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/LessonPlan'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LessonPlan'
+      tags:
+      - lessons
+    patch:
+      operationId: lessons_partial_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/LessonPlan'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/LessonPlan'
+      tags:
+      - lessons
+    delete:
+      operationId: lessons_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - lessons
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /schoolYears/:
+    get:
+      operationId: schoolYears_list
+      description: ''
+      parameters:
+      - name: search
+        in: query
+        description: A search term.
+        required: false
+        type: string
+      - name: ordering
+        in: query
+        description: Which field to use when ordering the results.
+        required: false
+        type: string
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/SchoolYear'
+      tags:
+      - schoolYears
+    post:
+      operationId: schoolYears_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/SchoolYear'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/SchoolYear'
+      tags:
+      - schoolYears
+    parameters: []
+  /schoolYears/{id}/:
+    get:
+      operationId: schoolYears_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/SchoolYear'
+      tags:
+      - schoolYears
+    put:
+      operationId: schoolYears_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/SchoolYear'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/SchoolYear'
+      tags:
+      - schoolYears
+    patch:
+      operationId: schoolYears_partial_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/SchoolYear'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/SchoolYear'
+      tags:
+      - schoolYears
+    delete:
+      operationId: schoolYears_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - schoolYears
+    parameters:
+    - name: id
+      in: path
+      description: A unique integer value identifying this school year.
+      required: true
+      type: integer
+  /schools/:
+    get:
+      operationId: schools_list
+      description: ''
+      parameters:
+      - name: search
+        in: query
+        description: A search term.
+        required: false
+        type: string
+      - name: ordering
+        in: query
+        description: Which field to use when ordering the results.
+        required: false
+        type: string
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/School'
+      tags:
+      - schools
+    post:
+      operationId: schools_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/School'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/School'
+      tags:
+      - schools
+    parameters: []
+  /schools/{id}/:
+    get:
+      operationId: schools_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/School'
+      tags:
+      - schools
+    put:
+      operationId: schools_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/School'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/School'
+      tags:
+      - schools
+    patch:
+      operationId: schools_partial_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/School'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/School'
+      tags:
+      - schools
+    delete:
+      operationId: schools_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - schools
+    parameters:
+    - name: id
+      in: path
+      description: A unique integer value identifying this school.
+      required: true
+      type: integer
+  /studentEvents/:
+    get:
+      operationId: studentEvents_list
+      description: ''
+      parameters:
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/StudentEvent'
+      tags:
+      - studentEvents
+    post:
+      operationId: studentEvents_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/StudentEvent'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/StudentEvent'
+      tags:
+      - studentEvents
+    parameters: []
+  /studentEvents/{id}/:
+    get:
+      operationId: studentEvents_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/StudentEvent'
+      tags:
+      - studentEvents
+    put:
+      operationId: studentEvents_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/StudentEvent'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/StudentEvent'
+      tags:
+      - studentEvents
+    patch:
+      operationId: studentEvents_partial_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/StudentEvent'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/StudentEvent'
+      tags:
+      - studentEvents
+    delete:
+      operationId: studentEvents_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - studentEvents
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /students/:
+    get:
+      operationId: students_list
+      description: ''
+      parameters:
+      - name: class_level
+        in: query
+        description: שכבה
+        required: false
+        type: string
+      - name: class_number
+        in: query
+        description: מספר כיתה
+        required: false
+        type: string
+      - name: search
+        in: query
+        description: A search term.
+        required: false
+        type: string
+      - name: ordering
+        in: query
+        description: Which field to use when ordering the results.
+        required: false
+        type: string
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Student'
+      tags:
+      - students
+    post:
+      operationId: students_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Student'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Student'
+      tags:
+      - students
+    parameters: []
+  /students/export/:
+    get:
+      operationId: students_export_students
+      description: ''
+      parameters:
+      - name: class_level
+        in: query
+        description: שכבה
+        required: false
+        type: string
+      - name: class_number
+        in: query
+        description: מספר כיתה
+        required: false
+        type: string
+      - name: search
+        in: query
+        description: A search term.
+        required: false
+        type: string
+      - name: ordering
+        in: query
+        description: Which field to use when ordering the results.
+        required: false
+        type: string
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Student'
+      tags:
+      - students
+    parameters: []
+  /students/import/:
+    post:
+      operationId: students_import_students
+      description: ''
+      parameters:
+      - name: full_name
+        in: formData
+        required: true
+        type: string
+        maxLength: 150
+        minLength: 1
+      - name: id_number
+        in: formData
+        required: true
+        type: string
+        maxLength: 9
+        minLength: 1
+      - name: address
+        in: formData
+        required: false
+        type: string
+        maxLength: 255
+        x-nullable: true
+      - name: mother_name
+        in: formData
+        required: false
+        type: string
+        maxLength: 100
+        x-nullable: true
+      - name: mother_phone
+        in: formData
+        required: false
+        type: string
+        maxLength: 20
+        x-nullable: true
+      - name: father_name
+        in: formData
+        required: false
+        type: string
+        maxLength: 100
+        x-nullable: true
+      - name: father_phone
+        in: formData
+        required: false
+        type: string
+        maxLength: 20
+        x-nullable: true
+      - name: school_year
+        in: formData
+        required: false
+        type: integer
+      - name: class_level
+        in: formData
+        required: false
+        type: integer
+      - name: class_number
+        in: formData
+        required: false
+        type: integer
+        minimum: 1
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Student'
+      consumes:
+      - multipart/form-data
+      tags:
+      - students
+    parameters: []
+  /students/{id}/:
+    get:
+      operationId: students_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Student'
+      tags:
+      - students
+    put:
+      operationId: students_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Student'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Student'
+      tags:
+      - students
+    patch:
+      operationId: students_partial_update
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Student'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Student'
+      tags:
+      - students
+    delete:
+      operationId: students_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      tags:
+      - students
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /students/{id}/timeline/:
+    get:
+      operationId: students_timeline
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Student'
+      tags:
+      - students
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /token/:
+    post:
+      operationId: token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/TokenObtainPair'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/TokenObtainPair'
+      tags:
+      - token
+    parameters: []
+  /token/refresh/:
+    post:
+      operationId: token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/TokenRefresh'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/TokenRefresh'
+      tags:
+      - token
+    parameters: []
+definitions:
+  ClassLevel:
+    required:
+    - name
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        enum:
+        - א
+        - ב
+        - ג
+        - ד
+        - ה
+        - ו
+        - ז
+        - ח
+  Counselor:
+    required:
+    - username
+    - password
+    - full_name
+    - school
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      username:
+        title: Username
+        type: string
+        minLength: 1
+      password:
+        title: Password
+        type: string
+        minLength: 1
+      full_name:
+        title: Full name
+        type: string
+        maxLength: 150
+        minLength: 1
+      school:
+        title: School
+        type: integer
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+  StudentEnrollment:
+    required:
+    - student
+    - school_year
+    - class_number
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      student:
+        title: Student
+        type: integer
+      school_year:
+        title: School year
+        type: integer
+      class_level:
+        title: Class level
+        type: integer
+        x-nullable: true
+      class_number:
+        title: Class number
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+      teacher_name:
+        title: Teacher name
+        type: string
+        maxLength: 150
+      school:
+        title: School
+        type: integer
+        readOnly: true
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+  LessonClassAssignment:
+    required:
+    - lesson
+    - class_level
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      lesson:
+        title: Lesson
+        type: integer
+      school:
+        title: School
+        type: integer
+        readOnly: true
+      class_level:
+        title: Class level
+        type: integer
+      class_level_name:
+        title: Class level name
+        type: string
+        readOnly: true
+        minLength: 1
+      class_number:
+        title: Class number
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+        x-nullable: true
+      status:
+        title: Status
+        type: string
+        enum:
+        - planned
+        - completed
+      planned_date:
+        title: Planned date
+        type: string
+        format: date-time
+        x-nullable: true
+      completed_date:
+        title: Completed date
+        type: string
+        format: date-time
+        x-nullable: true
+      summary:
+        title: Summary
+        type: string
+        x-nullable: true
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+  LessonPlan:
+    required:
+    - school_year
+    - title
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      school:
+        title: School
+        type: integer
+        readOnly: true
+      counselor:
+        title: Counselor
+        type: integer
+        readOnly: true
+      school_year:
+        title: School year
+        type: integer
+      title:
+        title: Title
+        type: string
+        maxLength: 200
+        minLength: 1
+      description:
+        title: Description
+        type: string
+        x-nullable: true
+      presentation_url:
+        title: Presentation url
+        type: string
+        format: uri
+        maxLength: 200
+        x-nullable: true
+      assignments:
+        type: array
+        items:
+          $ref: '#/definitions/LessonClassAssignment'
+        readOnly: true
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+  SchoolYear:
+    required:
+    - name
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 20
+        minLength: 1
+      is_active:
+        title: Is active
+        type: boolean
+  School:
+    required:
+    - name
+    - institution_code
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      name:
+        title: Name
+        type: string
+        maxLength: 150
+        minLength: 1
+      institution_code:
+        title: Institution code
+        type: string
+        maxLength: 20
+        minLength: 1
+      address:
+        title: Address
+        type: string
+        maxLength: 255
+        x-nullable: true
+      phone:
+        title: Phone
+        type: string
+        maxLength: 20
+        x-nullable: true
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+  StudentEvent:
+    required:
+    - student
+    - event_type
+    - title
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      student:
+        title: Student
+        type: integer
+      counselor:
+        title: Counselor
+        type: integer
+        readOnly: true
+      event_type:
+        title: Event type
+        type: string
+        enum:
+        - meeting
+        - call
+        - teacher_report
+        - other
+      title:
+        title: Title
+        type: string
+        maxLength: 200
+        minLength: 1
+      agenda:
+        title: Agenda
+        type: string
+        x-nullable: true
+      description:
+        title: Description
+        type: string
+        x-nullable: true
+      date:
+        title: Date
+        type: string
+        format: date-time
+      end_date:
+        title: End date
+        type: string
+        format: date-time
+        x-nullable: true
+      status:
+        title: Status
+        type: string
+        enum:
+        - pending
+        - completed
+      school:
+        title: School
+        type: integer
+        readOnly: true
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+  Student:
+    required:
+    - full_name
+    - id_number
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      full_name:
+        title: Full name
+        type: string
+        maxLength: 150
+        minLength: 1
+      id_number:
+        title: Id number
+        type: string
+        maxLength: 9
+        minLength: 1
+      address:
+        title: Address
+        type: string
+        maxLength: 255
+        x-nullable: true
+      mother_name:
+        title: Mother name
+        type: string
+        maxLength: 100
+        x-nullable: true
+      mother_phone:
+        title: Mother phone
+        type: string
+        maxLength: 20
+        x-nullable: true
+      father_name:
+        title: Father name
+        type: string
+        maxLength: 100
+        x-nullable: true
+      father_phone:
+        title: Father phone
+        type: string
+        maxLength: 20
+        x-nullable: true
+      school:
+        title: School
+        type: integer
+        readOnly: true
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+      current_class_level:
+        title: Current class level
+        type: string
+        readOnly: true
+      current_class_number:
+        title: Current class number
+        type: string
+        readOnly: true
+      current_teacher:
+        title: Current teacher
+        type: string
+        readOnly: true
+      last_event_date:
+        title: Last event date
+        type: string
+        readOnly: true
+      school_year:
+        title: School year
+        type: integer
+      class_level:
+        title: Class level
+        type: integer
+      class_number:
+        title: Class number
+        type: integer
+        minimum: 1
+  TokenObtainPair:
+    required:
+    - username
+    - password
+    type: object
+    properties:
+      username:
+        title: Username
+        type: string
+        minLength: 1
+      password:
+        title: Password
+        type: string
+        minLength: 1
+  TokenRefresh:
+    required:
+    - refresh
+    type: object
+    properties:
+      refresh:
+        title: Refresh
+        type: string
+        minLength: 1
+      access:
+        title: Access
+        type: string
+        readOnly: true
+        minLength: 1
