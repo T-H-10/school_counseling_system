@@ -99,7 +99,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 SWAGGER_SETTINGS = {
-    'USE_SESSION_AUTH': False,  
+    'USE_SESSION_AUTH': False,
+    'DEFAULT_INFO': 'config.urls.api_info',
     'SECURITY_DEFINITIONS': {
         'Bearer': {
             'type': 'apiKey',

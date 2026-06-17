@@ -23,12 +23,14 @@ from drf_yasg import openapi
 
 from core.views import DashboardView
 
+api_info = openapi.Info(
+    title="School API",
+    default_version='v1',
+    description="API documentation",
+)
+
 schema_view = get_schema_view(
-    openapi.Info(
-        title="School API",
-        default_version='v1',
-        description="API documentation",
-    ),
+    api_info,
     public=True,
     permission_classes=(permissions.AllowAny,),
 )
