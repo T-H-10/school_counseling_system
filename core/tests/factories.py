@@ -13,6 +13,7 @@ from django.contrib.auth.models import User
 from core.models import (
     ClassLevel,
     Counselor,
+    Document,
     LessonClassAssignment,
     LessonPlan,
     School,
@@ -132,3 +133,14 @@ class LessonClassAssignmentFactory(factory.django.DjangoModelFactory):
     class_level = factory.SubFactory(ClassLevelFactory)
     class_number = 1
     status = "planned"
+
+
+class DocumentFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Document
+
+    school = factory.SubFactory(SchoolFactory)
+    counselor = factory.SubFactory(CounselorFactory, school=factory.SelfAttribute("..school"))
+    category = "general"
+    title = factory.Sequence(lambda n: f"מסמך {n}")
+    file = factory.django.FileField(filename="test.pdf", data=b"%PDF-1.4 content")
