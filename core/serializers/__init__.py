@@ -20,6 +20,7 @@ from .lesson import (
     LessonClassAssignmentSerializer,
     LessonPlanSerializer,
 )
+from .document import DocumentSerializer
 
 __all__ = [
     "SchoolSerializer",
@@ -31,4 +32,5 @@ __all__ = [
     "StudentEventSerializer",
     "LessonClassAssignmentSerializer",
     "LessonPlanSerializer",
+    "DocumentSerializer",
 ]
