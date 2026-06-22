@@ -16,6 +16,7 @@ from .admin import (
     CounselorViewSet,
 )
 from .dashboard import DashboardView
+from .document import DocumentViewSet
 
 __all__ = [
     "BaseSchoolViewSet",
@@ -29,4 +30,5 @@ __all__ = [
     "SchoolYearViewSet",
     "CounselorViewSet",
     "DashboardView",
+    "DocumentViewSet",
 ]
