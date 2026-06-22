@@ -330,3 +330,46 @@ def test_filter_by_student(client_a, school_a, counselor_a):
     assert resp.status_code == 200
     assert resp.data["count"] == 1
     assert resp.data["results"][0]["student"] == s1.id
+
+
+# ---------------------------------------------------------------------------
+# Re-categorization (category change on update)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.django_db
+def test_recategorize_class_to_general_clears_class_level(client_a, school_a, counselor_a):
+    """Moving a class doc to general must succeed and clear class_level/class_number."""
+    cl = factories.ClassLevelFactory(name="ג")
+    doc = factories.DocumentFactory(
+        school=school_a, counselor=counselor_a,
+        category="class", class_level=cl, class_number=3,
+    )
+
+    resp = client_a.patch(f"/documents/{doc.id}/", {"category": "general"}, format="multipart")
+
+    assert resp.status_code == 200, resp.data
+    assert resp.data["category"] == "general"
+    assert resp.data["class_level"] is None
+    assert resp.data["class_number"] is None
+
+
+@pytest.mark.django_db
+def test_recategorize_student_to_class_clears_student(client_a, school_a, counselor_a):
+    """Moving a student doc to class must succeed and clear the student FK."""
+    student = factories.StudentFactory(school=school_a)
+    cl = factories.ClassLevelFactory(name="ד")
+    doc = factories.DocumentFactory(
+        school=school_a, counselor=counselor_a,
+        category="student", student=student,
+    )
+
+    resp = client_a.patch(f"/documents/{doc.id}/", {
+        "category": "class",
+        "class_level": cl.id,
+        "class_number": 1,
+    }, format="multipart")
+
+    assert resp.status_code == 200, resp.data
+    assert resp.data["category"] == "class"
+    assert resp.data["student"] is None
+    assert resp.data["class_level"] == cl.id
