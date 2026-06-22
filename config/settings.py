@@ -157,6 +157,35 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Media files (user-uploaded documents)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Maximum upload size for documents (bytes). Override via env var.
+DOCUMENT_MAX_UPLOAD_SIZE = int(os.environ.get('DOCUMENT_MAX_UPLOAD_SIZE', str(10 * 1024 * 1024)))
+
+# Cloudflare R2 storage (production). Activated when R2_ACCOUNT_ID env var is set.
+# Local FileSystemStorage is used by default (dev).
+_R2_ACCOUNT_ID = os.environ.get('R2_ACCOUNT_ID', '')
+if _R2_ACCOUNT_ID:
+    INSTALLED_APPS += ['storages']
+    STORAGES = {
+        'default': {
+            'BACKEND': 'storages.backends.s3.S3Storage',
+            'OPTIONS': {
+                'endpoint_url': f'https://{_R2_ACCOUNT_ID}.r2.cloudflarestorage.com',
+                'bucket_name': os.environ.get('R2_BUCKET_NAME', ''),
+                'access_key': os.environ.get('R2_ACCESS_KEY_ID', ''),
+                'secret_key': os.environ.get('R2_SECRET_ACCESS_KEY', ''),
+                'region_name': 'auto',
+                'default_acl': None,
+            },
+        },
+        'staticfiles': {
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+        },
+    }
+
 # Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
