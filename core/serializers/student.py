@@ -118,6 +118,8 @@ class StudentEnrollmentSerializer(serializers.ModelSerializer):
     class_level = serializers.PrimaryKeyRelatedField(
         queryset=ClassLevel.objects.all(), required=False, allow_null=True
     )
+    school_year_name = serializers.CharField(source="school_year.name", read_only=True)
+    class_level_name = serializers.CharField(source="class_level.name", read_only=True, allow_null=True)
 
     class Meta:
         model = StudentEnrollment
@@ -125,13 +127,15 @@ class StudentEnrollmentSerializer(serializers.ModelSerializer):
             "id",
             "student",
             "school_year",
+            "school_year_name",
             "class_level",
+            "class_level_name",
             "class_number",
             "teacher_name",
             "school",
             "created_at",
         ]
-        read_only_fields = ["school", "created_at"]
+        read_only_fields = ["school", "created_at", "school_year_name", "class_level_name"]
 
     def validate(self, data):
         request = self.context.get("request")

@@ -1,7 +1,9 @@
+from django.db import transaction
+from django.db.models import Count, Max
+
 from core.helpers import ensure_same_school
 from core.models import ClassLevel, SchoolYear, StudentEnrollment
 from core.services.base import apply_fields
-from django.db.models import Count, Max
 
 
 class StudentEnrollmentService:
@@ -64,7 +66,14 @@ class StudentEnrollmentService:
         return updated
 
     @staticmethod
+    @transaction.atomic
     def promote_students(user, data):
+        """Promote all students from from_year to to_year, advancing each one grade.
+
+        Idempotent: a second run with the same years skips all already-enrolled
+        students and returns created=0. All inserts happen in a single atomic
+        transaction so a mid-loop failure leaves no partial state.
+        """
         school = user.counselor.school
         from_year = SchoolYear.objects.get(pk=data["from_year"])
         to_year = SchoolYear.objects.get(pk=data["to_year"])
@@ -84,15 +93,28 @@ class StudentEnrollmentService:
 
         created = 0
         skipped = 0
+        skipped_students = []
         for enrollment in enrollments:
             if enrollment.student_id in already_enrolled:
                 skipped += 1
+                skipped_students.append({
+                    "id": enrollment.student_id,
+                    "full_name": enrollment.student.full_name,
+                    "grade": enrollment.class_level.name if enrollment.class_level else None,
+                    "reason": "already_enrolled",
+                })
                 continue
             next_level = (
                 next_level_map.get(enrollment.class_level_id) if enrollment.class_level_id else None
             )
             if next_level is None:
                 skipped += 1
+                skipped_students.append({
+                    "id": enrollment.student_id,
+                    "full_name": enrollment.student.full_name,
+                    "grade": enrollment.class_level.name if enrollment.class_level else None,
+                    "reason": "last_grade",
+                })
                 continue
             StudentEnrollment.objects.create(
                 student=enrollment.student,
@@ -104,4 +126,4 @@ class StudentEnrollmentService:
             )
             created += 1
 
-        return {"created": created, "skipped": skipped}
+        return {"created": created, "skipped": skipped, "skipped_students": skipped_students}

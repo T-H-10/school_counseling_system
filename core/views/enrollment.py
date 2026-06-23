@@ -18,6 +18,13 @@ class StudentEnrollmentViewSet(BaseSchoolViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["student"]
 
+    def get_queryset(self):
+        return (
+            super().get_queryset()
+            .select_related("school_year", "class_level", "student")
+            .order_by("-school_year__name")
+        )
+
     def perform_create(self, serializer):
         enrollment = StudentEnrollmentService.create_enrollment(
             self.request.user, serializer.validated_data
@@ -53,6 +60,17 @@ class StudentEnrollmentViewSet(BaseSchoolViewSet):
         to_year = request.data.get("to_year")
         if not from_year or not to_year:
             return Response({"error": "נדרשים from_year ו-to_year"}, status=400)
+        if str(from_year) == str(to_year):
+            return Response({"error": "שנת המקור ושנת היעד חייבות להיות שונות"}, status=400)
+        # Verify both years exist before checking enrollment counts.
+        try:
+            SchoolYear.objects.get(pk=from_year)
+            SchoolYear.objects.get(pk=to_year)
+        except SchoolYear.DoesNotExist:
+            return Response({"error": "שנת לימודים לא נמצאה"}, status=400)
+        school = request.user.counselor.school
+        if not StudentEnrollment.objects.filter(school=school, school_year_id=from_year).exists():
+            return Response({"error": "שנת המקור אינה מכילה תלמידים. בחר שנה אחרת."}, status=400)
         try:
             result = StudentEnrollmentService.promote_students(request.user, request.data)
         except SchoolYear.DoesNotExist:

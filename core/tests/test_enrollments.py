@@ -154,14 +154,16 @@ def test_promote_advances_to_next_grade(client_a, school_a, active_year, class_l
         format="json",
     )
     assert resp.status_code == 200
-    assert resp.data == {"created": 1, "skipped": 0}
+    assert resp.data["created"] == 1
+    assert resp.data["skipped"] == 0
+    assert resp.data["skipped_students"] == []
     promoted = StudentEnrollment.objects.get(student=enrollment.student, school_year=next_year)
     assert promoted.class_level.name == class_levels[1].name  # grade ב
 
 
 @pytest.mark.django_db
 def test_promote_skips_top_grade(client_a, school_a, active_year, class_levels):
-    _enroll(school_a, active_year, class_levels[-1])  # grade ח, no next level
+    enrollment = _enroll(school_a, active_year, class_levels[-1])  # grade ח, no next level
     next_year = factories.SchoolYearFactory(name="2026-2027")
 
     resp = client_a.post(
@@ -170,7 +172,13 @@ def test_promote_skips_top_grade(client_a, school_a, active_year, class_levels):
         format="json",
     )
     assert resp.status_code == 200
-    assert resp.data == {"created": 0, "skipped": 1}
+    assert resp.data["created"] == 0
+    assert resp.data["skipped"] == 1
+    assert len(resp.data["skipped_students"]) == 1
+    skipped = resp.data["skipped_students"][0]
+    assert skipped["id"] == enrollment.student_id
+    assert skipped["grade"] == class_levels[-1].name
+    assert skipped["reason"] == "last_grade"
 
 
 @pytest.mark.django_db
@@ -190,7 +198,10 @@ def test_promote_skips_students_already_in_target_year(
         format="json",
     )
     assert resp.status_code == 200
-    assert resp.data == {"created": 0, "skipped": 1}
+    assert resp.data["created"] == 0
+    assert resp.data["skipped"] == 1
+    skipped = resp.data["skipped_students"][0]
+    assert skipped["reason"] == "already_enrolled"
 
 
 @pytest.mark.django_db
@@ -244,3 +255,197 @@ def test_duplicate_enrollment_same_year_rejected(client_a, school_a, active_year
 
     assert resp.status_code == 400
     assert resp.data["non_field_errors"][0].code == "unique"
+
+
+# --- promote: edge cases ---------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_promote_zero_students_rejected(client_a, active_year):
+    """Promoting from a year with no enrollments is rejected with 400."""
+    next_year = factories.SchoolYearFactory(name="2026-2027")
+
+    resp = client_a.post(
+        "/enrollments/promote/",
+        {"from_year": active_year.id, "to_year": next_year.id},
+        format="json",
+    )
+    assert resp.status_code == 400
+    assert "שנת המקור אינה מכילה תלמידים" in resp.data["error"]
+
+
+@pytest.mark.django_db
+def test_promote_all_last_grade(client_a, school_a, active_year, class_levels):
+    """All students in כיתה ח' → created=0, all skipped with reason last_grade."""
+    for _ in range(3):
+        _enroll(school_a, active_year, class_levels[-1])  # grade ח
+    next_year = factories.SchoolYearFactory(name="2026-2027")
+
+    resp = client_a.post(
+        "/enrollments/promote/",
+        {"from_year": active_year.id, "to_year": next_year.id},
+        format="json",
+    )
+    assert resp.status_code == 200
+    assert resp.data["created"] == 0
+    assert resp.data["skipped"] == 3
+    assert all(s["reason"] == "last_grade" for s in resp.data["skipped_students"])
+
+
+@pytest.mark.django_db
+def test_promote_idempotent(client_a, school_a, active_year, class_levels):
+    """Running promote twice is idempotent: second run creates nothing."""
+    _enroll(school_a, active_year, class_levels[0])
+    next_year = factories.SchoolYearFactory(name="2026-2027")
+    payload = {"from_year": active_year.id, "to_year": next_year.id}
+
+    resp1 = client_a.post("/enrollments/promote/", payload, format="json")
+    assert resp1.data["created"] == 1
+
+    resp2 = client_a.post("/enrollments/promote/", payload, format="json")
+    assert resp2.status_code == 200
+    assert resp2.data["created"] == 0
+    assert resp2.data["skipped"] == 1
+    assert resp2.data["skipped_students"][0]["reason"] == "already_enrolled"
+    # DB must still have exactly one enrollment in the target year.
+    assert StudentEnrollment.objects.filter(school_year=next_year).count() == 1
+
+
+@pytest.mark.django_db
+def test_promote_skipped_students_include_grade(client_a, school_a, active_year, class_levels):
+    """Skipped students carry the grade name so the UI can display it."""
+    _enroll(school_a, active_year, class_levels[-1])  # ח
+    next_year = factories.SchoolYearFactory(name="2026-2027")
+
+    resp = client_a.post(
+        "/enrollments/promote/",
+        {"from_year": active_year.id, "to_year": next_year.id},
+        format="json",
+    )
+    assert resp.status_code == 200
+    skipped = resp.data["skipped_students"][0]
+    assert "grade" in skipped
+    assert skipped["grade"] == "ח"
+    assert "full_name" in skipped
+
+
+# --- inactive student filter -----------------------------------------------
+
+
+@pytest.mark.django_db
+def test_inactive_filter_returns_unenrolled_students(client_a, school_a, active_year, class_levels):
+    """?inactive=true returns students with no enrollment in the active year."""
+    enrolled_student = factories.StudentFactory(school=school_a)
+    factories.StudentEnrollmentFactory(
+        student=enrolled_student, school_year=active_year, class_level=class_levels[0], school=school_a
+    )
+    inactive_student = factories.StudentFactory(school=school_a)  # no enrollment
+
+    resp = client_a.get("/students/?inactive=true")
+    assert resp.status_code == 200
+    ids = [s["id"] for s in resp.data["results"]]
+    assert inactive_student.id in ids
+    assert enrolled_student.id not in ids
+
+
+@pytest.mark.django_db
+def test_inactive_false_returns_enrolled_students(client_a, school_a, active_year, class_levels):
+    """?inactive=false returns only students enrolled in the active year."""
+    enrolled = factories.StudentFactory(school=school_a)
+    factories.StudentEnrollmentFactory(
+        student=enrolled, school_year=active_year, class_level=class_levels[0], school=school_a
+    )
+    factories.StudentFactory(school=school_a)  # unenrolled
+
+    resp = client_a.get("/students/?inactive=false")
+    assert resp.status_code == 200
+    ids = [s["id"] for s in resp.data["results"]]
+    assert enrolled.id in ids
+    assert len(ids) == 1
+
+
+@pytest.mark.django_db
+def test_inactive_filter_no_active_year(client_a, school_a):
+    """When no active year exists, inactive=true returns all students."""
+    factories.StudentFactory(school=school_a)
+    factories.StudentFactory(school=school_a)
+
+    resp = client_a.get("/students/?inactive=true")
+    assert resp.status_code == 200
+    assert resp.data["count"] == 2
+
+
+# --- activate_year -----------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_activate_year_deactivates_others(admin_client, active_year):
+    """PATCH is_active=True on a year atomically deactivates all other years."""
+    new_year = factories.SchoolYearFactory(name="2026-2027", is_active=False)
+
+    resp = admin_client.patch(f"/schoolYears/{new_year.id}/", {"is_active": True}, format="json")
+    assert resp.status_code == 200
+
+    from core.models import SchoolYear as SY
+    active_years = SY.objects.filter(is_active=True)
+    assert active_years.count() == 1
+    assert active_years.first().id == new_year.id
+
+
+@pytest.mark.django_db
+def test_db_constraint_rejects_two_active_years(db):
+    """The DB partial unique index prevents two rows with is_active=True."""
+    from django.db import IntegrityError
+
+    factories.SchoolYearFactory(name="2025-2026", is_active=True)
+    with pytest.raises(IntegrityError):
+        factories.SchoolYearFactory(name="2026-2027", is_active=True)
+
+
+@pytest.mark.django_db
+def test_promote_same_year_rejected(client_a, school_a, active_year, class_levels):
+    """Promoting from a year to itself is rejected with 400."""
+    _enroll(school_a, active_year, class_levels[0])
+
+    resp = client_a.post(
+        "/enrollments/promote/",
+        {"from_year": active_year.id, "to_year": active_year.id},
+        format="json",
+    )
+    assert resp.status_code == 400
+    assert "שונות" in resp.data["error"]
+
+
+# --- enrollment history: serializer fields ---------------------------------
+
+
+@pytest.mark.django_db
+def test_enrollment_list_includes_name_fields(client_a, school_a, active_year, class_levels):
+    """GET /enrollments/?student={id} includes school_year_name and class_level_name."""
+    enrollment = _enroll(school_a, active_year, class_levels[2])  # grade ג
+
+    resp = client_a.get(f"/enrollments/?student={enrollment.student_id}")
+    assert resp.status_code == 200
+    assert resp.data["count"] == 1
+    row = resp.data["results"][0]
+    assert row["school_year_name"] == active_year.name
+    assert row["class_level_name"] == class_levels[2].name
+
+
+@pytest.mark.django_db
+def test_enrollment_list_ordered_newest_first(client_a, school_a, active_year, class_levels):
+    """GET /enrollments/?student={id} returns rows ordered newest school year first."""
+    student = factories.StudentFactory(school=school_a)
+    older_year = factories.SchoolYearFactory(name="2023-2024")  # alphabetically earlier
+    factories.StudentEnrollmentFactory(
+        student=student, school_year=older_year, class_level=class_levels[0], school=school_a
+    )
+    factories.StudentEnrollmentFactory(
+        student=student, school_year=active_year, class_level=class_levels[1], school=school_a
+    )
+
+    resp = client_a.get(f"/enrollments/?student={student.id}")
+    assert resp.status_code == 200
+    names = [r["school_year_name"] for r in resp.data["results"]]
+    assert names[0] == active_year.name   # "2025-2026" comes first (newest)
+    assert names[1] == older_year.name    # "2023-2024" comes second

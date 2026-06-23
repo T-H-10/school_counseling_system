@@ -29,6 +29,11 @@ class SchoolYearSerializer(serializers.ModelSerializer):
     class Meta:
         model = SchoolYear
         fields = "__all__"
+        # The unique_active_school_year partial DB constraint is enforced
+        # atomically by SchoolYearService.activate_year(). DRF 3.17+ auto-
+        # generates a field-level UniqueValidator from it which would reject
+        # valid activation requests before the service even runs — suppress it.
+        extra_kwargs = {"is_active": {"validators": []}}
 
 
 class CounselorSerializer(serializers.ModelSerializer):
