@@ -7,6 +7,7 @@ existing import paths (``from core.views import StudentViewSet``) keep working.
 from .admin import (
     ClassLevelViewSet,
     CounselorViewSet,
+    CustomTokenObtainPairView,
     SchoolViewSet,
     SchoolYearViewSet,
 )
@@ -17,6 +18,7 @@ from .enrollment import StudentEnrollmentViewSet
 from .lesson import LessonClassAssignmentViewSet, LessonPlanViewSet
 from .student import StudentViewSet
 from .student_event import StudentEventViewSet
+from .support import SupportRequestViewSet
 
 __all__ = [
     "BaseSchoolViewSet",
@@ -29,6 +31,8 @@ __all__ = [
     "ClassLevelViewSet",
     "SchoolYearViewSet",
     "CounselorViewSet",
+    "CustomTokenObtainPairView",
     "DashboardView",
     "DocumentViewSet",
+    "SupportRequestViewSet",
 ]

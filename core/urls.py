@@ -11,6 +11,7 @@ from .views import (
     StudentEnrollmentViewSet,
     StudentEventViewSet,
     StudentViewSet,
+    SupportRequestViewSet,
 )
 
 router = DefaultRouter()
@@ -24,5 +25,6 @@ router.register(r"classLevels", ClassLevelViewSet, basename="classLevel")
 router.register(r"schoolYears", SchoolYearViewSet, basename="schoolYear")
 router.register(r"counselors", CounselorViewSet, basename="counselor")
 router.register(r"documents", DocumentViewSet, basename="document")
+router.register(r"support", SupportRequestViewSet, basename="support")
 
 urlpatterns = router.urls

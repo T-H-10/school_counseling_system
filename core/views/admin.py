@@ -2,6 +2,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from core.models import ClassLevel, Counselor, School, SchoolYear
 from core.serializers import (
@@ -10,6 +11,11 @@ from core.serializers import (
     SchoolSerializer,
     SchoolYearSerializer,
 )
+from core.serializers.admin import CustomTokenObtainPairSerializer
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 from core.services.class_level_service import ClassLevelService
 from core.services.counselor_service import CounselorService
 from core.services.school_service import SchoolService

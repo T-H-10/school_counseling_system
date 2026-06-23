@@ -22,6 +22,7 @@ from core.models import (
     Student,
     StudentEnrollment,
     StudentEvent,
+    SupportRequest,
 )
 
 # Shared password for every factory-built user, so tests can log in via /token/.
@@ -142,6 +143,16 @@ class LessonClassAssignmentFactory(factory.django.DjangoModelFactory):
     class_level = factory.SubFactory(ClassLevelFactory)
     class_number = 1
     status = "planned"
+
+
+class SupportRequestFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = SupportRequest
+
+    counselor = factory.SubFactory(CounselorFactory)
+    school = factory.SelfAttribute("counselor.school")
+    subject = factory.Sequence(lambda n: f"פנייה {n}")
+    message = "תוכן הפנייה"
 
 
 class DocumentFactory(factory.django.DjangoModelFactory):

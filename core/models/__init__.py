@@ -12,6 +12,7 @@ from .document import Document
 from .lesson import LessonClassAssignment, LessonPlan
 from .school import Counselor, School
 from .student import Student, StudentEnrollment, StudentEvent
+from .support import SupportRequest
 
 __all__ = [
     "SoftDeleteModel",
@@ -28,4 +29,5 @@ __all__ = [
     "LessonPlan",
     "LessonClassAssignment",
     "Document",
+    "SupportRequest",
 ]

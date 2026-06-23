@@ -12,6 +12,7 @@ from .admin import (
     SchoolYearSerializer,
 )
 from .document import DocumentSerializer
+from .support import SupportRequestSerializer
 from .lesson import (
     LessonClassAssignmentSerializer,
     LessonPlanSerializer,
@@ -33,4 +34,5 @@ __all__ = [
     "LessonClassAssignmentSerializer",
     "LessonPlanSerializer",
     "DocumentSerializer",
+    "SupportRequestSerializer",
 ]
