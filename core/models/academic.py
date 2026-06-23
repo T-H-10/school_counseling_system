@@ -2,16 +2,15 @@ from django.db import models
 
 
 class ClassLevel(models.Model):
-
     LEVEL_CHOICES = [
-        ('א', 'א'),
-        ('ב', 'ב'),
-        ('ג', 'ג'),
-        ('ד', 'ד'),
-        ('ה', 'ה'),
-        ('ו', 'ו'),
-        ('ז', 'ז'),
-        ('ח', 'ח'),
+        ("א", "א"),
+        ("ב", "ב"),
+        ("ג", "ג"),
+        ("ד", "ד"),
+        ("ה", "ה"),
+        ("ו", "ו"),
+        ("ז", "ז"),
+        ("ח", "ח"),
     ]
 
     name = models.CharField(max_length=1, choices=LEVEL_CHOICES, unique=True)

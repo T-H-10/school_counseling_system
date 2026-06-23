@@ -4,7 +4,6 @@ from core.models import ClassLevel, LessonPlan, LessonClassAssignment, SchoolYea
 
 
 class LessonClassAssignmentSerializer(serializers.ModelSerializer):
-
     school = serializers.PrimaryKeyRelatedField(read_only=True)
     lesson = serializers.PrimaryKeyRelatedField(queryset=LessonPlan.objects.all())
     class_level = serializers.PrimaryKeyRelatedField(queryset=ClassLevel.objects.all())
@@ -29,7 +28,6 @@ class LessonClassAssignmentSerializer(serializers.ModelSerializer):
 
 
 class LessonPlanSerializer(serializers.ModelSerializer):
-
     school = serializers.PrimaryKeyRelatedField(read_only=True)
     counselor = serializers.PrimaryKeyRelatedField(read_only=True)
 

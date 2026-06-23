@@ -5,25 +5,26 @@ from core.services.base import apply_fields
 
 
 class StudentEnrollmentService:
-
     @staticmethod
     def create_enrollment(user, data):
         school = user.counselor.school
-        student = data['student']
+        student = data["student"]
         ensure_same_school(user, student)
         return StudentEnrollment.objects.create(
             student=student,
-            school_year=data['school_year'],
-            class_level=data.get('class_level'),
-            class_number=data['class_number'],
-            teacher_name=data.get('teacher_name', ''),
+            school_year=data["school_year"],
+            class_level=data.get("class_level"),
+            class_number=data["class_number"],
+            teacher_name=data.get("teacher_name", ""),
             school=school,
         )
 
     @staticmethod
     def update_enrollment(user, enrollment, data):
         ensure_same_school(user, enrollment)
-        return apply_fields(enrollment, data, exclude={'school', 'student', 'school_year', 'id'})
+        return apply_fields(
+            enrollment, data, exclude={"school", "student", "school_year", "id"}
+        )
 
     @staticmethod
     def delete_enrollment(user, enrollment):
@@ -37,14 +38,19 @@ class StudentEnrollmentService:
         if not active_year:
             return []
         groups = (
-            StudentEnrollment.objects
-            .filter(school=school, school_year=active_year)
-            .values('class_level', 'class_level__name', 'class_number', 'school_year', 'school_year__name')
-            .annotate(
-                student_count=Count('pk'),
-                teacher_name=Max('teacher_name'),
+            StudentEnrollment.objects.filter(school=school, school_year=active_year)
+            .values(
+                "class_level",
+                "class_level__name",
+                "class_number",
+                "school_year",
+                "school_year__name",
             )
-            .order_by('class_level__name', 'class_number')
+            .annotate(
+                student_count=Count("pk"),
+                teacher_name=Max("teacher_name"),
+            )
+            .order_by("class_level__name", "class_number")
         )
         return list(groups)
 
@@ -53,31 +59,29 @@ class StudentEnrollmentService:
         school = user.counselor.school
         updated = StudentEnrollment.objects.filter(
             school=school,
-            school_year_id=data['school_year'],
-            class_level_id=data['class_level'],
-            class_number=data['class_number'],
-        ).update(teacher_name=data.get('teacher_name', ''))
+            school_year_id=data["school_year"],
+            class_level_id=data["class_level"],
+            class_number=data["class_number"],
+        ).update(teacher_name=data.get("teacher_name", ""))
         return updated
 
     @staticmethod
     def promote_students(user, data):
         school = user.counselor.school
-        from_year = SchoolYear.objects.get(pk=data['from_year'])
-        to_year = SchoolYear.objects.get(pk=data['to_year'])
+        from_year = SchoolYear.objects.get(pk=data["from_year"])
+        to_year = SchoolYear.objects.get(pk=data["to_year"])
 
-        levels = list(ClassLevel.objects.all().order_by('name'))
+        levels = list(ClassLevel.objects.all().order_by("name"))
         next_level_map = {levels[i].id: levels[i + 1] for i in range(len(levels) - 1)}
 
-        enrollments = (
-            StudentEnrollment.objects
-            .filter(school=school, school_year=from_year)
-            .select_related('class_level', 'student')
-        )
+        enrollments = StudentEnrollment.objects.filter(
+            school=school, school_year=from_year
+        ).select_related("class_level", "student")
 
         already_enrolled = set(
-            StudentEnrollment.objects
-            .filter(school=school, school_year=to_year)
-            .values_list('student_id', flat=True)
+            StudentEnrollment.objects.filter(
+                school=school, school_year=to_year
+            ).values_list("student_id", flat=True)
         )
 
         created = 0
@@ -86,7 +90,11 @@ class StudentEnrollmentService:
             if enrollment.student_id in already_enrolled:
                 skipped += 1
                 continue
-            next_level = next_level_map.get(enrollment.class_level_id) if enrollment.class_level_id else None
+            next_level = (
+                next_level_map.get(enrollment.class_level_id)
+                if enrollment.class_level_id
+                else None
+            )
             if next_level is None:
                 skipped += 1
                 continue
@@ -95,9 +103,9 @@ class StudentEnrollmentService:
                 school_year=to_year,
                 class_level=next_level,
                 class_number=enrollment.class_number,
-                teacher_name='',
+                teacher_name="",
                 school=school,
             )
             created += 1
 
-        return {'created': created, 'skipped': skipped}
+        return {"created": created, "skipped": skipped}

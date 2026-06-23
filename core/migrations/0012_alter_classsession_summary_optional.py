@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0011_add_agenda_to_student_event'),
+        ("core", "0011_add_agenda_to_student_event"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='classsession',
-            name='summary',
+            model_name="classsession",
+            name="summary",
             field=models.TextField(blank=True, null=True),
         ),
     ]

@@ -4,19 +4,24 @@ from core.helpers import ensure_same_school
 from core.services.base import apply_fields
 from rest_framework.exceptions import ValidationError
 
-class StudentService:
 
+class StudentService:
     @staticmethod
     def create_student(user, data):
         school = user.counselor.school
 
-        school_year = data.get('school_year')
-        class_level = data.get('class_level')
-        class_number = data.get('class_number')
+        school_year = data.get("school_year")
+        class_level = data.get("class_level")
+        class_number = data.get("class_number")
 
         allowed_fields = {
-            "full_name", "id_number", "address",
-            "mother_name", "mother_phone", "father_name", "father_phone",
+            "full_name",
+            "id_number",
+            "address",
+            "mother_name",
+            "mother_phone",
+            "father_name",
+            "father_phone",
         }
         clean_data = {k: v for k, v in data.items() if k in allowed_fields}
 
@@ -32,18 +37,16 @@ class StudentService:
                 )
                 return student
         except IntegrityError:
-            raise ValidationError({
-                "id_number": ["תלמיד עם תעודת זהות זו כבר קיים בבית הספר"]
-            })
-            
-    
+            raise ValidationError(
+                {"id_number": ["תלמיד עם תעודת זהות זו כבר קיים בבית הספר"]}
+            )
+
     @staticmethod
     def update_student(user, student, data):
 
         ensure_same_school(user, student)
 
         return apply_fields(student, data, exclude=["school", "id"])
-    
 
     @staticmethod
     def delete_student(user, student):
@@ -60,10 +63,12 @@ class StudentService:
                 StudentService.create_student(user, data)
                 created += 1
             except ValidationError as e:
-                errors.append({'row': row_num, 'message': StudentService._flatten_error(e)})
+                errors.append(
+                    {"row": row_num, "message": StudentService._flatten_error(e)}
+                )
             except Exception as e:
-                errors.append({'row': row_num, 'message': str(e)})
-        return {'created': created, 'errors': errors}
+                errors.append({"row": row_num, "message": str(e)})
+        return {"created": created, "errors": errors}
 
     @staticmethod
     def _flatten_error(e):
@@ -75,8 +80,7 @@ class StudentService:
                     parts.extend(str(m) for m in msgs)
                 else:
                     parts.append(str(msgs))
-            return ' | '.join(parts)
+            return " | ".join(parts)
         if isinstance(detail, list):
-            return ' | '.join(str(m) for m in detail)
+            return " | ".join(str(m) for m in detail)
         return str(detail)
-

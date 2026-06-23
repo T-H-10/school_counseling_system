@@ -5,20 +5,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0005_remove_student_unique_student_per_school_and_more'),
+        ("core", "0005_remove_student_unique_student_per_school_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='studentenrollment',
-            name='end_date',
+            model_name="studentenrollment",
+            name="end_date",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='studentenrollment',
-            name='start_date',
+            model_name="studentenrollment",
+            name="start_date",
             field=models.DateTimeField(default=django.utils.timezone.now),
         ),
     ]

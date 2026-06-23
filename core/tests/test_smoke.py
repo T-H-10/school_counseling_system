@@ -4,6 +4,7 @@ These prove the pytest-django wiring works end to end: project settings are
 loaded and the test database spins up and is queryable. The real API suite
 replaces/augments these in later steps.
 """
+
 import pytest
 
 

@@ -4,22 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0015_classroom'),
+        ("core", "0015_classroom"),
     ]
 
     operations = [
         migrations.RemoveConstraint(
-            model_name='classroom',
-            name='unique_classroom_per_year',
+            model_name="classroom",
+            name="unique_classroom_per_year",
         ),
         migrations.AddField(
-            model_name='studentenrollment',
-            name='teacher_name',
-            field=models.CharField(blank=True, default='', max_length=150),
+            model_name="studentenrollment",
+            name="teacher_name",
+            field=models.CharField(blank=True, default="", max_length=150),
         ),
         migrations.DeleteModel(
-            name='ClassRoom',
+            name="ClassRoom",
         ),
     ]

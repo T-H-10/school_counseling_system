@@ -6,6 +6,7 @@ unique fields (``id_number``, ``institution_code``, ``username``) collision-free
 ``school`` on child rows is pinned to the parent's school via ``SelfAttribute``
 so objects are internally consistent (same-tenant) unless a test says otherwise.
 """
+
 import factory
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
@@ -85,7 +86,9 @@ def _make_valid_israeli_id(n):
     base = f"{n:08d}"
     digits = [int(c) for c in base]
     weights = [1, 2, 1, 2, 1, 2, 1, 2]
-    total = sum((d * w) - 9 if (d * w) >= 10 else (d * w) for d, w in zip(digits, weights))
+    total = sum(
+        (d * w) - 9 if (d * w) >= 10 else (d * w) for d, w in zip(digits, weights)
+    )
     return base + str((10 - total % 10) % 10)
 
 
@@ -127,7 +130,9 @@ class LessonPlanFactory(factory.django.DjangoModelFactory):
         model = LessonPlan
 
     school = factory.SubFactory(SchoolFactory)
-    counselor = factory.SubFactory(CounselorFactory, school=factory.SelfAttribute("..school"))
+    counselor = factory.SubFactory(
+        CounselorFactory, school=factory.SelfAttribute("..school")
+    )
     school_year = factory.SubFactory(SchoolYearFactory)
     title = factory.Sequence(lambda n: f"מערך {n}")
 
@@ -148,7 +153,9 @@ class DocumentFactory(factory.django.DjangoModelFactory):
         model = Document
 
     school = factory.SubFactory(SchoolFactory)
-    counselor = factory.SubFactory(CounselorFactory, school=factory.SelfAttribute("..school"))
+    counselor = factory.SubFactory(
+        CounselorFactory, school=factory.SelfAttribute("..school")
+    )
     category = "general"
     title = factory.Sequence(lambda n: f"מסמך {n}")
     file = factory.django.FileField(filename="test.pdf", data=b"%PDF-1.4 content")

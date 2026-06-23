@@ -3,7 +3,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from django_apscheduler.jobstores import DjangoJobStore
 
 scheduler = BackgroundScheduler()
-scheduler.add_jobstore(DjangoJobStore(), 'default')
+scheduler.add_jobstore(DjangoJobStore(), "default")
 
 
 def send_meeting_reminders():
@@ -14,7 +14,7 @@ def send_meeting_reminders():
     from core.models import StudentEvent
 
     now = timezone.now()
-    events = StudentEvent.objects.select_related('counselor__user', 'student').filter(
+    events = StudentEvent.objects.select_related("counselor__user", "student").filter(
         date__gte=now + timedelta(minutes=25),
         date__lte=now + timedelta(minutes=35),
         reminder_sent=False,
@@ -35,14 +35,14 @@ def send_meeting_reminders():
             body += f"\nמטרת הפגישה:\n{event.agenda}\n"
         send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [recipient])
         event.reminder_sent = True
-        event.save(update_fields=['reminder_sent'])
+        event.save(update_fields=["reminder_sent"])
 
 
 def start():
     scheduler.add_job(
         send_meeting_reminders,
         trigger=IntervalTrigger(minutes=5),
-        id='send_meeting_reminders',
+        id="send_meeting_reminders",
         replace_existing=True,
     )
     scheduler.start()

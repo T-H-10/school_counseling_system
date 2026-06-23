@@ -4,15 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0003_alter_studentenrollment_school_and_more'),
+        ("core", "0003_alter_studentenrollment_school_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='classlevel',
-            name='name',
-            field=models.CharField(choices=[('א', 'א'), ('ב', 'ב'), ('ג', 'ג'), ('ד', 'ד'), ('ה', 'ה'), ('ו', 'ו'), ('ז', 'ז'), ('ח', 'ח')], max_length=1),
+            model_name="classlevel",
+            name="name",
+            field=models.CharField(
+                choices=[
+                    ("א", "א"),
+                    ("ב", "ב"),
+                    ("ג", "ג"),
+                    ("ד", "ד"),
+                    ("ה", "ה"),
+                    ("ו", "ו"),
+                    ("ז", "ז"),
+                    ("ח", "ח"),
+                ],
+                max_length=1,
+            ),
         ),
     ]

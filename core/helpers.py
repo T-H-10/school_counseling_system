@@ -1,9 +1,26 @@
 def ensure_same_school(user, obj):
     school = user.counselor.school
 
-    from core.models import Student, StudentEnrollment, StudentEvent, LessonPlan, LessonClassAssignment, Document
+    from core.models import (
+        Student,
+        StudentEnrollment,
+        StudentEvent,
+        LessonPlan,
+        LessonClassAssignment,
+        Document,
+    )
 
-    if isinstance(obj, (Student, StudentEnrollment, StudentEvent, LessonPlan, LessonClassAssignment, Document)):
+    if isinstance(
+        obj,
+        (
+            Student,
+            StudentEnrollment,
+            StudentEvent,
+            LessonPlan,
+            LessonClassAssignment,
+            Document,
+        ),
+    ):
         obj_school = obj.school
     else:
         raise PermissionError("Unsupported object type")

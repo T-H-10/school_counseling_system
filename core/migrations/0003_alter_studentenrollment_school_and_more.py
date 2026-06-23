@@ -5,20 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0002_studentenrollment_school_studentevent_school'),
+        ("core", "0002_studentenrollment_school_studentevent_school"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='studentenrollment',
-            name='school',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.school'),
+            model_name="studentenrollment",
+            name="school",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="core.school"
+            ),
         ),
         migrations.AlterField(
-            model_name='studentevent',
-            name='school',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.school'),
+            model_name="studentevent",
+            name="school",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="core.school"
+            ),
         ),
     ]

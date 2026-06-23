@@ -6,20 +6,15 @@ from core.services.base import apply_fields
 
 
 class LessonClassAssignmentService:
-
     @staticmethod
     def assign_class(user, data):
         lesson = data["lesson"]
         ensure_same_school(user, lesson)
 
-        clean_data = {
-            k: v for k, v in data.items()
-            if k not in ["school"]
-        }
+        clean_data = {k: v for k, v in data.items() if k not in ["school"]}
 
         return LessonClassAssignment.objects.create(
-            school=user.counselor.school,
-            **clean_data
+            school=user.counselor.school, **clean_data
         )
 
     @staticmethod

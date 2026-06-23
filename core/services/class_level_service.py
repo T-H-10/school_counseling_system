@@ -3,7 +3,6 @@ from core.services.base import apply_fields, create_excluding
 
 
 class ClassLevelService:
-
     @staticmethod
     def create_class_level(data):
         return create_excluding(ClassLevel, data)

@@ -6,7 +6,6 @@ from core.services.base import apply_fields
 
 
 class CounselorService:
-
     @staticmethod
     @transaction.atomic
     def create_counselor(data):
@@ -14,26 +13,17 @@ class CounselorService:
         if User.objects.filter(username=data["username"]).exists():
             raise ValueError("Username already exists")
 
-        user_data = {
-            k: v for k, v in data.items()
-            if k in ["username", "password"]
-        }
+        user_data = {k: v for k, v in data.items() if k in ["username", "password"]}
 
         counselor_data = {
-            k: v for k, v in data.items()
-            if k not in ["username", "password", "id"]
+            k: v for k, v in data.items() if k not in ["username", "password", "id"]
         }
 
         user = User.objects.create_user(
-            username=user_data["username"],
-            password=user_data["password"]
+            username=user_data["username"], password=user_data["password"]
         )
 
-        return Counselor.objects.create(
-            user=user,
-            **counselor_data
-        )
-    
+        return Counselor.objects.create(user=user, **counselor_data)
 
     @staticmethod
     def update_counselor(counselor, data):

@@ -4,7 +4,6 @@ from core.models import School, ClassLevel, SchoolYear, Counselor
 
 
 class SchoolSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = School
         fields = "__all__"
@@ -12,21 +11,18 @@ class SchoolSerializer(serializers.ModelSerializer):
 
 
 class ClassLevelSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = ClassLevel
         fields = "__all__"
 
 
 class SchoolYearSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = SchoolYear
         fields = "__all__"
 
 
 class CounselorSerializer(serializers.ModelSerializer):
-
     username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
 

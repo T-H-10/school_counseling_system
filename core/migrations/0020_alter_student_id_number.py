@@ -5,15 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0019_document'),
+        ("core", "0019_document"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='student',
-            name='id_number',
-            field=models.CharField(max_length=9, unique=True, validators=[core.validators.validate_id_number]),
+            model_name="student",
+            name="id_number",
+            field=models.CharField(
+                max_length=9,
+                unique=True,
+                validators=[core.validators.validate_id_number],
+            ),
         ),
     ]

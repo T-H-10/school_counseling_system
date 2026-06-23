@@ -5,20 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0007_studentevent_date'),
+        ("core", "0007_studentevent_date"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='studentevent',
-            name='end_date',
+            model_name="studentevent",
+            name="end_date",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='studentevent',
-            name='date',
-            field=models.DateTimeField(default=datetime.datetime(2026, 4, 26, 14, 15, 24, 769883, tzinfo=datetime.timezone.utc)),
+            model_name="studentevent",
+            name="date",
+            field=models.DateTimeField(
+                default=datetime.datetime(
+                    2026, 4, 26, 14, 15, 24, 769883, tzinfo=datetime.timezone.utc
+                )
+            ),
         ),
     ]

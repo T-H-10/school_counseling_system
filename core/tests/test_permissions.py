@@ -13,6 +13,7 @@ Documented quirks (asserted as real behavior):
 - Cross-school object access returns 404 (filtered out of the queryset), not
   403, because scoping happens before object-level checks.
 """
+
 import pytest
 
 from core.tests import factories
@@ -70,6 +71,7 @@ def _make_objects_in_school(school, counselor, school_year, class_level):
 
 # --- Anonymous -------------------------------------------------------------
 
+
 @pytest.mark.django_db
 @pytest.mark.parametrize("url", ALL_PROTECTED)
 def test_anonymous_is_rejected(api, url):
@@ -78,6 +80,7 @@ def test_anonymous_is_rejected(api, url):
 
 
 # --- Authenticated user without a Counselor profile ------------------------
+
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("url", COUNSELOR_ENDPOINTS + ADMIN_ENDPOINTS)
@@ -97,6 +100,7 @@ def test_plain_user_allowed_on_authenticated_endpoints(auth_client, url):
 
 # --- Counselor -------------------------------------------------------------
 
+
 @pytest.mark.django_db
 @pytest.mark.parametrize("url", COUNSELOR_ENDPOINTS + AUTHENTICATED_ENDPOINTS)
 def test_counselor_allowed_on_own_endpoints(client_a, url):
@@ -110,6 +114,7 @@ def test_counselor_forbidden_on_admin_endpoints(client_a, url):
 
 
 # --- Admin (is_staff, no Counselor profile) --------------------------------
+
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("url", ADMIN_ENDPOINTS + AUTHENTICATED_ENDPOINTS)
@@ -125,6 +130,7 @@ def test_admin_without_counselor_forbidden_on_counselor_endpoints(admin_client, 
 
 
 # --- Cross-school (tenant) isolation ---------------------------------------
+
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("resource", SCOPED_RESOURCES)

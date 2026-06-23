@@ -1,6 +1,7 @@
 """P1 — Lessons: CRUD, ordering, nested assignments, the calendar action, and
 cascade soft-delete of assignments.
 """
+
 from datetime import timedelta
 
 import pytest
@@ -18,9 +19,14 @@ def _lesson(school, counselor, year, **kwargs):
 
 # --- CRUD ------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_create_lesson_succeeds(client_a, active_year):
-    payload = {"school_year": active_year.id, "title": "רגשות", "description": "שיעור פתיחה"}
+    payload = {
+        "school_year": active_year.id,
+        "title": "רגשות",
+        "description": "שיעור פתיחה",
+    }
     resp = client_a.post("/lessons/", payload, format="json")
 
     assert resp.status_code == 201
@@ -29,7 +35,9 @@ def test_create_lesson_succeeds(client_a, active_year):
 
 
 @pytest.mark.django_db
-def test_list_lessons_ordered_newest_first(client_a, school_a, counselor_a, active_year):
+def test_list_lessons_ordered_newest_first(
+    client_a, school_a, counselor_a, active_year
+):
     older = _lesson(school_a, counselor_a, active_year, title="ישן")
     _lesson(school_a, counselor_a, active_year, title="חדש")
     # Force a deterministic gap (update bypasses auto_now_add).
@@ -43,9 +51,13 @@ def test_list_lessons_ordered_newest_first(client_a, school_a, counselor_a, acti
 
 
 @pytest.mark.django_db
-def test_retrieve_lesson_includes_assignments(client_a, school_a, counselor_a, active_year, class_levels):
+def test_retrieve_lesson_includes_assignments(
+    client_a, school_a, counselor_a, active_year, class_levels
+):
     lesson = _lesson(school_a, counselor_a, active_year)
-    factories.LessonClassAssignmentFactory(lesson=lesson, class_level=class_levels[0], class_number=2)
+    factories.LessonClassAssignmentFactory(
+        lesson=lesson, class_level=class_levels[0], class_number=2
+    )
 
     resp = client_a.get(f"/lessons/{lesson.id}/")
     assert resp.status_code == 200
@@ -64,21 +76,30 @@ def test_update_lesson_title_persists(client_a, school_a, counselor_a, active_ye
 
 
 @pytest.mark.django_db
-def test_delete_lesson_cascade_soft_deletes_assignments(client_a, school_a, counselor_a, active_year, class_levels):
+def test_delete_lesson_cascade_soft_deletes_assignments(
+    client_a, school_a, counselor_a, active_year, class_levels
+):
     lesson = _lesson(school_a, counselor_a, active_year)
-    assignment = factories.LessonClassAssignmentFactory(lesson=lesson, class_level=class_levels[0])
+    assignment = factories.LessonClassAssignmentFactory(
+        lesson=lesson, class_level=class_levels[0]
+    )
 
     resp = client_a.delete(f"/lessons/{lesson.id}/")
     assert resp.status_code == 204
     # Both the lesson and its assignment are soft-deleted (archived), not hard-deleted.
     assert LessonPlan.all_objects.get(id=lesson.id).deleted_at is not None
-    assert LessonClassAssignment.all_objects.get(id=assignment.id).deleted_at is not None
+    assert (
+        LessonClassAssignment.all_objects.get(id=assignment.id).deleted_at is not None
+    )
 
 
 # --- calendar action -------------------------------------------------------
 
+
 @pytest.mark.django_db
-def test_calendar_returns_lessons_and_events(client_a, school_a, counselor_a, active_year, class_levels):
+def test_calendar_returns_lessons_and_events(
+    client_a, school_a, counselor_a, active_year, class_levels
+):
     lesson = _lesson(school_a, counselor_a, active_year)
     factories.LessonClassAssignmentFactory(
         lesson=lesson, class_level=class_levels[0], planned_date=timezone.now()
@@ -92,7 +113,9 @@ def test_calendar_returns_lessons_and_events(client_a, school_a, counselor_a, ac
 
 
 @pytest.mark.django_db
-def test_calendar_assignment_without_planned_date_is_excluded(client_a, school_a, counselor_a, active_year, class_levels):
+def test_calendar_assignment_without_planned_date_is_excluded(
+    client_a, school_a, counselor_a, active_year, class_levels
+):
     lesson = _lesson(school_a, counselor_a, active_year)
     # planned_date defaults to None -> the assignment is skipped in the calendar.
     factories.LessonClassAssignmentFactory(lesson=lesson, class_level=class_levels[0])
@@ -103,7 +126,9 @@ def test_calendar_assignment_without_planned_date_is_excluded(client_a, school_a
 
 
 @pytest.mark.django_db
-def test_calendar_filters_out_of_range(client_a, school_a, counselor_a, active_year, class_levels):
+def test_calendar_filters_out_of_range(
+    client_a, school_a, counselor_a, active_year, class_levels
+):
     lesson = _lesson(school_a, counselor_a, active_year)
     factories.LessonClassAssignmentFactory(
         lesson=lesson, class_level=class_levels[0], planned_date=timezone.now()
@@ -119,7 +144,9 @@ def test_calendar_filters_out_of_range(client_a, school_a, counselor_a, active_y
 
 
 @pytest.mark.django_db
-def test_calendar_invalid_date_param_returns_500(client_a, school_a, counselor_a, active_year, class_levels):
+def test_calendar_invalid_date_param_returns_500(
+    client_a, school_a, counselor_a, active_year, class_levels
+):
     """FINDING (latent bug): an unparseable start/end is parsed to None and fed
     straight into ``planned_date__gte=None``, which Django rejects -> unhandled
     500. It should be validated to a 400. Documented here as current behavior."""

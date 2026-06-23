@@ -5,24 +5,59 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0014_studentevent_status'),
+        ("core", "0014_studentevent_status"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ClassRoom',
+            name="ClassRoom",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('class_number', models.PositiveIntegerField()),
-                ('teacher_name', models.CharField(blank=True, default='', max_length=150)),
-                ('class_level', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.classlevel')),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='classrooms', to='core.school')),
-                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='classrooms', to='core.schoolyear')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("class_number", models.PositiveIntegerField()),
+                (
+                    "teacher_name",
+                    models.CharField(blank=True, default="", max_length=150),
+                ),
+                (
+                    "class_level",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.classlevel",
+                    ),
+                ),
+                (
+                    "school",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="classrooms",
+                        to="core.school",
+                    ),
+                ),
+                (
+                    "school_year",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="classrooms",
+                        to="core.schoolyear",
+                    ),
+                ),
             ],
             options={
-                'constraints': [models.UniqueConstraint(fields=('school', 'school_year', 'class_level', 'class_number'), name='unique_classroom_per_year')],
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("school", "school_year", "class_level", "class_number"),
+                        name="unique_classroom_per_year",
+                    )
+                ],
             },
         ),
     ]

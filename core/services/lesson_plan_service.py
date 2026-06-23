@@ -6,20 +6,14 @@ from core.services.base import apply_fields
 
 
 class LessonPlanService:
-
     @staticmethod
     def create_lesson(user, data):
         counselor = user.counselor
 
-        clean_data = {
-            k: v for k, v in data.items()
-            if k not in ["school", "counselor"]
-        }
+        clean_data = {k: v for k, v in data.items() if k not in ["school", "counselor"]}
 
         return LessonPlan.objects.create(
-            school=counselor.school,
-            counselor=counselor,
-            **clean_data
+            school=counselor.school, counselor=counselor, **clean_data
         )
 
     @staticmethod
@@ -39,11 +33,9 @@ class LessonPlanService:
     def get_calendar(user, start, end):
         counselor = user.counselor
 
-        assignments = (
-            LessonClassAssignment.objects
-            .filter(school=counselor.school, lesson__counselor=counselor)
-            .select_related("class_level", "lesson")
-        )
+        assignments = LessonClassAssignment.objects.filter(
+            school=counselor.school, lesson__counselor=counselor
+        ).select_related("class_level", "lesson")
 
         meetings = StudentEvent.objects.filter(counselor=counselor)
 
@@ -65,25 +57,29 @@ class LessonPlanService:
             label = a.class_level.name
             if a.class_number:
                 label = f"{label}{a.class_number}"
-            result.append({
-                "id": a.id,
-                "lesson_id": a.lesson.id,
-                "type": "lesson",
-                "title": a.lesson.title,
-                "start": a.planned_date,
-                "end": a.completed_date,
-                "with": label,
-            })
+            result.append(
+                {
+                    "id": a.id,
+                    "lesson_id": a.lesson.id,
+                    "type": "lesson",
+                    "title": a.lesson.title,
+                    "start": a.planned_date,
+                    "end": a.completed_date,
+                    "with": label,
+                }
+            )
 
         for m in meetings:
-            result.append({
-                "id": m.id,
-                "type": "student_event",
-                "title": m.title,
-                "start": m.date,
-                "end": m.end_date,
-                "with": m.student.full_name,
-            })
+            result.append(
+                {
+                    "id": m.id,
+                    "type": "student_event",
+                    "title": m.title,
+                    "start": m.date,
+                    "end": m.end_date,
+                    "with": m.student.full_name,
+                }
+            )
 
         result.sort(key=lambda x: x["start"], reverse=True)
         return result

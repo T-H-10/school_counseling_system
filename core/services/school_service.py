@@ -3,7 +3,6 @@ from core.services.base import apply_fields, create_excluding
 
 
 class SchoolService:
-
     @staticmethod
     def create_school(data):
         return create_excluding(School, data)

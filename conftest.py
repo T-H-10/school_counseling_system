@@ -12,6 +12,7 @@ provided through the ``auth_client`` factory-fixture, which issues a real JWT so
 the authentication path is exercised; ``client_a`` / ``client_b`` / ``admin_client``
 are ready-made shortcuts.
 """
+
 import pytest
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -37,6 +38,7 @@ def _fast_password_hashing(settings):
 
 # --- Unauthenticated client ------------------------------------------------
 
+
 @pytest.fixture
 def api():
     """A bare, unauthenticated APIClient."""
@@ -44,6 +46,7 @@ def api():
 
 
 # --- Academic reference data ----------------------------------------------
+
 
 @pytest.fixture
 def class_levels(db):
@@ -58,6 +61,7 @@ def active_year(db):
 
 
 # --- Tenants and users -----------------------------------------------------
+
 
 @pytest.fixture
 def school_a(db):
@@ -86,6 +90,7 @@ def admin_user(db):
 
 # --- Authenticated clients -------------------------------------------------
 
+
 @pytest.fixture
 def auth_client():
     """Factory: return an APIClient authenticated as the given user.
@@ -93,6 +98,7 @@ def auth_client():
     Accepts a Counselor (uses its ``.user``) or a plain User. Issues a real JWT
     via the Bearer header so the SimpleJWT auth path is exercised end to end.
     """
+
     def _make(user_or_counselor):
         user = getattr(user_or_counselor, "user", user_or_counselor)
         client = APIClient()

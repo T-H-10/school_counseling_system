@@ -1,12 +1,13 @@
 from core.models import StudentEvent
 
-class StudentTimelineService:
 
+class StudentTimelineService:
     @staticmethod
     def get_timeline(student):
         events = StudentEvent.objects.filter(student=student)
 
-        timeline = [{
+        timeline = [
+            {
                 "id": e.id,
                 "type": "event",
                 "date": e.date,

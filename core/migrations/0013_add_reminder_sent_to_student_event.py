@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0012_alter_classsession_summary_optional'),
+        ("core", "0012_alter_classsession_summary_optional"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='studentevent',
-            name='reminder_sent',
+            model_name="studentevent",
+            name="reminder_sent",
             field=models.BooleanField(default=False),
         ),
     ]

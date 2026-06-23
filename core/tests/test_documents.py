@@ -8,8 +8,8 @@ Covers:
 - Authenticated content/download actions (Content-Disposition headers)
 - Soft-delete keeps the physical file; file-replace removes the old file
 """
+
 import email.header
-import os
 
 import pytest
 from django.core.files.storage import default_storage
@@ -33,17 +33,23 @@ def _decode_header(value):
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def pdf(name="test.pdf", size=1024):
-    return SimpleUploadedFile(name, b"%PDF-1.4 " + b"x" * size, content_type="application/pdf")
+    return SimpleUploadedFile(
+        name, b"%PDF-1.4 " + b"x" * size, content_type="application/pdf"
+    )
 
 
 def png(name="img.png"):
-    return SimpleUploadedFile(name, b"\x89PNG\r\n" + b"x" * 64, content_type="image/png")
+    return SimpleUploadedFile(
+        name, b"\x89PNG\r\n" + b"x" * 64, content_type="image/png"
+    )
 
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(autouse=True)
 def media_root(tmp_path, settings):
@@ -56,13 +62,18 @@ def media_root(tmp_path, settings):
 # Happy-path CRUD
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_create_general_document(client_a):
-    resp = client_a.post("/documents/", {
-        "category": "general",
-        "title": "חוזר מנהל",
-        "file": pdf(),
-    }, format="multipart")
+    resp = client_a.post(
+        "/documents/",
+        {
+            "category": "general",
+            "title": "חוזר מנהל",
+            "file": pdf(),
+        },
+        format="multipart",
+    )
 
     assert resp.status_code == 201
     assert resp.data["category"] == "general"
@@ -75,12 +86,16 @@ def test_create_general_document(client_a):
 @pytest.mark.django_db
 def test_create_student_document(client_a, counselor_a, school_a):
     student = factories.StudentFactory(school=school_a)
-    resp = client_a.post("/documents/", {
-        "category": "student",
-        "title": "הערכה פסיכולוגית",
-        "file": pdf(),
-        "student": student.id,
-    }, format="multipart")
+    resp = client_a.post(
+        "/documents/",
+        {
+            "category": "student",
+            "title": "הערכה פסיכולוגית",
+            "file": pdf(),
+            "student": student.id,
+        },
+        format="multipart",
+    )
 
     assert resp.status_code == 201
     assert resp.data["student"] == student.id
@@ -89,13 +104,17 @@ def test_create_student_document(client_a, counselor_a, school_a):
 @pytest.mark.django_db
 def test_create_class_document(client_a, school_a):
     cl = factories.ClassLevelFactory(name="ב")
-    resp = client_a.post("/documents/", {
-        "category": "class",
-        "title": "תכנית ב׳",
-        "file": pdf(),
-        "class_level": cl.id,
-        "class_number": 2,
-    }, format="multipart")
+    resp = client_a.post(
+        "/documents/",
+        {
+            "category": "class",
+            "title": "תכנית ב׳",
+            "file": pdf(),
+            "class_level": cl.id,
+            "class_number": 2,
+        },
+        format="multipart",
+    )
 
     assert resp.status_code == 201
     assert resp.data["class_level"] == cl.id
@@ -103,7 +122,9 @@ def test_create_class_document(client_a, school_a):
 
 
 @pytest.mark.django_db
-def test_list_returns_only_own_school_documents(client_a, school_a, counselor_a, school_b, counselor_b):
+def test_list_returns_only_own_school_documents(
+    client_a, school_a, counselor_a, school_b, counselor_b
+):
     factories.DocumentFactory(school=school_a, counselor=counselor_a)
     factories.DocumentFactory(school=school_a, counselor=counselor_a)
     factories.DocumentFactory(school=school_b, counselor=counselor_b)
@@ -116,7 +137,9 @@ def test_list_returns_only_own_school_documents(client_a, school_a, counselor_a,
 @pytest.mark.django_db
 def test_update_title(client_a, school_a, counselor_a):
     doc = factories.DocumentFactory(school=school_a, counselor=counselor_a)
-    resp = client_a.patch(f"/documents/{doc.id}/", {"title": "כותרת חדשה"}, format="multipart")
+    resp = client_a.patch(
+        f"/documents/{doc.id}/", {"title": "כותרת חדשה"}, format="multipart"
+    )
     assert resp.status_code == 200
     assert resp.data["title"] == "כותרת חדשה"
 
@@ -134,6 +157,7 @@ def test_soft_delete_returns_204(client_a, school_a, counselor_a):
 # Soft-delete keeps the physical file
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_soft_delete_keeps_physical_file(client_a, school_a, counselor_a):
     doc = factories.DocumentFactory(school=school_a, counselor=counselor_a)
@@ -146,17 +170,24 @@ def test_soft_delete_keeps_physical_file(client_a, school_a, counselor_a):
 # File-replace removes the old file (C3)
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_file_replace_deletes_old_file(client_a, school_a, counselor_a):
     doc = factories.DocumentFactory(school=school_a, counselor=counselor_a)
     old_name = doc.file.name
 
-    client_a.patch(f"/documents/{doc.id}/", {
-        "title": doc.title,
-        "file": pdf("replacement.pdf"),
-    }, format="multipart")
+    client_a.patch(
+        f"/documents/{doc.id}/",
+        {
+            "title": doc.title,
+            "file": pdf("replacement.pdf"),
+        },
+        format="multipart",
+    )
 
-    assert not default_storage.exists(old_name), "Old file must be removed after file replace"
+    assert not default_storage.exists(old_name), (
+        "Old file must be removed after file replace"
+    )
     doc.refresh_from_db()
     assert default_storage.exists(doc.file.name), "New file must exist"
 
@@ -165,24 +196,33 @@ def test_file_replace_deletes_old_file(client_a, school_a, counselor_a):
 # Category validation
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_student_category_requires_student(client_a):
-    resp = client_a.post("/documents/", {
-        "category": "student",
-        "title": "test",
-        "file": pdf(),
-    }, format="multipart")
+    resp = client_a.post(
+        "/documents/",
+        {
+            "category": "student",
+            "title": "test",
+            "file": pdf(),
+        },
+        format="multipart",
+    )
     assert resp.status_code == 400
     assert "student" in resp.data
 
 
 @pytest.mark.django_db
 def test_class_category_requires_class_level(client_a):
-    resp = client_a.post("/documents/", {
-        "category": "class",
-        "title": "test",
-        "file": pdf(),
-    }, format="multipart")
+    resp = client_a.post(
+        "/documents/",
+        {
+            "category": "class",
+            "title": "test",
+            "file": pdf(),
+        },
+        format="multipart",
+    )
     assert resp.status_code == 400
     assert "class_level" in resp.data
 
@@ -190,12 +230,16 @@ def test_class_category_requires_class_level(client_a):
 @pytest.mark.django_db
 def test_general_category_rejects_student_relation(client_a, school_a):
     student = factories.StudentFactory(school=school_a)
-    resp = client_a.post("/documents/", {
-        "category": "general",
-        "title": "test",
-        "file": pdf(),
-        "student": student.id,
-    }, format="multipart")
+    resp = client_a.post(
+        "/documents/",
+        {
+            "category": "general",
+            "title": "test",
+            "file": pdf(),
+            "student": student.id,
+        },
+        format="multipart",
+    )
     assert resp.status_code == 400
     assert "student" in resp.data
 
@@ -204,8 +248,11 @@ def test_general_category_rejects_student_relation(client_a, school_a):
 # DB CheckConstraint (bypasses the API)
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
-def test_db_check_constraint_rejects_student_category_without_student(school_a, counselor_a):
+def test_db_check_constraint_rejects_student_category_without_student(
+    school_a, counselor_a
+):
     with pytest.raises((IntegrityError, Exception)):
         Document.objects.create(
             school=school_a,
@@ -221,14 +268,21 @@ def test_db_check_constraint_rejects_student_category_without_student(school_a, 
 # File validation
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_rejects_disallowed_extension(client_a):
-    bad_file = SimpleUploadedFile("virus.exe", b"MZ", content_type="application/octet-stream")
-    resp = client_a.post("/documents/", {
-        "category": "general",
-        "title": "bad file",
-        "file": bad_file,
-    }, format="multipart")
+    bad_file = SimpleUploadedFile(
+        "virus.exe", b"MZ", content_type="application/octet-stream"
+    )
+    resp = client_a.post(
+        "/documents/",
+        {
+            "category": "general",
+            "title": "bad file",
+            "file": bad_file,
+        },
+        format="multipart",
+    )
     assert resp.status_code == 400
     assert "file" in resp.data
 
@@ -236,12 +290,18 @@ def test_rejects_disallowed_extension(client_a):
 @pytest.mark.django_db
 def test_rejects_oversized_file(client_a, settings):
     settings.DOCUMENT_MAX_UPLOAD_SIZE = 10  # 10 bytes
-    big = SimpleUploadedFile("big.pdf", b"%PDF " + b"x" * 100, content_type="application/pdf")
-    resp = client_a.post("/documents/", {
-        "category": "general",
-        "title": "big",
-        "file": big,
-    }, format="multipart")
+    big = SimpleUploadedFile(
+        "big.pdf", b"%PDF " + b"x" * 100, content_type="application/pdf"
+    )
+    resp = client_a.post(
+        "/documents/",
+        {
+            "category": "general",
+            "title": "big",
+            "file": big,
+        },
+        format="multipart",
+    )
     assert resp.status_code == 400
     assert "file" in resp.data
 
@@ -249,6 +309,7 @@ def test_rejects_oversized_file(client_a, settings):
 # ---------------------------------------------------------------------------
 # School-scoping (cross-tenant isolation)
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.django_db
 def test_cross_school_detail_returns_404(client_a, school_b, counselor_b):
@@ -278,6 +339,7 @@ def test_cross_school_download_returns_404(client_a, school_b, counselor_b):
 # content / download actions
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_content_action_serves_inline(client_a, school_a, counselor_a):
     doc = factories.DocumentFactory(school=school_a, counselor=counselor_a)
@@ -297,7 +359,9 @@ def test_download_action_forces_attachment(client_a, school_a, counselor_a):
 
 @pytest.mark.django_db
 def test_download_filename_uses_document_title(client_a, school_a, counselor_a):
-    doc = factories.DocumentFactory(school=school_a, counselor=counselor_a, title="דוח שנתי")
+    doc = factories.DocumentFactory(
+        school=school_a, counselor=counselor_a, title="דוח שנתי"
+    )
     resp = client_a.get(f"/documents/{doc.id}/download/")
     cd = _decode_header(resp.get("Content-Disposition", ""))
     assert "attachment" in cd
@@ -308,11 +372,16 @@ def test_download_filename_uses_document_title(client_a, school_a, counselor_a):
 # Filter support
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
 def test_filter_by_category(client_a, school_a, counselor_a):
-    factories.DocumentFactory(school=school_a, counselor=counselor_a, category="general")
+    factories.DocumentFactory(
+        school=school_a, counselor=counselor_a, category="general"
+    )
     student = factories.StudentFactory(school=school_a)
-    factories.DocumentFactory(school=school_a, counselor=counselor_a, category="student", student=student)
+    factories.DocumentFactory(
+        school=school_a, counselor=counselor_a, category="student", student=student
+    )
 
     resp = client_a.get("/documents/?category=general")
     assert resp.status_code == 200
@@ -323,8 +392,12 @@ def test_filter_by_category(client_a, school_a, counselor_a):
 def test_filter_by_student(client_a, school_a, counselor_a):
     s1 = factories.StudentFactory(school=school_a)
     s2 = factories.StudentFactory(school=school_a)
-    factories.DocumentFactory(school=school_a, counselor=counselor_a, category="student", student=s1)
-    factories.DocumentFactory(school=school_a, counselor=counselor_a, category="student", student=s2)
+    factories.DocumentFactory(
+        school=school_a, counselor=counselor_a, category="student", student=s1
+    )
+    factories.DocumentFactory(
+        school=school_a, counselor=counselor_a, category="student", student=s2
+    )
 
     resp = client_a.get(f"/documents/?student={s1.id}")
     assert resp.status_code == 200
@@ -336,16 +409,24 @@ def test_filter_by_student(client_a, school_a, counselor_a):
 # Re-categorization (category change on update)
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.django_db
-def test_recategorize_class_to_general_clears_class_level(client_a, school_a, counselor_a):
+def test_recategorize_class_to_general_clears_class_level(
+    client_a, school_a, counselor_a
+):
     """Moving a class doc to general must succeed and clear class_level/class_number."""
     cl = factories.ClassLevelFactory(name="ג")
     doc = factories.DocumentFactory(
-        school=school_a, counselor=counselor_a,
-        category="class", class_level=cl, class_number=3,
+        school=school_a,
+        counselor=counselor_a,
+        category="class",
+        class_level=cl,
+        class_number=3,
     )
 
-    resp = client_a.patch(f"/documents/{doc.id}/", {"category": "general"}, format="multipart")
+    resp = client_a.patch(
+        f"/documents/{doc.id}/", {"category": "general"}, format="multipart"
+    )
 
     assert resp.status_code == 200, resp.data
     assert resp.data["category"] == "general"
@@ -359,15 +440,21 @@ def test_recategorize_student_to_class_clears_student(client_a, school_a, counse
     student = factories.StudentFactory(school=school_a)
     cl = factories.ClassLevelFactory(name="ד")
     doc = factories.DocumentFactory(
-        school=school_a, counselor=counselor_a,
-        category="student", student=student,
+        school=school_a,
+        counselor=counselor_a,
+        category="student",
+        student=student,
     )
 
-    resp = client_a.patch(f"/documents/{doc.id}/", {
-        "category": "class",
-        "class_level": cl.id,
-        "class_number": 1,
-    }, format="multipart")
+    resp = client_a.patch(
+        f"/documents/{doc.id}/",
+        {
+            "category": "class",
+            "class_level": cl.id,
+            "class_number": 1,
+        },
+        format="multipart",
+    )
 
     assert resp.status_code == 200, resp.data
     assert resp.data["category"] == "class"

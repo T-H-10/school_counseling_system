@@ -4,8 +4,8 @@ from django.utils import timezone
 
 from core.models import LessonClassAssignment, Student, StudentEvent
 
-class DashboardService:
 
+class DashboardService:
     @staticmethod
     def get_dashboard(user):
         counselor = user.counselor
@@ -17,48 +17,66 @@ class DashboardService:
         week_ago = now - timedelta(days=7)
         cutoff_90 = now - timedelta(days=90)
 
-        today_lessons = LessonClassAssignment.objects.filter(
-            lesson__counselor=counselor,
-            planned_date__range=(today_start, today_end)
-        ).select_related("lesson").order_by("planned_date")
+        today_lessons = (
+            LessonClassAssignment.objects.filter(
+                lesson__counselor=counselor,
+                planned_date__range=(today_start, today_end),
+            )
+            .select_related("lesson")
+            .order_by("planned_date")
+        )
 
-        recent_events = StudentEvent.objects.filter(
-            counselor=counselor,
-            date__gte=week_ago,
-            date__lte=now,
-        ).order_by("-date").select_related("student")[:5]
+        recent_events = (
+            StudentEvent.objects.filter(
+                counselor=counselor,
+                date__gte=week_ago,
+                date__lte=now,
+            )
+            .order_by("-date")
+            .select_related("student")[:5]
+        )
 
-        students_count = Student.objects.filter(
-            school=counselor.school
-        ).count()
+        students_count = Student.objects.filter(school=counselor.school).count()
 
         event_this_week = StudentEvent.objects.filter(
-            counselor=counselor,
-            date__gte=week_ago
+            counselor=counselor, date__gte=week_ago
         ).count()
 
-        upcoming_today_events = StudentEvent.objects.filter(
-            counselor=counselor,
-            date__range=(today_start, today_end),
-        ).select_related('student').order_by('date')
+        upcoming_today_events = (
+            StudentEvent.objects.filter(
+                counselor=counselor,
+                date__range=(today_start, today_end),
+            )
+            .select_related("student")
+            .order_by("date")
+        )
 
         next_7_days = now + timedelta(days=7)
-        upcoming_future_events = StudentEvent.objects.filter(
-            counselor=counselor,
-            date__gt=today_end,
-            date__lte=next_7_days,
-        ).select_related('student').order_by('date')[:5]
+        upcoming_future_events = (
+            StudentEvent.objects.filter(
+                counselor=counselor,
+                date__gt=today_end,
+                date__lte=next_7_days,
+            )
+            .select_related("student")
+            .order_by("date")[:5]
+        )
 
-        missing_summaries = StudentEvent.objects.filter(
-            counselor=counselor,
-            date__lt=now,
-        ).filter(
-            Q(description__isnull=True) | Q(description='')
-        ).select_related('student').order_by('-date')[:10]
+        missing_summaries = (
+            StudentEvent.objects.filter(
+                counselor=counselor,
+                date__lt=now,
+            )
+            .filter(Q(description__isnull=True) | Q(description=""))
+            .select_related("student")
+            .order_by("-date")[:10]
+        )
 
         at_risk_90 = (
             Student.objects.filter(school=counselor.school)
-            .annotate(last_event=Max('events__date', filter=Q(events__counselor=counselor)))
+            .annotate(
+                last_event=Max("events__date", filter=Q(events__counselor=counselor))
+            )
             .filter(Q(last_event__isnull=True) | Q(last_event__lt=cutoff_90))
             .distinct()
         )
@@ -86,24 +104,24 @@ class DashboardService:
             "alerts": {
                 "upcoming_today": [
                     {
-                        "id":           str(e.id),
-                        "title":        e.title,
-                        "date":         e.date,
-                        "student_id":   str(e.student.id),
+                        "id": str(e.id),
+                        "title": e.title,
+                        "date": e.date,
+                        "student_id": str(e.student.id),
                         "student_name": e.student.full_name,
-                        "event_type":   e.event_type,
-                        "status":       e.status,
+                        "event_type": e.event_type,
+                        "status": e.status,
                     }
                     for e in upcoming_today_events
                 ],
                 "upcoming_future": [
                     {
-                        "id":           str(e.id),
-                        "title":        e.title,
-                        "date":         e.date,
-                        "student_id":   str(e.student.id),
+                        "id": str(e.id),
+                        "title": e.title,
+                        "date": e.date,
+                        "student_id": str(e.student.id),
                         "student_name": e.student.full_name,
-                        "event_type":   e.event_type,
+                        "event_type": e.event_type,
                     }
                     for e in upcoming_future_events
                 ],

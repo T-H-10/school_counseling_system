@@ -5,15 +5,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0006_studentenrollment_end_date_and_more'),
+        ("core", "0006_studentenrollment_end_date_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='studentevent',
-            name='date',
-            field=models.DateTimeField(default=datetime.datetime(2026, 4, 26, 13, 52, 0, 726680, tzinfo=datetime.timezone.utc)),
+            model_name="studentevent",
+            name="date",
+            field=models.DateTimeField(
+                default=datetime.datetime(
+                    2026, 4, 26, 13, 52, 0, 726680, tzinfo=datetime.timezone.utc
+                )
+            ),
         ),
     ]

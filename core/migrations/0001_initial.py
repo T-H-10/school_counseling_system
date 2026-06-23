@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,117 +14,293 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='ClassLevel',
+            name="ClassLevel",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=1)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=1)),
             ],
         ),
         migrations.CreateModel(
-            name='School',
+            name="School",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150)),
-                ('institution_code', models.CharField(max_length=20, unique=True)),
-                ('address', models.CharField(blank=True, max_length=255, null=True)),
-                ('phone', models.CharField(blank=True, max_length=20, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=150)),
+                ("institution_code", models.CharField(max_length=20, unique=True)),
+                ("address", models.CharField(blank=True, max_length=255, null=True)),
+                ("phone", models.CharField(blank=True, max_length=20, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
-            name='SchoolYear',
+            name="SchoolYear",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=20)),
-                ('is_active', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=20)),
+                ("is_active", models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
-            name='Counselor',
+            name="Counselor",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('full_name', models.CharField(max_length=150)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='counselors', to='core.school')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("full_name", models.CharField(max_length=150)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "school",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="counselors",
+                        to="core.school",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ClassSession',
+            name="ClassSession",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('deleted_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('title', models.CharField(max_length=200)),
-                ('summary', models.TextField()),
-                ('date', models.DateTimeField()),
-                ('class_level', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.classlevel')),
-                ('counselor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sessions', to='core.counselor')),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sessions', to='core.school')),
-                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.schoolyear')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("deleted_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("title", models.CharField(max_length=200)),
+                ("summary", models.TextField()),
+                ("date", models.DateTimeField()),
+                (
+                    "class_level",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.classlevel",
+                    ),
+                ),
+                (
+                    "counselor",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sessions",
+                        to="core.counselor",
+                    ),
+                ),
+                (
+                    "school",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sessions",
+                        to="core.school",
+                    ),
+                ),
+                (
+                    "school_year",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.schoolyear",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Student',
+            name="Student",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('deleted_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('full_name', models.CharField(max_length=150)),
-                ('id_number', models.CharField(max_length=20)),
-                ('address', models.CharField(blank=True, max_length=255, null=True)),
-                ('mother_name', models.CharField(blank=True, max_length=100, null=True)),
-                ('mother_phone', models.CharField(blank=True, max_length=20, null=True)),
-                ('father_name', models.CharField(blank=True, max_length=100, null=True)),
-                ('father_phone', models.CharField(blank=True, max_length=20, null=True)),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='students', to='core.school')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("deleted_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("full_name", models.CharField(max_length=150)),
+                ("id_number", models.CharField(max_length=20)),
+                ("address", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "mother_name",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
+                (
+                    "mother_phone",
+                    models.CharField(blank=True, max_length=20, null=True),
+                ),
+                (
+                    "father_name",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
+                (
+                    "father_phone",
+                    models.CharField(blank=True, max_length=20, null=True),
+                ),
+                (
+                    "school",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="students",
+                        to="core.school",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='StudentEnrollment',
+            name="StudentEnrollment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('deleted_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('class_number', models.PositiveIntegerField()),
-                ('class_level', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.classlevel')),
-                ('school_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='enrollments', to='core.schoolyear')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='enrollments', to='core.student')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("deleted_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("class_number", models.PositiveIntegerField()),
+                (
+                    "class_level",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="core.classlevel",
+                    ),
+                ),
+                (
+                    "school_year",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="enrollments",
+                        to="core.schoolyear",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="enrollments",
+                        to="core.student",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='StudentEvent',
+            name="StudentEvent",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('deleted_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('event_type', models.CharField(choices=[('meeting', 'פגישה'), ('call', 'שיחה'), ('teacher_report', 'דיווח מורה'), ('other', 'אחר')], max_length=30)),
-                ('title', models.CharField(max_length=200)),
-                ('description', models.TextField()),
-                ('counselor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='events', to='core.counselor')),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='events', to='core.student')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("deleted_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "event_type",
+                    models.CharField(
+                        choices=[
+                            ("meeting", "פגישה"),
+                            ("call", "שיחה"),
+                            ("teacher_report", "דיווח מורה"),
+                            ("other", "אחר"),
+                        ],
+                        max_length=30,
+                    ),
+                ),
+                ("title", models.CharField(max_length=200)),
+                ("description", models.TextField()),
+                (
+                    "counselor",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="events",
+                        to="core.counselor",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="events",
+                        to="core.student",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.AddIndex(
-            model_name='student',
-            index=models.Index(fields=['school'], name='core_studen_school__e42026_idx'),
+            model_name="student",
+            index=models.Index(
+                fields=["school"], name="core_studen_school__e42026_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='student',
-            index=models.Index(fields=['id_number'], name='core_studen_id_numb_2812bf_idx'),
+            model_name="student",
+            index=models.Index(
+                fields=["id_number"], name="core_studen_id_numb_2812bf_idx"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='student',
-            constraint=models.UniqueConstraint(fields=('school', 'id_number'), name='unique_student_per_school'),
+            model_name="student",
+            constraint=models.UniqueConstraint(
+                fields=("school", "id_number"), name="unique_student_per_school"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='studentenrollment',
-            constraint=models.UniqueConstraint(fields=('student', 'school_year'), name='unique_enrollment_per_year'),
+            model_name="studentenrollment",
+            constraint=models.UniqueConstraint(
+                fields=("student", "school_year"), name="unique_enrollment_per_year"
+            ),
         ),
     ]

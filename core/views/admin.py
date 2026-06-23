@@ -8,7 +8,12 @@ from core.services.class_level_service import ClassLevelService
 from core.services.school_year_service import SchoolYearService
 from core.services.counselor_service import CounselorService
 from core.models import School, ClassLevel, SchoolYear, Counselor
-from core.serializers import SchoolSerializer, ClassLevelSerializer, SchoolYearSerializer, CounselorSerializer
+from core.serializers import (
+    SchoolSerializer,
+    ClassLevelSerializer,
+    SchoolYearSerializer,
+    CounselorSerializer,
+)
 
 
 class SchoolViewSet(ModelViewSet):
@@ -22,8 +27,7 @@ class SchoolViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         school = SchoolService.update_school(
-            self.get_object(),
-            serializer.validated_data
+            self.get_object(), serializer.validated_data
         )
         serializer.instance = school
 
@@ -42,8 +46,7 @@ class ClassLevelViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         level = ClassLevelService.update_class_level(
-            self.get_object(),
-            serializer.validated_data
+            self.get_object(), serializer.validated_data
         )
         serializer.instance = level
 
@@ -56,7 +59,7 @@ class SchoolYearViewSet(ModelViewSet):
     serializer_class = SchoolYearSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ["list", "retrieve"]:
             return [IsAuthenticated()]
         return [IsAdminUser()]
 
@@ -66,15 +69,12 @@ class SchoolYearViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         year = SchoolYearService.update_school_year(
-            self.get_object(),
-            serializer.validated_data
+            self.get_object(), serializer.validated_data
         )
         serializer.instance = year
 
     def perform_destroy(self, instance):
-        SchoolYearService.delete_school_year(
-            instance
-            )
+        SchoolYearService.delete_school_year(instance)
 
 
 class CounselorViewSet(ModelViewSet):
@@ -83,30 +83,22 @@ class CounselorViewSet(ModelViewSet):
     serializer_class = CounselorSerializer
 
     def perform_create(self, serializer):
-        counselor = CounselorService.create_counselor(
-            serializer.validated_data
-            )
+        counselor = CounselorService.create_counselor(serializer.validated_data)
         serializer.instance = counselor
 
     def perform_update(self, serializer):
         counselor = CounselorService.update_counselor(
-            self.get_object(),
-            serializer.validated_data
+            self.get_object(), serializer.validated_data
         )
         serializer.instance = counselor
 
     def perform_destroy(self, instance):
-        CounselorService.delete_counselor(
-            instance
-        )
+        CounselorService.delete_counselor(instance)
 
     @action(detail=True, methods=["post"], permission_classes=[IsAdminUser])
     def reset_password(self, request, pk=None):
         counselor = self.get_object()
 
-        CounselorService.reset_password(
-            counselor,
-            request.data["new_password"]
-        )
+        CounselorService.reset_password(counselor, request.data["new_password"])
 
         return Response({"status": "password updated"})

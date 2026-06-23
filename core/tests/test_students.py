@@ -7,6 +7,7 @@ Covers the two validation layers a student write passes through:
 
 Messages are asserted verbatim because the React UI renders them.
 """
+
 import pytest
 
 from core.models import Student, StudentEnrollment
@@ -30,8 +31,11 @@ def _valid_payload(active_year, class_level, drop=(), **overrides):
 
 # --- Happy path ------------------------------------------------------------
 
+
 @pytest.mark.django_db
-def test_create_student_succeeds_and_creates_enrollment(client_a, active_year, class_levels):
+def test_create_student_succeeds_and_creates_enrollment(
+    client_a, active_year, class_levels
+):
     payload = _valid_payload(active_year, class_levels[0])
     resp = client_a.post("/students/", payload, format="json")
 
@@ -42,27 +46,39 @@ def test_create_student_succeeds_and_creates_enrollment(client_a, active_year, c
     assert resp.data["current_class_number"] == 1
 
     student = Student.objects.get(id=resp.data["id"])
-    assert StudentEnrollment.objects.filter(student=student, school_year=active_year).count() == 1
+    assert (
+        StudentEnrollment.objects.filter(
+            student=student, school_year=active_year
+        ).count()
+        == 1
+    )
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("id_number", ["12345674", "123456782"])
-def test_create_accepts_8_and_9_digit_ids(client_a, active_year, class_levels, id_number):
+def test_create_accepts_8_and_9_digit_ids(
+    client_a, active_year, class_levels, id_number
+):
     payload = _valid_payload(active_year, class_levels[0], id_number=id_number)
     assert client_a.post("/students/", payload, format="json").status_code == 201
 
 
 @pytest.mark.django_db
 def test_update_student_name_persists(client_a, active_year, class_levels):
-    created = client_a.post("/students/", _valid_payload(active_year, class_levels[0]), format="json")
+    created = client_a.post(
+        "/students/", _valid_payload(active_year, class_levels[0]), format="json"
+    )
     student_id = created.data["id"]
 
-    resp = client_a.patch(f"/students/{student_id}/", {"full_name": "שם מעודכן"}, format="json")
+    resp = client_a.patch(
+        f"/students/{student_id}/", {"full_name": "שם מעודכן"}, format="json"
+    )
     assert resp.status_code == 200
     assert resp.data["full_name"] == "שם מעודכן"
 
 
 # --- Field validation ------------------------------------------------------
+
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("bad_id", ["abcdefghi", "1234567", "12.345678"])
@@ -117,9 +133,12 @@ def test_create_invalid_phone_rejected(client_a, active_year, class_levels, fiel
 
 # --- Required-on-create enrollment fields ----------------------------------
 
+
 @pytest.mark.django_db
 @pytest.mark.parametrize("field", ["school_year", "class_level", "class_number"])
-def test_create_missing_enrollment_field_rejected(client_a, active_year, class_levels, field):
+def test_create_missing_enrollment_field_rejected(
+    client_a, active_year, class_levels, field
+):
     payload = _valid_payload(active_year, class_levels[0], drop=[field])
     resp = client_a.post("/students/", payload, format="json")
 
@@ -138,8 +157,11 @@ def test_create_class_number_below_one_rejected(client_a, active_year, class_lev
 
 # --- Duplicate id_number (service-level IntegrityError guard) ---------------
 
+
 @pytest.mark.django_db
-def test_create_duplicate_id_number_same_school_rejected(client_a, school_a, active_year, class_levels):
+def test_create_duplicate_id_number_same_school_rejected(
+    client_a, school_a, active_year, class_levels
+):
     """A live duplicate is caught by DRF's auto UniqueValidator (code 'unique')
     at serializer time — the service's custom message is NOT what the API returns
     here (see the soft-delete edge test for where that message actually fires)."""
@@ -152,7 +174,9 @@ def test_create_duplicate_id_number_same_school_rejected(client_a, school_a, act
 
 
 @pytest.mark.django_db
-def test_create_duplicate_id_number_across_schools_rejected(client_a, school_b, active_year, class_levels):
+def test_create_duplicate_id_number_across_schools_rejected(
+    client_a, school_b, active_year, class_levels
+):
     """id_number is globally unique, so a clash with ANOTHER school's student is
     still rejected (code 'unique')."""
     factories.StudentFactory(school=school_b, id_number="123456782")
@@ -164,7 +188,9 @@ def test_create_duplicate_id_number_across_schools_rejected(client_a, school_b, 
 
 
 @pytest.mark.django_db
-def test_create_duplicate_of_soft_deleted_id_hits_service_message(client_a, school_a, active_year, class_levels):
+def test_create_duplicate_of_soft_deleted_id_hits_service_message(
+    client_a, school_a, active_year, class_levels
+):
     """The service's custom Hebrew duplicate message is reachable ONLY here:
     the alive-only manager hides a soft-deleted student from UniqueValidator, so
     validation passes, but the DB unique constraint (spanning soft-deleted rows)
@@ -181,9 +207,12 @@ def test_create_duplicate_of_soft_deleted_id_hits_service_message(client_a, scho
 
 # --- Update edge: enrollment fields are ignored on update ------------------
 
+
 @pytest.mark.django_db
 def test_update_ignores_enrollment_fields(client_a, active_year, class_levels):
-    created = client_a.post("/students/", _valid_payload(active_year, class_levels[0]), format="json")
+    created = client_a.post(
+        "/students/", _valid_payload(active_year, class_levels[0]), format="json"
+    )
     student_id = created.data["id"]
 
     # PATCH carrying enrollment fields must not create a second enrollment.

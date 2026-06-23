@@ -18,9 +18,7 @@ class School(models.Model):
 class Counselor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     school = models.ForeignKey(
-        School,
-        on_delete=models.CASCADE,
-        related_name="counselors"
+        School, on_delete=models.CASCADE, related_name="counselors"
     )
 
     full_name = models.CharField(max_length=150)

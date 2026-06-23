@@ -14,25 +14,19 @@ class StudentEventViewSet(BaseSchoolViewSet):
     serializer_class = StudentEventSerializer
 
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['student']
+    filterset_fields = ["student"]
 
     def perform_create(self, serializer):
         event = StudentEventService.create_event(
-            self.request.user,
-            serializer.validated_data
+            self.request.user, serializer.validated_data
         )
         serializer.instance = event
 
     def perform_update(self, serializer):
         event = StudentEventService.update_event(
-            self.request.user,
-            self.get_object(),
-            serializer.validated_data
+            self.request.user, self.get_object(), serializer.validated_data
         )
         serializer.instance = event
 
     def perform_destroy(self, instance):
-        StudentEventService.delete_event(
-            self.request.user,
-            instance
-        )
+        StudentEventService.delete_event(self.request.user, instance)

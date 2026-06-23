@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0013_add_reminder_sent_to_student_event'),
+        ("core", "0013_add_reminder_sent_to_student_event"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='studentevent',
-            name='status',
-            field=models.CharField(choices=[('pending', 'ממתין'), ('completed', 'הושלם')], default='pending', max_length=20),
+            model_name="studentevent",
+            name="status",
+            field=models.CharField(
+                choices=[("pending", "ממתין"), ("completed", "הושלם")],
+                default="pending",
+                max_length=20,
+            ),
         ),
     ]
