@@ -1,21 +1,18 @@
 from django.db import models
 from django.utils import timezone
 
-from .base import BaseModel
-from .school import School, Counselor
-from .academic import ClassLevel, SchoolYear
 from core.validators import validate_id_number
+
+from .academic import ClassLevel, SchoolYear
+from .base import BaseModel
+from .school import Counselor, School
 
 
 class Student(BaseModel):
-    school = models.ForeignKey(
-        School, on_delete=models.CASCADE, related_name="students"
-    )
+    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="students")
 
     full_name = models.CharField(max_length=150)
-    id_number = models.CharField(
-        max_length=9, unique=True, validators=[validate_id_number]
-    )
+    id_number = models.CharField(max_length=9, unique=True, validators=[validate_id_number])
 
     address = models.CharField(max_length=255, blank=True, null=True)
 
@@ -36,9 +33,7 @@ class Student(BaseModel):
 
 
 class StudentEnrollment(BaseModel):
-    student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, related_name="enrollments"
-    )
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="enrollments")
     school_year = models.ForeignKey(
         SchoolYear, on_delete=models.CASCADE, related_name="enrollments"
     )
@@ -70,12 +65,8 @@ class StudentEvent(BaseModel):
         ("other", "אחר"),
     ]
 
-    student = models.ForeignKey(
-        Student, on_delete=models.CASCADE, related_name="events"
-    )
-    counselor = models.ForeignKey(
-        Counselor, on_delete=models.CASCADE, related_name="events"
-    )
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="events")
+    counselor = models.ForeignKey(Counselor, on_delete=models.CASCADE, related_name="events")
 
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     event_type = models.CharField(max_length=30, choices=EVENT_TYPES)

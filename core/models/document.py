@@ -3,11 +3,12 @@ import uuid
 
 from django.db import models
 
-from .base import BaseModel
-from .school import School, Counselor
-from .academic import ClassLevel
-from .student import Student
 from core.validators import validate_document_file
+
+from .academic import ClassLevel
+from .base import BaseModel
+from .school import Counselor, School
+from .student import Student
 
 
 def document_upload_path(instance, filename):
@@ -93,24 +94,17 @@ class Document(BaseModel):
         ]
         constraints = [
             models.CheckConstraint(
-                condition=~(
-                    models.Q(category="student") & models.Q(student__isnull=True)
-                ),
+                condition=~(models.Q(category="student") & models.Q(student__isnull=True)),
                 name="document_student_required_for_student_category",
             ),
             models.CheckConstraint(
-                condition=~(
-                    models.Q(category="class") & models.Q(class_level__isnull=True)
-                ),
+                condition=~(models.Q(category="class") & models.Q(class_level__isnull=True)),
                 name="document_class_level_required_for_class_category",
             ),
             models.CheckConstraint(
                 condition=~(
                     models.Q(category="general")
-                    & (
-                        models.Q(student__isnull=False)
-                        | models.Q(class_level__isnull=False)
-                    )
+                    & (models.Q(student__isnull=False) | models.Q(class_level__isnull=False))
                 ),
                 name="document_general_must_have_no_relations",
             ),

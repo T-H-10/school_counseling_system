@@ -1,8 +1,7 @@
-from django.db import transaction
-
 from core.helpers import ensure_same_school
 from core.models import Document
 from core.services.base import apply_fields
+from django.db import transaction
 
 
 class DocumentService:

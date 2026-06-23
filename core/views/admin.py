@@ -1,19 +1,19 @@
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
-from core.services.school_service import SchoolService
-from core.services.class_level_service import ClassLevelService
-from core.services.school_year_service import SchoolYearService
-from core.services.counselor_service import CounselorService
-from core.models import School, ClassLevel, SchoolYear, Counselor
+from core.models import ClassLevel, Counselor, School, SchoolYear
 from core.serializers import (
-    SchoolSerializer,
     ClassLevelSerializer,
-    SchoolYearSerializer,
     CounselorSerializer,
+    SchoolSerializer,
+    SchoolYearSerializer,
 )
+from core.services.class_level_service import ClassLevelService
+from core.services.counselor_service import CounselorService
+from core.services.school_service import SchoolService
+from core.services.school_year_service import SchoolYearService
 
 
 class SchoolViewSet(ModelViewSet):
@@ -26,9 +26,7 @@ class SchoolViewSet(ModelViewSet):
         serializer.instance = school
 
     def perform_update(self, serializer):
-        school = SchoolService.update_school(
-            self.get_object(), serializer.validated_data
-        )
+        school = SchoolService.update_school(self.get_object(), serializer.validated_data)
         serializer.instance = school
 
     def perform_destroy(self, instance):
@@ -45,9 +43,7 @@ class ClassLevelViewSet(ModelViewSet):
         serializer.instance = level
 
     def perform_update(self, serializer):
-        level = ClassLevelService.update_class_level(
-            self.get_object(), serializer.validated_data
-        )
+        level = ClassLevelService.update_class_level(self.get_object(), serializer.validated_data)
         serializer.instance = level
 
     def perform_destroy(self, instance):
@@ -68,9 +64,7 @@ class SchoolYearViewSet(ModelViewSet):
         serializer.instance = year
 
     def perform_update(self, serializer):
-        year = SchoolYearService.update_school_year(
-            self.get_object(), serializer.validated_data
-        )
+        year = SchoolYearService.update_school_year(self.get_object(), serializer.validated_data)
         serializer.instance = year
 
     def perform_destroy(self, instance):
@@ -87,9 +81,7 @@ class CounselorViewSet(ModelViewSet):
         serializer.instance = counselor
 
     def perform_update(self, serializer):
-        counselor = CounselorService.update_counselor(
-            self.get_object(), serializer.validated_data
-        )
+        counselor = CounselorService.update_counselor(self.get_object(), serializer.validated_data)
         serializer.instance = counselor
 
     def perform_destroy(self, instance):

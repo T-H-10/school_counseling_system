@@ -14,10 +14,9 @@ are ready-made shortcuts.
 """
 
 import pytest
+from core.tests import factories
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
-
-from core.tests import factories
 
 
 @pytest.fixture(autouse=True)

@@ -1,8 +1,8 @@
 from datetime import timedelta
-from django.db.models import Max, Q
-from django.utils import timezone
 
 from core.models import LessonClassAssignment, Student, StudentEvent
+from django.db.models import Max, Q
+from django.utils import timezone
 
 
 class DashboardService:
@@ -74,17 +74,14 @@ class DashboardService:
 
         at_risk_90 = (
             Student.objects.filter(school=counselor.school)
-            .annotate(
-                last_event=Max("events__date", filter=Q(events__counselor=counselor))
-            )
+            .annotate(last_event=Max("events__date", filter=Q(events__counselor=counselor)))
             .filter(Q(last_event__isnull=True) | Q(last_event__lt=cutoff_90))
             .distinct()
         )
 
         return {
             "today_lessons": [
-                {"id": s.id, "title": s.lesson.title, "date": s.planned_date}
-                for s in today_lessons
+                {"id": s.id, "title": s.lesson.title, "date": s.planned_date} for s in today_lessons
             ],
             "recent_events": [
                 {
@@ -138,8 +135,7 @@ class DashboardService:
                 "at_risk_students": {
                     "count": at_risk_90.count(),
                     "students": [
-                        {"id": str(s.id), "full_name": s.full_name}
-                        for s in at_risk_90[:10]
+                        {"id": str(s.id), "full_name": s.full_name} for s in at_risk_90[:10]
                     ],
                 },
             },

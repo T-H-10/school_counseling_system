@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from core.models import ClassLevel, SchoolYear, Student, StudentEnrollment, StudentEvent
-from core.validators import validate_phone, validate_id_number, validate_name
+from core.validators import validate_id_number, validate_name, validate_phone
 
 
 class StudentSerializer(serializers.ModelSerializer):

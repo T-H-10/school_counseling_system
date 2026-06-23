@@ -2,12 +2,12 @@ def ensure_same_school(user, obj):
     school = user.counselor.school
 
     from core.models import (
+        Document,
+        LessonClassAssignment,
+        LessonPlan,
         Student,
         StudentEnrollment,
         StudentEvent,
-        LessonPlan,
-        LessonClassAssignment,
-        Document,
     )
 
     if isinstance(

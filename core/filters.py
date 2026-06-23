@@ -1,5 +1,6 @@
 import django_filters
-from core.models import Student, ClassLevel
+
+from core.models import ClassLevel, Student
 
 
 class StudentFilter(django_filters.FilterSet):

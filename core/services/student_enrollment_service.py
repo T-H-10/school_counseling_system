@@ -1,7 +1,7 @@
-from django.db.models import Count, Max
-from core.models import StudentEnrollment, SchoolYear, ClassLevel
 from core.helpers import ensure_same_school
+from core.models import ClassLevel, SchoolYear, StudentEnrollment
 from core.services.base import apply_fields
+from django.db.models import Count, Max
 
 
 class StudentEnrollmentService:
@@ -22,9 +22,7 @@ class StudentEnrollmentService:
     @staticmethod
     def update_enrollment(user, enrollment, data):
         ensure_same_school(user, enrollment)
-        return apply_fields(
-            enrollment, data, exclude={"school", "student", "school_year", "id"}
-        )
+        return apply_fields(enrollment, data, exclude={"school", "student", "school_year", "id"})
 
     @staticmethod
     def delete_enrollment(user, enrollment):
@@ -79,9 +77,9 @@ class StudentEnrollmentService:
         ).select_related("class_level", "student")
 
         already_enrolled = set(
-            StudentEnrollment.objects.filter(
-                school=school, school_year=to_year
-            ).values_list("student_id", flat=True)
+            StudentEnrollment.objects.filter(school=school, school_year=to_year).values_list(
+                "student_id", flat=True
+            )
         )
 
         created = 0
@@ -91,9 +89,7 @@ class StudentEnrollmentService:
                 skipped += 1
                 continue
             next_level = (
-                next_level_map.get(enrollment.class_level_id)
-                if enrollment.class_level_id
-                else None
+                next_level_map.get(enrollment.class_level_id) if enrollment.class_level_id else None
             )
             if next_level is None:
                 skipped += 1

@@ -281,15 +281,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="student",
-            index=models.Index(
-                fields=["school"], name="core_studen_school__e42026_idx"
-            ),
+            index=models.Index(fields=["school"], name="core_studen_school__e42026_idx"),
         ),
         migrations.AddIndex(
             model_name="student",
-            index=models.Index(
-                fields=["id_number"], name="core_studen_id_numb_2812bf_idx"
-            ),
+            index=models.Index(fields=["id_number"], name="core_studen_id_numb_2812bf_idx"),
         ),
         migrations.AddConstraint(
             model_name="student",

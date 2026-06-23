@@ -35,15 +35,11 @@ def test_create_lesson_succeeds(client_a, active_year):
 
 
 @pytest.mark.django_db
-def test_list_lessons_ordered_newest_first(
-    client_a, school_a, counselor_a, active_year
-):
+def test_list_lessons_ordered_newest_first(client_a, school_a, counselor_a, active_year):
     older = _lesson(school_a, counselor_a, active_year, title="ישן")
     _lesson(school_a, counselor_a, active_year, title="חדש")
     # Force a deterministic gap (update bypasses auto_now_add).
-    LessonPlan.all_objects.filter(id=older.id).update(
-        created_at=timezone.now() - timedelta(days=1)
-    )
+    LessonPlan.all_objects.filter(id=older.id).update(created_at=timezone.now() - timedelta(days=1))
 
     resp = client_a.get("/lessons/")
     assert resp.status_code == 200
@@ -80,17 +76,13 @@ def test_delete_lesson_cascade_soft_deletes_assignments(
     client_a, school_a, counselor_a, active_year, class_levels
 ):
     lesson = _lesson(school_a, counselor_a, active_year)
-    assignment = factories.LessonClassAssignmentFactory(
-        lesson=lesson, class_level=class_levels[0]
-    )
+    assignment = factories.LessonClassAssignmentFactory(lesson=lesson, class_level=class_levels[0])
 
     resp = client_a.delete(f"/lessons/{lesson.id}/")
     assert resp.status_code == 204
     # Both the lesson and its assignment are soft-deleted (archived), not hard-deleted.
     assert LessonPlan.all_objects.get(id=lesson.id).deleted_at is not None
-    assert (
-        LessonClassAssignment.all_objects.get(id=assignment.id).deleted_at is not None
-    )
+    assert LessonClassAssignment.all_objects.get(id=assignment.id).deleted_at is not None
 
 
 # --- calendar action -------------------------------------------------------
@@ -126,9 +118,7 @@ def test_calendar_assignment_without_planned_date_is_excluded(
 
 
 @pytest.mark.django_db
-def test_calendar_filters_out_of_range(
-    client_a, school_a, counselor_a, active_year, class_levels
-):
+def test_calendar_filters_out_of_range(client_a, school_a, counselor_a, active_year, class_levels):
     lesson = _lesson(school_a, counselor_a, active_year)
     factories.LessonClassAssignmentFactory(
         lesson=lesson, class_level=class_levels[0], planned_date=timezone.now()

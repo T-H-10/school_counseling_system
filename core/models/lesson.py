@@ -1,15 +1,13 @@
 from django.db import models
 
-from .base import BaseModel
-from .school import School, Counselor
 from .academic import ClassLevel, SchoolYear
+from .base import BaseModel
+from .school import Counselor, School
 
 
 class LessonPlan(BaseModel):
     school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="lessons")
-    counselor = models.ForeignKey(
-        Counselor, on_delete=models.CASCADE, related_name="lessons"
-    )
+    counselor = models.ForeignKey(Counselor, on_delete=models.CASCADE, related_name="lessons")
 
     school_year = models.ForeignKey(SchoolYear, on_delete=models.CASCADE)
 
@@ -27,12 +25,8 @@ class LessonClassAssignment(BaseModel):
         ("completed", "הושלם"),
     ]
 
-    lesson = models.ForeignKey(
-        LessonPlan, on_delete=models.CASCADE, related_name="assignments"
-    )
-    school = models.ForeignKey(
-        School, on_delete=models.CASCADE, related_name="lesson_assignments"
-    )
+    lesson = models.ForeignKey(LessonPlan, on_delete=models.CASCADE, related_name="assignments")
+    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="lesson_assignments")
 
     class_level = models.ForeignKey(ClassLevel, on_delete=models.CASCADE)
     class_number = models.PositiveIntegerField(null=True, blank=True)

@@ -11,8 +11,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -101,9 +101,7 @@ CORS_ALLOWED_ORIGINS = [
 SWAGGER_SETTINGS = {
     "USE_SESSION_AUTH": False,
     "DEFAULT_INFO": "config.urls.api_info",
-    "SECURITY_DEFINITIONS": {
-        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
-    },
+    "SECURITY_DEFINITIONS": {"Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}},
 }
 
 # Database
@@ -158,9 +156,7 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Maximum upload size for documents (bytes). Override via env var.
-DOCUMENT_MAX_UPLOAD_SIZE = int(
-    os.environ.get("DOCUMENT_MAX_UPLOAD_SIZE", str(10 * 1024 * 1024))
-)
+DOCUMENT_MAX_UPLOAD_SIZE = int(os.environ.get("DOCUMENT_MAX_UPLOAD_SIZE", str(10 * 1024 * 1024)))
 
 # Cloudflare R2 storage (production). Activated when R2_ACCOUNT_ID env var is set.
 # Local FileSystemStorage is used by default (dev).

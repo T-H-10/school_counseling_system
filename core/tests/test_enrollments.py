@@ -37,18 +37,11 @@ def test_create_enrollment_succeeds(client_a, school_a, active_year, class_level
 
     assert resp.status_code == 201
     assert resp.data["class_number"] == 4
-    assert (
-        StudentEnrollment.objects.filter(
-            student=student, school_year=active_year
-        ).count()
-        == 1
-    )
+    assert StudentEnrollment.objects.filter(student=student, school_year=active_year).count() == 1
 
 
 @pytest.mark.django_db
-def test_list_enrollments_filtered_by_student(
-    client_a, school_a, active_year, class_levels
-):
+def test_list_enrollments_filtered_by_student(client_a, school_a, active_year, class_levels):
     enrollment = _enroll(school_a, active_year, class_levels[0])
     _enroll(school_a, active_year, class_levels[1])  # a second, unrelated enrollment
 
@@ -113,9 +106,7 @@ def test_classes_empty_without_active_year(client_a, school_a, class_levels):
 
 
 @pytest.mark.django_db
-def test_set_class_teacher_updates_matching_rows(
-    client_a, school_a, active_year, class_levels
-):
+def test_set_class_teacher_updates_matching_rows(client_a, school_a, active_year, class_levels):
     _enroll(school_a, active_year, class_levels[0], class_number=3)
     _enroll(school_a, active_year, class_levels[0], class_number=3)
 
@@ -136,9 +127,7 @@ def test_set_class_teacher_updates_matching_rows(
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("missing", ["school_year", "class_level", "class_number"])
-def test_set_class_teacher_missing_field_rejected(
-    client_a, active_year, class_levels, missing
-):
+def test_set_class_teacher_missing_field_rejected(client_a, active_year, class_levels, missing):
     body = {
         "school_year": active_year.id,
         "class_level": class_levels[0].id,
@@ -166,9 +155,7 @@ def test_promote_advances_to_next_grade(client_a, school_a, active_year, class_l
     )
     assert resp.status_code == 200
     assert resp.data == {"created": 1, "skipped": 0}
-    promoted = StudentEnrollment.objects.get(
-        student=enrollment.student, school_year=next_year
-    )
+    promoted = StudentEnrollment.objects.get(student=enrollment.student, school_year=next_year)
     assert promoted.class_level.name == class_levels[1].name  # grade ב
 
 
@@ -208,9 +195,7 @@ def test_promote_skips_students_already_in_target_year(
 
 @pytest.mark.django_db
 def test_promote_missing_year_rejected(client_a, active_year):
-    resp = client_a.post(
-        "/enrollments/promote/", {"from_year": active_year.id}, format="json"
-    )
+    resp = client_a.post("/enrollments/promote/", {"from_year": active_year.id}, format="json")
     assert resp.status_code == 400
     assert "נדרשים from_year ו-to_year" in resp.data["error"]
 
@@ -245,9 +230,7 @@ def test_create_enrollment_for_other_school_student_rejected(
 
 
 @pytest.mark.django_db
-def test_duplicate_enrollment_same_year_rejected(
-    client_a, school_a, active_year, class_levels
-):
+def test_duplicate_enrollment_same_year_rejected(client_a, school_a, active_year, class_levels):
     """UNIQUE(student, school_year): a second live enrollment for the same pair
     is rejected with 400 (code 'unique')."""
     enrollment = _enroll(school_a, active_year, class_levels[0])

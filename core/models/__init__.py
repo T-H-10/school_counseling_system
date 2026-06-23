@@ -6,12 +6,12 @@ soft-delete base classes) so existing import paths
 foreign-key dependency chain.
 """
 
-from .base import SoftDeleteModel, BaseQuerySet, BaseManager, BaseModel
-from .school import School, Counselor
 from .academic import ClassLevel, SchoolYear
-from .student import Student, StudentEnrollment, StudentEvent
-from .lesson import LessonPlan, LessonClassAssignment
+from .base import BaseManager, BaseModel, BaseQuerySet, SoftDeleteModel
 from .document import Document
+from .lesson import LessonClassAssignment, LessonPlan
+from .school import Counselor, School
+from .student import Student, StudentEnrollment, StudentEvent
 
 __all__ = [
     "SoftDeleteModel",

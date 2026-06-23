@@ -1,12 +1,12 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
 
-from core.services.lesson_plan_service import LessonPlanService
-from core.services.lesson_class_assignment_service import LessonClassAssignmentService
-from core.models import LessonPlan, LessonClassAssignment
-from core.serializers import LessonPlanSerializer, LessonClassAssignmentSerializer
+from core.models import LessonClassAssignment, LessonPlan
 from core.permissions import IsCounselor
+from core.serializers import LessonClassAssignmentSerializer, LessonPlanSerializer
+from core.services.lesson_class_assignment_service import LessonClassAssignmentService
+from core.services.lesson_plan_service import LessonPlanService
 
 from .base import BaseSchoolViewSet
 
@@ -25,9 +25,7 @@ class LessonPlanViewSet(BaseSchoolViewSet):
         )
 
     def perform_create(self, serializer):
-        lesson = LessonPlanService.create_lesson(
-            self.request.user, serializer.validated_data
-        )
+        lesson = LessonPlanService.create_lesson(self.request.user, serializer.validated_data)
         serializer.instance = lesson
 
     def perform_update(self, serializer):

@@ -24,8 +24,7 @@ def _decode_header(value):
     """Decode an RFC 2047 encoded header value (test client encodes Hebrew filenames)."""
     parts = email.header.decode_header(value)
     return "".join(
-        part.decode(enc or "utf-8") if isinstance(part, bytes) else part
-        for part, enc in parts
+        part.decode(enc or "utf-8") if isinstance(part, bytes) else part for part, enc in parts
     )
 
 
@@ -35,15 +34,11 @@ def _decode_header(value):
 
 
 def pdf(name="test.pdf", size=1024):
-    return SimpleUploadedFile(
-        name, b"%PDF-1.4 " + b"x" * size, content_type="application/pdf"
-    )
+    return SimpleUploadedFile(name, b"%PDF-1.4 " + b"x" * size, content_type="application/pdf")
 
 
 def png(name="img.png"):
-    return SimpleUploadedFile(
-        name, b"\x89PNG\r\n" + b"x" * 64, content_type="image/png"
-    )
+    return SimpleUploadedFile(name, b"\x89PNG\r\n" + b"x" * 64, content_type="image/png")
 
 
 # ---------------------------------------------------------------------------
@@ -137,9 +132,7 @@ def test_list_returns_only_own_school_documents(
 @pytest.mark.django_db
 def test_update_title(client_a, school_a, counselor_a):
     doc = factories.DocumentFactory(school=school_a, counselor=counselor_a)
-    resp = client_a.patch(
-        f"/documents/{doc.id}/", {"title": "כותרת חדשה"}, format="multipart"
-    )
+    resp = client_a.patch(f"/documents/{doc.id}/", {"title": "כותרת חדשה"}, format="multipart")
     assert resp.status_code == 200
     assert resp.data["title"] == "כותרת חדשה"
 
@@ -185,9 +178,7 @@ def test_file_replace_deletes_old_file(client_a, school_a, counselor_a):
         format="multipart",
     )
 
-    assert not default_storage.exists(old_name), (
-        "Old file must be removed after file replace"
-    )
+    assert not default_storage.exists(old_name), "Old file must be removed after file replace"
     doc.refresh_from_db()
     assert default_storage.exists(doc.file.name), "New file must exist"
 
@@ -250,9 +241,7 @@ def test_general_category_rejects_student_relation(client_a, school_a):
 
 
 @pytest.mark.django_db
-def test_db_check_constraint_rejects_student_category_without_student(
-    school_a, counselor_a
-):
+def test_db_check_constraint_rejects_student_category_without_student(school_a, counselor_a):
     with pytest.raises((IntegrityError, Exception)):
         Document.objects.create(
             school=school_a,
@@ -271,9 +260,7 @@ def test_db_check_constraint_rejects_student_category_without_student(
 
 @pytest.mark.django_db
 def test_rejects_disallowed_extension(client_a):
-    bad_file = SimpleUploadedFile(
-        "virus.exe", b"MZ", content_type="application/octet-stream"
-    )
+    bad_file = SimpleUploadedFile("virus.exe", b"MZ", content_type="application/octet-stream")
     resp = client_a.post(
         "/documents/",
         {
@@ -290,9 +277,7 @@ def test_rejects_disallowed_extension(client_a):
 @pytest.mark.django_db
 def test_rejects_oversized_file(client_a, settings):
     settings.DOCUMENT_MAX_UPLOAD_SIZE = 10  # 10 bytes
-    big = SimpleUploadedFile(
-        "big.pdf", b"%PDF " + b"x" * 100, content_type="application/pdf"
-    )
+    big = SimpleUploadedFile("big.pdf", b"%PDF " + b"x" * 100, content_type="application/pdf")
     resp = client_a.post(
         "/documents/",
         {
@@ -359,9 +344,7 @@ def test_download_action_forces_attachment(client_a, school_a, counselor_a):
 
 @pytest.mark.django_db
 def test_download_filename_uses_document_title(client_a, school_a, counselor_a):
-    doc = factories.DocumentFactory(
-        school=school_a, counselor=counselor_a, title="דוח שנתי"
-    )
+    doc = factories.DocumentFactory(school=school_a, counselor=counselor_a, title="דוח שנתי")
     resp = client_a.get(f"/documents/{doc.id}/download/")
     cd = _decode_header(resp.get("Content-Disposition", ""))
     assert "attachment" in cd
@@ -375,9 +358,7 @@ def test_download_filename_uses_document_title(client_a, school_a, counselor_a):
 
 @pytest.mark.django_db
 def test_filter_by_category(client_a, school_a, counselor_a):
-    factories.DocumentFactory(
-        school=school_a, counselor=counselor_a, category="general"
-    )
+    factories.DocumentFactory(school=school_a, counselor=counselor_a, category="general")
     student = factories.StudentFactory(school=school_a)
     factories.DocumentFactory(
         school=school_a, counselor=counselor_a, category="student", student=student
@@ -411,9 +392,7 @@ def test_filter_by_student(client_a, school_a, counselor_a):
 
 
 @pytest.mark.django_db
-def test_recategorize_class_to_general_clears_class_level(
-    client_a, school_a, counselor_a
-):
+def test_recategorize_class_to_general_clears_class_level(client_a, school_a, counselor_a):
     """Moving a class doc to general must succeed and clear class_level/class_number."""
     cl = factories.ClassLevelFactory(name="ג")
     doc = factories.DocumentFactory(
@@ -424,9 +403,7 @@ def test_recategorize_class_to_general_clears_class_level(
         class_number=3,
     )
 
-    resp = client_a.patch(
-        f"/documents/{doc.id}/", {"category": "general"}, format="multipart"
-    )
+    resp = client_a.patch(f"/documents/{doc.id}/", {"category": "general"}, format="multipart")
 
     assert resp.status_code == 200, resp.data
     assert resp.data["category"] == "general"

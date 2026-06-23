@@ -1,7 +1,7 @@
-from django.db import IntegrityError, transaction
-from core.models import Student, StudentEnrollment
 from core.helpers import ensure_same_school
+from core.models import Student, StudentEnrollment
 from core.services.base import apply_fields
+from django.db import IntegrityError, transaction
 from rest_framework.exceptions import ValidationError
 
 
@@ -37,9 +37,7 @@ class StudentService:
                 )
                 return student
         except IntegrityError:
-            raise ValidationError(
-                {"id_number": ["תלמיד עם תעודת זהות זו כבר קיים בבית הספר"]}
-            )
+            raise ValidationError({"id_number": ["תלמיד עם תעודת זהות זו כבר קיים בבית הספר"]})
 
     @staticmethod
     def update_student(user, student, data):
@@ -63,9 +61,7 @@ class StudentService:
                 StudentService.create_student(user, data)
                 created += 1
             except ValidationError as e:
-                errors.append(
-                    {"row": row_num, "message": StudentService._flatten_error(e)}
-                )
+                errors.append({"row": row_num, "message": StudentService._flatten_error(e)})
             except Exception as e:
                 errors.append({"row": row_num, "message": str(e)})
         return {"created": created, "errors": errors}

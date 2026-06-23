@@ -24,7 +24,7 @@ def validate_document_file(f):
     ext = os.path.splitext(f.name)[1].lower()
     if ext not in _ALLOWED_EXTENSIONS:
         raise ValidationError(
-            f'סוג הקובץ "{ext}" אינו נתמך. סוגים מותרים: PDF, Word, Excel, PowerPoint, תמונות, טקסט.'
+            f'סוג הקובץ "{ext}" אינו נתמך.סוגים מותרים: PDF, Word, Excel, PowerPoint, תמונות, טקסט.'
         )
     max_size = settings.DOCUMENT_MAX_UPLOAD_SIZE
     if f.size > max_size:

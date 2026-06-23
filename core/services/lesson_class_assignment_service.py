@@ -1,8 +1,7 @@
-from django.utils import timezone
-
 from core.helpers import ensure_same_school
 from core.models import LessonClassAssignment
 from core.services.base import apply_fields
+from django.utils import timezone
 
 
 class LessonClassAssignmentService:
@@ -13,9 +12,7 @@ class LessonClassAssignmentService:
 
         clean_data = {k: v for k, v in data.items() if k not in ["school"]}
 
-        return LessonClassAssignment.objects.create(
-            school=user.counselor.school, **clean_data
-        )
+        return LessonClassAssignment.objects.create(school=user.counselor.school, **clean_data)
 
     @staticmethod
     def update_assignment(user, assignment, data):

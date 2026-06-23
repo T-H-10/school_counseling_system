@@ -23,9 +23,7 @@ class StudentEventService:
 
         ensure_same_school(user, event)
 
-        return apply_fields(
-            event, data, exclude=["school", "counselor", "student", "id"]
-        )
+        return apply_fields(event, data, exclude=["school", "counselor", "student", "id"])
 
     @staticmethod
     def delete_event(user, event):

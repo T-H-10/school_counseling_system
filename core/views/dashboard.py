@@ -1,8 +1,8 @@
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from core.services.dashboard_service import DashboardService
 from core.permissions import IsCounselor
+from core.services.dashboard_service import DashboardService
 
 
 class DashboardView(APIView):

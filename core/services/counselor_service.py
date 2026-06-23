@@ -1,8 +1,7 @@
-from django.contrib.auth.models import User
-from django.db import transaction
-
 from core.models import Counselor
 from core.services.base import apply_fields
+from django.contrib.auth.models import User
+from django.db import transaction
 
 
 class CounselorService:
@@ -15,9 +14,7 @@ class CounselorService:
 
         user_data = {k: v for k, v in data.items() if k in ["username", "password"]}
 
-        counselor_data = {
-            k: v for k, v in data.items() if k not in ["username", "password", "id"]
-        }
+        counselor_data = {k: v for k, v in data.items() if k not in ["username", "password", "id"]}
 
         user = User.objects.create_user(
             username=user_data["username"], password=user_data["password"]

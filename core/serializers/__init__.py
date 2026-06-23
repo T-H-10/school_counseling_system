@@ -6,21 +6,21 @@ keep working.
 """
 
 from .admin import (
-    SchoolSerializer,
     ClassLevelSerializer,
-    SchoolYearSerializer,
     CounselorSerializer,
+    SchoolSerializer,
+    SchoolYearSerializer,
 )
-from .student import (
-    StudentSerializer,
-    StudentEnrollmentSerializer,
-    StudentEventSerializer,
-)
+from .document import DocumentSerializer
 from .lesson import (
     LessonClassAssignmentSerializer,
     LessonPlanSerializer,
 )
-from .document import DocumentSerializer
+from .student import (
+    StudentEnrollmentSerializer,
+    StudentEventSerializer,
+    StudentSerializer,
+)
 
 __all__ = [
     "SchoolSerializer",

@@ -57,9 +57,7 @@ def _make_objects_in_school(school, counselor, school_year, class_level):
     lesson = factories.LessonPlanFactory(
         school=school, counselor=counselor, school_year=school_year
     )
-    assignment = factories.LessonClassAssignmentFactory(
-        lesson=lesson, class_level=class_level
-    )
+    assignment = factories.LessonClassAssignmentFactory(lesson=lesson, class_level=class_level)
     return {
         "students": student,
         "enrollments": enrollment,

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from core.models import School, ClassLevel, SchoolYear, Counselor
+from core.models import ClassLevel, Counselor, School, SchoolYear
 
 
 class SchoolSerializer(serializers.ModelSerializer):

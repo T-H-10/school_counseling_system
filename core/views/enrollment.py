@@ -1,11 +1,11 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
 
-from core.services.student_enrollment_service import StudentEnrollmentService
-from core.models import StudentEnrollment, SchoolYear
-from core.serializers import StudentEnrollmentSerializer
+from core.models import SchoolYear, StudentEnrollment
 from core.permissions import IsCounselor
+from core.serializers import StudentEnrollmentSerializer
+from core.services.student_enrollment_service import StudentEnrollmentService
 
 from .base import BaseSchoolViewSet
 
@@ -54,9 +54,7 @@ class StudentEnrollmentViewSet(BaseSchoolViewSet):
         if not from_year or not to_year:
             return Response({"error": "נדרשים from_year ו-to_year"}, status=400)
         try:
-            result = StudentEnrollmentService.promote_students(
-                request.user, request.data
-            )
+            result = StudentEnrollmentService.promote_students(request.user, request.data)
         except SchoolYear.DoesNotExist:
             return Response({"error": "שנת לימודים לא נמצאה"}, status=400)
         return Response(result)

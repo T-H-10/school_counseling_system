@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 
 class School(models.Model):
@@ -17,9 +17,7 @@ class School(models.Model):
 
 class Counselor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    school = models.ForeignKey(
-        School, on_delete=models.CASCADE, related_name="counselors"
-    )
+    school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="counselors")
 
     full_name = models.CharField(max_length=150)
 

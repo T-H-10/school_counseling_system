@@ -2,10 +2,10 @@ import mimetypes
 import os
 from urllib.parse import quote
 
+from django.http import FileResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
-from django.http import FileResponse
 
 from core.models import Document
 from core.permissions import DocumentAccessPolicy

@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from .models import Counselor, School, Student
 
 admin.site.register(Counselor)

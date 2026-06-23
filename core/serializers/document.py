@@ -55,11 +55,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         # When category changes on an update, auto-clear relations that no longer belong.
         # This lets callers send only the new required fields without explicitly nulling
         # the old ones — the single source of truth stays validate_document_category().
-        if (
-            self.instance
-            and "category" in data
-            and data["category"] != self.instance.category
-        ):
+        if self.instance and "category" in data and data["category"] != self.instance.category:
             if new_category != "student":
                 data["student"] = None
             if new_category != "class":
@@ -67,9 +63,7 @@ class DocumentSerializer(serializers.ModelSerializer):
                 data["class_number"] = None
 
         student = data.get("student", getattr(self.instance, "student", None))
-        class_level = data.get(
-            "class_level", getattr(self.instance, "class_level", None)
-        )
+        class_level = data.get("class_level", getattr(self.instance, "class_level", None))
 
         errors = validate_document_category(new_category, student, class_level)
         if errors:

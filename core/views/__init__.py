@@ -4,19 +4,19 @@ Split into per-domain modules; this package re-exports every ViewSet/View so
 existing import paths (``from core.views import StudentViewSet``) keep working.
 """
 
-from .base import BaseSchoolViewSet
-from .student import StudentViewSet
-from .enrollment import StudentEnrollmentViewSet
-from .student_event import StudentEventViewSet
-from .lesson import LessonPlanViewSet, LessonClassAssignmentViewSet
 from .admin import (
-    SchoolViewSet,
     ClassLevelViewSet,
-    SchoolYearViewSet,
     CounselorViewSet,
+    SchoolViewSet,
+    SchoolYearViewSet,
 )
+from .base import BaseSchoolViewSet
 from .dashboard import DashboardView
 from .document import DocumentViewSet
+from .enrollment import StudentEnrollmentViewSet
+from .lesson import LessonClassAssignmentViewSet, LessonPlanViewSet
+from .student import StudentViewSet
+from .student_event import StudentEventViewSet
 
 __all__ = [
     "BaseSchoolViewSet",

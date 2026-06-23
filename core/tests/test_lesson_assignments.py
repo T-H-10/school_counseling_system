@@ -9,9 +9,7 @@ from core.tests import factories
 
 
 def _lesson(school, counselor, year):
-    return factories.LessonPlanFactory(
-        school=school, counselor=counselor, school_year=year
-    )
+    return factories.LessonPlanFactory(school=school, counselor=counselor, school_year=year)
 
 
 # --- assign / CRUD ---------------------------------------------------------
@@ -35,9 +33,7 @@ def test_assign_class_succeeds_as_planned(
 
 
 @pytest.mark.django_db
-def test_list_filtered_by_lesson(
-    client_a, school_a, counselor_a, active_year, class_levels
-):
+def test_list_filtered_by_lesson(client_a, school_a, counselor_a, active_year, class_levels):
     lesson1 = _lesson(school_a, counselor_a, active_year)
     lesson2 = _lesson(school_a, counselor_a, active_year)
     factories.LessonClassAssignmentFactory(lesson=lesson1, class_level=class_levels[0])
@@ -50,13 +46,9 @@ def test_list_filtered_by_lesson(
 
 
 @pytest.mark.django_db
-def test_update_assignment_persists(
-    client_a, school_a, counselor_a, active_year, class_levels
-):
+def test_update_assignment_persists(client_a, school_a, counselor_a, active_year, class_levels):
     lesson = _lesson(school_a, counselor_a, active_year)
-    assignment = factories.LessonClassAssignmentFactory(
-        lesson=lesson, class_level=class_levels[0]
-    )
+    assignment = factories.LessonClassAssignmentFactory(lesson=lesson, class_level=class_levels[0])
 
     resp = client_a.patch(
         f"/lessonAssignments/{assignment.id}/", {"class_number": 5}, format="json"
@@ -67,19 +59,13 @@ def test_update_assignment_persists(
 
 
 @pytest.mark.django_db
-def test_delete_assignment_soft_deletes(
-    client_a, school_a, counselor_a, active_year, class_levels
-):
+def test_delete_assignment_soft_deletes(client_a, school_a, counselor_a, active_year, class_levels):
     lesson = _lesson(school_a, counselor_a, active_year)
-    assignment = factories.LessonClassAssignmentFactory(
-        lesson=lesson, class_level=class_levels[0]
-    )
+    assignment = factories.LessonClassAssignmentFactory(lesson=lesson, class_level=class_levels[0])
 
     resp = client_a.delete(f"/lessonAssignments/{assignment.id}/")
     assert resp.status_code == 204
-    assert (
-        LessonClassAssignment.all_objects.get(id=assignment.id).deleted_at is not None
-    )
+    assert LessonClassAssignment.all_objects.get(id=assignment.id).deleted_at is not None
 
 
 # --- complete action -------------------------------------------------------
@@ -90,9 +76,7 @@ def test_complete_sets_status_summary_and_default_date(
     client_a, school_a, counselor_a, active_year, class_levels
 ):
     lesson = _lesson(school_a, counselor_a, active_year)
-    assignment = factories.LessonClassAssignmentFactory(
-        lesson=lesson, class_level=class_levels[0]
-    )
+    assignment = factories.LessonClassAssignmentFactory(lesson=lesson, class_level=class_levels[0])
 
     resp = client_a.post(
         f"/lessonAssignments/{assignment.id}/complete/",
@@ -107,13 +91,9 @@ def test_complete_sets_status_summary_and_default_date(
 
 
 @pytest.mark.django_db
-def test_complete_with_explicit_date(
-    client_a, school_a, counselor_a, active_year, class_levels
-):
+def test_complete_with_explicit_date(client_a, school_a, counselor_a, active_year, class_levels):
     lesson = _lesson(school_a, counselor_a, active_year)
-    assignment = factories.LessonClassAssignmentFactory(
-        lesson=lesson, class_level=class_levels[0]
-    )
+    assignment = factories.LessonClassAssignmentFactory(lesson=lesson, class_level=class_levels[0])
 
     resp = client_a.post(
         f"/lessonAssignments/{assignment.id}/complete/",
@@ -135,9 +115,7 @@ def test_complete_preserves_existing_summary_when_omitted(
         lesson=lesson, class_level=class_levels[0], summary="סיכום קודם"
     )
 
-    resp = client_a.post(
-        f"/lessonAssignments/{assignment.id}/complete/", {}, format="json"
-    )
+    resp = client_a.post(f"/lessonAssignments/{assignment.id}/complete/", {}, format="json")
     assert resp.status_code == 200
     assert resp.data["status"] == "completed"
     assert resp.data["summary"] == "סיכום קודם"
@@ -151,13 +129,9 @@ def test_complete_other_school_assignment_404(
     client_a, school_b, counselor_b, active_year, class_levels
 ):
     lesson = _lesson(school_b, counselor_b, active_year)
-    assignment = factories.LessonClassAssignmentFactory(
-        lesson=lesson, class_level=class_levels[0]
-    )
+    assignment = factories.LessonClassAssignmentFactory(lesson=lesson, class_level=class_levels[0])
 
-    resp = client_a.post(
-        f"/lessonAssignments/{assignment.id}/complete/", {}, format="json"
-    )
+    resp = client_a.post(f"/lessonAssignments/{assignment.id}/complete/", {}, format="json")
     assert resp.status_code == 404
 
 

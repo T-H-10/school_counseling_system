@@ -33,9 +33,7 @@ def _valid_payload(active_year, class_level, drop=(), **overrides):
 
 
 @pytest.mark.django_db
-def test_create_student_succeeds_and_creates_enrollment(
-    client_a, active_year, class_levels
-):
+def test_create_student_succeeds_and_creates_enrollment(client_a, active_year, class_levels):
     payload = _valid_payload(active_year, class_levels[0])
     resp = client_a.post("/students/", payload, format="json")
 
@@ -46,19 +44,12 @@ def test_create_student_succeeds_and_creates_enrollment(
     assert resp.data["current_class_number"] == 1
 
     student = Student.objects.get(id=resp.data["id"])
-    assert (
-        StudentEnrollment.objects.filter(
-            student=student, school_year=active_year
-        ).count()
-        == 1
-    )
+    assert StudentEnrollment.objects.filter(student=student, school_year=active_year).count() == 1
 
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("id_number", ["12345674", "123456782"])
-def test_create_accepts_8_and_9_digit_ids(
-    client_a, active_year, class_levels, id_number
-):
+def test_create_accepts_8_and_9_digit_ids(client_a, active_year, class_levels, id_number):
     payload = _valid_payload(active_year, class_levels[0], id_number=id_number)
     assert client_a.post("/students/", payload, format="json").status_code == 201
 
@@ -70,9 +61,7 @@ def test_update_student_name_persists(client_a, active_year, class_levels):
     )
     student_id = created.data["id"]
 
-    resp = client_a.patch(
-        f"/students/{student_id}/", {"full_name": "שם מעודכן"}, format="json"
-    )
+    resp = client_a.patch(f"/students/{student_id}/", {"full_name": "שם מעודכן"}, format="json")
     assert resp.status_code == 200
     assert resp.data["full_name"] == "שם מעודכן"
 
@@ -136,9 +125,7 @@ def test_create_invalid_phone_rejected(client_a, active_year, class_levels, fiel
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("field", ["school_year", "class_level", "class_number"])
-def test_create_missing_enrollment_field_rejected(
-    client_a, active_year, class_levels, field
-):
+def test_create_missing_enrollment_field_rejected(client_a, active_year, class_levels, field):
     payload = _valid_payload(active_year, class_levels[0], drop=[field])
     resp = client_a.post("/students/", payload, format="json")
 

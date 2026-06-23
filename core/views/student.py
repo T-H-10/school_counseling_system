@@ -1,20 +1,20 @@
 from django.http import HttpResponse
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
 
 from core.filters import StudentFilter
-from core.services.student_timeline_service import StudentTimelineService
-from core.services.student_service import StudentService
-from core.services.student_import_export_service import (
-    StudentImportExportService,
-    ExcelImportError,
-)
 from core.models import Student
-from core.serializers import StudentSerializer
 from core.permissions import IsCounselor
+from core.serializers import StudentSerializer
+from core.services.student_import_export_service import (
+    ExcelImportError,
+    StudentImportExportService,
+)
+from core.services.student_service import StudentService
+from core.services.student_timeline_service import StudentTimelineService
 
 from .base import BaseSchoolViewSet
 
@@ -70,9 +70,7 @@ class StudentViewSet(BaseSchoolViewSet):
         return response
 
     def perform_create(self, serializer):
-        student = StudentService.create_student(
-            self.request.user, serializer.validated_data
-        )
+        student = StudentService.create_student(self.request.user, serializer.validated_data)
         serializer.instance = student
 
     def perform_update(self, serializer):

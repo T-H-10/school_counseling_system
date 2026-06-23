@@ -7,8 +7,8 @@ HTTP concerns (status codes, file responses) stay in the view.
 """
 
 import io
-import openpyxl
 
+import openpyxl
 from core.models import ClassLevel, SchoolYear
 from core.services.student_service import StudentService
 
@@ -97,9 +97,7 @@ class StudentImportExportService:
                 return None
             val = row[idx]
             return (
-                str(int(val))
-                if isinstance(val, float) and val.is_integer()
-                else str(val).strip()
+                str(int(val)) if isinstance(val, float) and val.is_integer() else str(val).strip()
             )
 
         parsed = []
@@ -179,13 +177,9 @@ class StudentImportExportService:
                 [
                     student.full_name,
                     student.id_number,
-                    enrollment.class_level.name
-                    if enrollment and enrollment.class_level
-                    else "",
+                    enrollment.class_level.name if enrollment and enrollment.class_level else "",
                     enrollment.class_number if enrollment else "",
-                    enrollment.school_year.name
-                    if enrollment and enrollment.school_year
-                    else "",
+                    enrollment.school_year.name if enrollment and enrollment.school_year else "",
                     student.mother_name or "",
                     student.mother_phone or "",
                     student.father_name or "",
