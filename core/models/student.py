@@ -4,6 +4,7 @@ from django.utils import timezone
 from .base import BaseModel
 from .school import School, Counselor
 from .academic import ClassLevel, SchoolYear
+from core.validators import validate_id_number
 
 
 class Student(BaseModel):
@@ -14,7 +15,7 @@ class Student(BaseModel):
     )
 
     full_name = models.CharField(max_length=150)
-    id_number = models.CharField(max_length=9, unique=True)
+    id_number = models.CharField(max_length=9, unique=True, validators=[validate_id_number])
 
     address = models.CharField(max_length=255, blank=True, null=True)
 

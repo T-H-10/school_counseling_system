@@ -17,7 +17,7 @@ def _valid_payload(active_year, class_level, drop=(), **overrides):
     """A valid POST /students/ body; ``drop`` removes keys, kwargs override."""
     payload = {
         "full_name": "ישראל ישראלי",
-        "id_number": "123456789",
+        "id_number": "123456782",
         "school_year": active_year.id,
         "class_level": class_level.id,
         "class_number": 1,
@@ -46,7 +46,7 @@ def test_create_student_succeeds_and_creates_enrollment(client_a, active_year, c
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("id_number", ["12345678", "123456789"])
+@pytest.mark.parametrize("id_number", ["12345674", "123456782"])
 def test_create_accepts_8_and_9_digit_ids(client_a, active_year, class_levels, id_number):
     payload = _valid_payload(active_year, class_levels[0], id_number=id_number)
     assert client_a.post("/students/", payload, format="json").status_code == 201
@@ -72,18 +72,28 @@ def test_create_invalid_id_number_rejected(client_a, active_year, class_levels, 
     resp = client_a.post("/students/", payload, format="json")
 
     assert resp.status_code == 400
-    assert "Invalid ID number" in resp.data["id_number"]
+    assert "מספר תעודת זהות לא תקין" in resp.data["id_number"]
 
 
 @pytest.mark.django_db
-def test_create_id_number_over_9_chars_rejected_by_length(client_a, active_year, class_levels):
-    """A 10-digit ID is stopped by the model's max_length=9 (CharField) before the
-    custom validator runs — so the code is 'max_length', not 'Invalid ID number'."""
+@pytest.mark.parametrize("bad_id", ["123456789", "12345678"])
+def test_create_wrong_check_digit_rejected(client_a, active_year, class_levels, bad_id):
+    """Structurally valid (8-9 digits) but failing the Luhn check digit."""
+    payload = _valid_payload(active_year, class_levels[0], id_number=bad_id)
+    resp = client_a.post("/students/", payload, format="json")
+
+    assert resp.status_code == 400
+    assert "מספר תעודת זהות לא תקין" in resp.data["id_number"]
+
+
+@pytest.mark.django_db
+def test_create_id_number_over_9_chars_rejected(client_a, active_year, class_levels):
+    """A 10-digit ID fails the length check in validate_id_number (wrong length)."""
     payload = _valid_payload(active_year, class_levels[0], id_number="1234567890")
     resp = client_a.post("/students/", payload, format="json")
 
     assert resp.status_code == 400
-    assert resp.data["id_number"][0].code == "max_length"
+    assert "מספר תעודת זהות לא תקין" in resp.data["id_number"]
 
 
 @pytest.mark.django_db
@@ -133,8 +143,8 @@ def test_create_duplicate_id_number_same_school_rejected(client_a, school_a, act
     """A live duplicate is caught by DRF's auto UniqueValidator (code 'unique')
     at serializer time — the service's custom message is NOT what the API returns
     here (see the soft-delete edge test for where that message actually fires)."""
-    factories.StudentFactory(school=school_a, id_number="123456789")
-    payload = _valid_payload(active_year, class_levels[0], id_number="123456789")
+    factories.StudentFactory(school=school_a, id_number="123456782")
+    payload = _valid_payload(active_year, class_levels[0], id_number="123456782")
     resp = client_a.post("/students/", payload, format="json")
 
     assert resp.status_code == 400
@@ -145,8 +155,8 @@ def test_create_duplicate_id_number_same_school_rejected(client_a, school_a, act
 def test_create_duplicate_id_number_across_schools_rejected(client_a, school_b, active_year, class_levels):
     """id_number is globally unique, so a clash with ANOTHER school's student is
     still rejected (code 'unique')."""
-    factories.StudentFactory(school=school_b, id_number="123456789")
-    payload = _valid_payload(active_year, class_levels[0], id_number="123456789")
+    factories.StudentFactory(school=school_b, id_number="123456782")
+    payload = _valid_payload(active_year, class_levels[0], id_number="123456782")
     resp = client_a.post("/students/", payload, format="json")
 
     assert resp.status_code == 400
@@ -159,10 +169,10 @@ def test_create_duplicate_of_soft_deleted_id_hits_service_message(client_a, scho
     the alive-only manager hides a soft-deleted student from UniqueValidator, so
     validation passes, but the DB unique constraint (spanning soft-deleted rows)
     raises IntegrityError, which the service maps to its custom 400."""
-    student = factories.StudentFactory(school=school_a, id_number="123456789")
+    student = factories.StudentFactory(school=school_a, id_number="123456782")
     student.delete()  # soft-delete: sets deleted_at, row remains in the DB
 
-    payload = _valid_payload(active_year, class_levels[0], id_number="123456789")
+    payload = _valid_payload(active_year, class_levels[0], id_number="123456782")
     resp = client_a.post("/students/", payload, format="json")
 
     assert resp.status_code == 400

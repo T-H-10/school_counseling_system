@@ -80,14 +80,22 @@ class SchoolYearFactory(factory.django.DjangoModelFactory):
     is_active = False
 
 
+def _make_valid_israeli_id(n):
+    """Return a 9-digit string that passes the Israeli ID check-digit algorithm."""
+    base = f"{n:08d}"
+    digits = [int(c) for c in base]
+    weights = [1, 2, 1, 2, 1, 2, 1, 2]
+    total = sum((d * w) - 9 if (d * w) >= 10 else (d * w) for d, w in zip(digits, weights))
+    return base + str((10 - total % 10) % 10)
+
+
 class StudentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Student
 
     school = factory.SubFactory(SchoolFactory)
     full_name = factory.Sequence(lambda n: f"תלמיד {n}")
-    # 9 digits — valid for validate_id_number and unique.
-    id_number = factory.Sequence(lambda n: str(300000000 + n))
+    id_number = factory.Sequence(lambda n: _make_valid_israeli_id(10_000_000 + n))
 
 
 class StudentEnrollmentFactory(factory.django.DjangoModelFactory):

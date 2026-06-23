@@ -25,8 +25,15 @@ def validate_phone(value):
 
 
 def validate_id_number(value):
-    if not value.isdigit() or len(value) not in [8, 9]:
-        raise ValidationError("Invalid ID number")
+    if not value.isdigit() or len(value) not in (8, 9):
+        raise ValidationError("מספר תעודת זהות לא תקין")
+    padded = value.zfill(9)
+    total = 0
+    for i, ch in enumerate(padded):
+        product = int(ch) * (1 if i % 2 == 0 else 2)
+        total += product - 9 if product >= 10 else product
+    if total % 10 != 0:
+        raise ValidationError("מספר תעודת זהות לא תקין")
 
 
 def validate_name(value):
