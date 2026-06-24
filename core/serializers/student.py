@@ -91,6 +91,8 @@ class StudentSerializer(serializers.ModelSerializer):
             "mother_phone",
             "father_name",
             "father_phone",
+            "parents_status",
+            "notes",
             "school",
             "created_at",
             "current_class_level",

@@ -9,6 +9,15 @@ from .school import Counselor, School
 
 
 class Student(BaseModel):
+    PARENTS_STATUS_CHOICES = [
+        ("married",       "נשואים"),
+        ("divorced",      "גרושים"),
+        ("separated",     "פרודים"),
+        ("single_parent", "חד הוריות"),
+        ("widowed",       "שכול"),
+        ("other",         "אחר"),
+    ]
+
     school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="students")
 
     full_name = models.CharField(max_length=150)
@@ -21,6 +30,11 @@ class Student(BaseModel):
 
     father_name = models.CharField(max_length=100, blank=True, null=True)
     father_phone = models.CharField(max_length=20, blank=True, null=True)
+
+    parents_status = models.CharField(
+        max_length=20, choices=PARENTS_STATUS_CHOICES, blank=True, default=""
+    )
+    notes = models.TextField(blank=True, default="")
 
     def __str__(self):
         return self.full_name

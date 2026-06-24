@@ -17,6 +17,17 @@ class ExcelImportError(Exception):
     """Raised for whole-file problems the view should surface as HTTP 400."""
 
 
+# Mirrors Student.PARENTS_STATUS_CHOICES — update both together if choices change.
+_PARENTS_STATUS_HEBREW_TO_VALUE = {
+    "נשואים": "married",
+    "גרושים": "divorced",
+    "פרודים": "separated",
+    "חד הוריות": "single_parent",
+    "שכול": "widowed",
+    "אחר": "other",
+}
+_PARENTS_STATUS_VALUE_TO_HEBREW = {v: k for k, v in _PARENTS_STATUS_HEBREW_TO_VALUE.items()}
+
 COL_MAP = {
     "שם מלא": "full_name",
     "מספר זהות": "id_number",
@@ -28,6 +39,8 @@ COL_MAP = {
     "שם אב": "father_name",
     "טלפון אב": "father_phone",
     "כתובת": "address",
+    "מצב משפחתי": "parents_status",
+    "הערות": "notes",
 }
 REQUIRED_COLS = {
     "full_name",
@@ -55,6 +68,8 @@ EXPORT_HEADERS = [
     "שם אב",
     "טלפון אב",
     "כתובת",
+    "מצב משפחתי",
+    "הערות",
 ]
 
 
@@ -136,6 +151,18 @@ class StudentImportExportService:
             if not class_number:
                 row_errors.append("מספר כיתה חסר או לא תקין")
 
+            parents_status_raw = cell(row, "parents_status")
+            parents_status = ""
+            if parents_status_raw:
+                resolved = _PARENTS_STATUS_HEBREW_TO_VALUE.get(parents_status_raw)
+                if resolved is None:
+                    valid = "، ".join(_PARENTS_STATUS_HEBREW_TO_VALUE)
+                    row_errors.append(
+                        f'מצב משפחתי "{parents_status_raw}" אינו חוקי. ערכים אפשריים: {valid}'
+                    )
+                else:
+                    parents_status = resolved
+
             if row_errors:
                 pre_errors.append({"row": row_num, "message": " | ".join(row_errors)})
                 continue
@@ -148,6 +175,8 @@ class StudentImportExportService:
                 "mother_phone": cell(row, "mother_phone"),
                 "father_name": cell(row, "father_name"),
                 "father_phone": cell(row, "father_phone"),
+                "parents_status": parents_status,
+                "notes": cell(row, "notes") or "",
                 "class_number": class_number,
                 "class_level": class_level,
                 "school_year": school_year,
@@ -185,6 +214,8 @@ class StudentImportExportService:
                     student.father_name or "",
                     student.father_phone or "",
                     student.address or "",
+                    _PARENTS_STATUS_VALUE_TO_HEBREW.get(student.parents_status, ""),
+                    student.notes or "",
                 ]
             )
 

@@ -8,9 +8,16 @@ Covers the two validation layers a student write passes through:
 Messages are asserted verbatim because the React UI renders them.
 """
 
+import io
+
+import openpyxl
 import pytest
 
 from core.models import Student, StudentEnrollment
+from core.services.student_import_export_service import (
+    ExcelImportError,
+    StudentImportExportService,
+)
 from core.tests import factories
 
 
@@ -210,3 +217,123 @@ def test_update_ignores_enrollment_fields(client_a, active_year, class_levels):
     )
     assert resp.status_code == 200
     assert StudentEnrollment.objects.filter(student_id=student_id).count() == 1
+
+
+# --- parents_status and notes fields ----------------------------------------
+
+
+@pytest.mark.django_db
+def test_create_student_with_parents_status_and_notes(client_a, active_year, class_levels):
+    payload = _valid_payload(
+        active_year, class_levels[0], parents_status="divorced", notes="הערה כלשהי"
+    )
+    resp = client_a.post("/students/", payload, format="json")
+
+    assert resp.status_code == 201
+    assert resp.data["parents_status"] == "divorced"
+    assert resp.data["notes"] == "הערה כלשהי"
+
+
+@pytest.mark.django_db
+def test_update_parents_status_and_notes(client_a, active_year, class_levels):
+    created = client_a.post(
+        "/students/", _valid_payload(active_year, class_levels[0]), format="json"
+    )
+    student_id = created.data["id"]
+
+    resp = client_a.patch(
+        f"/students/{student_id}/",
+        {"parents_status": "married", "notes": "הערה מעודכנת"},
+        format="json",
+    )
+    assert resp.status_code == 200
+    assert resp.data["parents_status"] == "married"
+    assert resp.data["notes"] == "הערה מעודכנת"
+
+
+@pytest.mark.django_db
+def test_invalid_parents_status_rejected(client_a, active_year, class_levels):
+    payload = _valid_payload(active_year, class_levels[0], parents_status="invalid_value")
+    resp = client_a.post("/students/", payload, format="json")
+
+    assert resp.status_code == 400
+    assert "parents_status" in resp.data
+
+
+@pytest.mark.django_db
+def test_parents_status_and_notes_are_optional(client_a, active_year, class_levels):
+    resp = client_a.post("/students/", _valid_payload(active_year, class_levels[0]), format="json")
+
+    assert resp.status_code == 201
+    assert resp.data["parents_status"] == ""
+    assert resp.data["notes"] == ""
+
+
+# --- import/export -----------------------------------------------------------
+
+
+def _make_xlsx(headers, rows):
+    """Build an in-memory xlsx with the given headers and data rows."""
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(headers)
+    for row in rows:
+        ws.append(row)
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf
+
+
+@pytest.mark.django_db
+def test_export_includes_new_fields(counselor_a, school_a, active_year, class_levels):
+    factories.StudentEnrollmentFactory(
+        student=factories.StudentFactory(school=school_a, parents_status="divorced", notes="בדיקה"),
+        school_year=active_year,
+        class_level=class_levels[0],
+        school=school_a,
+    )
+    xlsx_bytes = StudentImportExportService.export_students(school_a.students.all())
+
+    wb = openpyxl.load_workbook(io.BytesIO(xlsx_bytes))
+    headers = [cell.value for cell in wb.active[1]]
+
+    assert "מצב משפחתי" in headers
+    assert "הערות" in headers
+
+    row = list(wb.active.iter_rows(min_row=2, values_only=True))[0]
+    col_idx = {h: i for i, h in enumerate(headers)}
+    assert row[col_idx["מצב משפחתי"]] == "גרושים"
+    assert row[col_idx["הערות"]] == "בדיקה"
+
+
+@pytest.mark.django_db
+def test_import_parents_status_invalid_value_rejected(counselor_a, active_year, class_levels):
+    headers = [
+        "שם מלא", "מספר זהות", "כיתה", "מספר כיתה", "שנת לימודים", "מצב משפחתי",
+    ]
+    rows = [["ישראל ישראלי", "123456782", "א", 1, active_year.name, "ערך לא חוקי"]]
+    file = _make_xlsx(headers, rows)
+
+    result = StudentImportExportService.import_students(counselor_a.user, file)
+
+    assert result["created"] == 0
+    assert len(result["errors"]) == 1
+    assert "מצב משפחתי" in result["errors"][0]["message"]
+
+
+@pytest.mark.django_db
+def test_import_with_new_fields_succeeds(counselor_a, active_year, class_levels):
+    headers = [
+        "שם מלא", "מספר זהות", "כיתה", "מספר כיתה", "שנת לימודים", "מצב משפחתי", "הערות",
+    ]
+    rows = [["ישראל ישראלי", "123456782", "א", 1, active_year.name, "גרושים", "הערת בדיקה"]]
+    file = _make_xlsx(headers, rows)
+
+    result = StudentImportExportService.import_students(counselor_a.user, file)
+
+    assert result["created"] == 1
+    assert result["errors"] == []
+    student = Student.objects.get(id_number="123456782")
+    assert student.parents_status == "divorced"
+    assert student.notes == "הערת בדיקה"

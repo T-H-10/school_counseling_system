@@ -22,6 +22,8 @@ class StudentService:
             "mother_phone",
             "father_name",
             "father_phone",
+            "parents_status",
+            "notes",
         }
         clean_data = {k: v for k, v in data.items() if k in allowed_fields}
 
