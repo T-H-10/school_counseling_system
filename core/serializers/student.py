@@ -9,6 +9,8 @@ class StudentSerializer(serializers.ModelSerializer):
     current_class_number = serializers.SerializerMethodField()
     current_teacher = serializers.SerializerMethodField()
     last_event_date = serializers.SerializerMethodField()
+    is_graduated = serializers.SerializerMethodField()
+    graduation_year = serializers.SerializerMethodField()
 
     # Write-only enrollment fields — required on creation, ignored on update
     school_year = serializers.PrimaryKeyRelatedField(
@@ -28,14 +30,25 @@ class StudentSerializer(serializers.ModelSerializer):
     )
 
     def _get_current_enrollment(self, obj):
+        # Uses the prefetch cache — must not call .filter() on the related manager.
         if not hasattr(obj, "_cached_enrollment"):
-            obj._cached_enrollment = (
-                obj.enrollments.select_related("class_level", "school_year")
-                .filter(class_level__isnull=False)
-                .order_by("-school_year__is_active", "-created_at")
-                .first()
-            )
+            candidates = [
+                e for e in obj.enrollments.all()
+                if e.class_level_id is not None and e.school_year.is_active
+            ]
+            obj._cached_enrollment = candidates[0] if candidates else None
         return obj._cached_enrollment
+
+    def _get_last_enrollment(self, obj):
+        # Uses the prefetch cache — must not call .filter() on the related manager.
+        if not hasattr(obj, "_cached_last_enrollment"):
+            candidates = sorted(
+                [e for e in obj.enrollments.all() if e.class_level_id is not None],
+                key=lambda e: (e.school_year.name, e.created_at),
+                reverse=True,
+            )
+            obj._cached_last_enrollment = candidates[0] if candidates else None
+        return obj._cached_last_enrollment
 
     def get_current_class_level(self, obj):
         enrollment = self._get_current_enrollment(obj)
@@ -50,7 +63,22 @@ class StudentSerializer(serializers.ModelSerializer):
         return enrollment.teacher_name if enrollment else None
 
     def get_last_event_date(self, obj):
-        return obj.events.order_by("-date").values_list("date", flat=True).first()
+        dates = [e.date for e in obj.events.all()]
+        return max(dates) if dates else None
+
+    def get_is_graduated(self, obj):
+        if self._get_current_enrollment(obj):
+            return False
+        last = self._get_last_enrollment(obj)
+        return last is not None and last.class_level is not None and last.class_level.name == "ח"
+
+    def get_graduation_year(self, obj):
+        if self._get_current_enrollment(obj):
+            return None
+        last = self._get_last_enrollment(obj)
+        if last and last.class_level and last.class_level.name == "ח":
+            return last.school_year.name
+        return None
 
     def validate_full_name(self, value):
         validate_name(value)
@@ -99,6 +127,8 @@ class StudentSerializer(serializers.ModelSerializer):
             "current_class_number",
             "current_teacher",
             "last_event_date",
+            "is_graduated",
+            "graduation_year",
             "school_year",
             "class_level",
             "class_number",
@@ -110,6 +140,8 @@ class StudentSerializer(serializers.ModelSerializer):
             "current_class_number",
             "current_teacher",
             "last_event_date",
+            "is_graduated",
+            "graduation_year",
         ]
 
 

@@ -38,7 +38,9 @@ class StudentEnrollmentService:
         if not active_year:
             return []
         groups = (
-            StudentEnrollment.objects.filter(school=school, school_year=active_year)
+            StudentEnrollment.objects.filter(
+                school=school, school_year=active_year, student__deleted_at__isnull=True
+            )
             .values(
                 "class_level",
                 "class_level__name",
@@ -82,7 +84,7 @@ class StudentEnrollmentService:
         next_level_map = {levels[i].id: levels[i + 1] for i in range(len(levels) - 1)}
 
         enrollments = StudentEnrollment.objects.filter(
-            school=school, school_year=from_year
+            school=school, school_year=from_year, student__deleted_at__isnull=True
         ).select_related("class_level", "student")
 
         already_enrolled = set(

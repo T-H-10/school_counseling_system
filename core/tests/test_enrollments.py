@@ -449,3 +449,155 @@ def test_enrollment_list_ordered_newest_first(client_a, school_a, active_year, c
     names = [r["school_year_name"] for r in resp.data["results"]]
     assert names[0] == active_year.name   # "2025-2026" comes first (newest)
     assert names[1] == older_year.name    # "2023-2024" comes second
+
+
+# --- Bug fixes: cross-year filter isolation --------------------------------
+
+
+@pytest.mark.django_db
+def test_class_level_filter_scoped_to_active_year(client_a, school_a, active_year, class_levels):
+    """A student promoted out of ז must not appear when filtering ז in the active year."""
+    past_year = factories.SchoolYearFactory(name="2024-2025")
+    student = factories.StudentFactory(school=school_a)
+    factories.StudentEnrollmentFactory(
+        student=student, school_year=past_year, class_level=class_levels[6],  # ז
+        class_number=1, school=school_a,
+    )
+    factories.StudentEnrollmentFactory(
+        student=student, school_year=active_year, class_level=class_levels[7],  # ח
+        class_number=1, school=school_a,
+    )
+
+    resp = client_a.get(f"/students/?class_level={class_levels[6].id}&class_number=1")
+    assert resp.status_code == 200
+    ids = [s["id"] for s in resp.data["results"]]
+    assert student.id not in ids
+
+
+@pytest.mark.django_db
+def test_class_number_filter_scoped_to_active_year(client_a, school_a, active_year, class_levels):
+    """Filtering by class_number returns only students in that number in the active year."""
+    past_year = factories.SchoolYearFactory(name="2024-2025")
+    student = factories.StudentFactory(school=school_a)
+    factories.StudentEnrollmentFactory(
+        student=student, school_year=past_year, class_level=class_levels[0],
+        class_number=2, school=school_a,
+    )
+    factories.StudentEnrollmentFactory(
+        student=student, school_year=active_year, class_level=class_levels[0],
+        class_number=1, school=school_a,
+    )
+
+    resp = client_a.get("/students/?class_number=2")
+    assert resp.status_code == 200
+    ids = [s["id"] for s in resp.data["results"]]
+    assert student.id not in ids
+
+
+@pytest.mark.django_db
+def test_class_filter_no_active_year_returns_empty(client_a, school_a, class_levels):
+    """When no active year exists, class_level filter must return an empty list."""
+    factories.StudentFactory(school=school_a)  # unenrolled student, no active year
+
+    resp = client_a.get(f"/students/?class_level={class_levels[0].id}")
+    assert resp.status_code == 200
+    assert resp.data["count"] == 0
+
+
+# --- Bug fixes: soft-deleted students excluded from counts and promotion ----
+
+
+@pytest.mark.django_db
+def test_get_classes_excludes_soft_deleted_students(client_a, school_a, active_year, class_levels):
+    """classes/ student_count must not include students who were soft-deleted."""
+    _enroll(school_a, active_year, class_levels[0], class_number=1)
+    deleted_enrollment = _enroll(school_a, active_year, class_levels[0], class_number=1)
+    deleted_enrollment.student.delete()  # soft-delete the student; enrollment row stays
+
+    resp = client_a.get("/enrollments/classes/")
+    assert resp.status_code == 200
+    assert len(resp.data) == 1
+    assert resp.data[0]["student_count"] == 1
+
+
+@pytest.mark.django_db
+def test_promote_skips_soft_deleted_students(client_a, school_a, active_year, class_levels):
+    """Soft-deleted students must not be promoted to the next year."""
+    alive_enrollment = _enroll(school_a, active_year, class_levels[0])
+    deleted_enrollment = _enroll(school_a, active_year, class_levels[0])
+    deleted_enrollment.student.delete()
+
+    next_year = factories.SchoolYearFactory(name="2026-2027")
+    resp = client_a.post(
+        "/enrollments/promote/",
+        {"from_year": active_year.id, "to_year": next_year.id},
+        format="json",
+    )
+    assert resp.status_code == 200
+    assert resp.data["created"] == 1
+    assert StudentEnrollment.objects.filter(
+        school_year=next_year, student=alive_enrollment.student
+    ).exists()
+    assert not StudentEnrollment.objects.filter(
+        school_year=next_year, student_id=deleted_enrollment.student_id
+    ).exists()
+
+
+# --- is_graduated field ----------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_is_graduated_true_for_last_grade_student(client_a, school_a, active_year, class_levels):
+    """A student whose last enrollment was grade ח with no active-year enrollment is graduated."""
+    past_year = factories.SchoolYearFactory(name="2024-2025")
+    student = factories.StudentFactory(school=school_a)
+    factories.StudentEnrollmentFactory(
+        student=student, school_year=past_year, class_level=class_levels[-1],  # ח
+        class_number=1, school=school_a,
+    )
+
+    resp = client_a.get(f"/students/{student.id}/")
+    assert resp.status_code == 200
+    assert resp.data["is_graduated"] is True
+
+
+@pytest.mark.django_db
+def test_is_graduated_false_for_currently_enrolled_student(
+    client_a, school_a, active_year, class_levels
+):
+    """A student enrolled in the active year is not graduated."""
+    enrollment = _enroll(school_a, active_year, class_levels[-1])
+
+    resp = client_a.get(f"/students/{enrollment.student_id}/")
+    assert resp.status_code == 200
+    assert resp.data["is_graduated"] is False
+
+
+@pytest.mark.django_db
+def test_is_graduated_false_for_transferred_student(client_a, school_a, active_year, class_levels):
+    """A student with no active enrollment whose last grade is not ח is not graduated."""
+    past_year = factories.SchoolYearFactory(name="2024-2025")
+    student = factories.StudentFactory(school=school_a)
+    factories.StudentEnrollmentFactory(
+        student=student, school_year=past_year, class_level=class_levels[5],  # ו
+        class_number=1, school=school_a,
+    )
+
+    resp = client_a.get(f"/students/{student.id}/")
+    assert resp.status_code == 200
+    assert resp.data["is_graduated"] is False
+
+
+@pytest.mark.django_db
+def test_graduation_year_returned_for_last_grade_student(client_a, school_a, active_year, class_levels):
+    """graduation_year returns the school year name for a student who finished grade ח."""
+    past_year = factories.SchoolYearFactory(name="2024-2025")
+    student = factories.StudentFactory(school=school_a)
+    factories.StudentEnrollmentFactory(
+        student=student, school_year=past_year, class_level=class_levels[-1],  # ח
+        class_number=1, school=school_a,
+    )
+
+    resp = client_a.get(f"/students/{student.id}/")
+    assert resp.status_code == 200
+    assert resp.data["graduation_year"] == "2024-2025"

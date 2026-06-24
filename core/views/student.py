@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
@@ -6,7 +7,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 
 from core.filters import StudentFilter
-from core.models import Student
+from core.models import Student, StudentEnrollment
 from core.permissions import IsCounselor
 from core.serializers import StudentSerializer
 from core.services.student_import_export_service import (
@@ -32,7 +33,18 @@ class StudentViewSet(BaseSchoolViewSet):
     ordering = ["full_name"]
 
     def get_queryset(self):
-        return super().get_queryset().distinct()
+        return (
+            super()
+            .get_queryset()
+            .prefetch_related(
+                Prefetch(
+                    "enrollments",
+                    queryset=StudentEnrollment.objects.select_related("class_level", "school_year"),
+                ),
+                "events",
+            )
+            .distinct()
+        )
 
     @action(detail=True, methods=["get"])
     def timeline(self, request, pk=None):
