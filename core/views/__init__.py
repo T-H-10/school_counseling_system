@@ -16,6 +16,7 @@ from .dashboard import DashboardView
 from .document import DocumentViewSet
 from .enrollment import StudentEnrollmentViewSet
 from .lesson import LessonClassAssignmentViewSet, LessonPlanViewSet
+from .search import GlobalSearchView
 from .student import StudentViewSet
 from .student_event import StudentEventViewSet
 from .support import SupportRequestViewSet
@@ -35,4 +36,5 @@ __all__ = [
     "DashboardView",
     "DocumentViewSet",
     "SupportRequestViewSet",
+    "GlobalSearchView",
 ]
