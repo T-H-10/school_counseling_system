@@ -151,3 +151,83 @@ def test_report_cross_school_denied(counselor_a, counselor_b):
 
     with pytest.raises(PermissionError):
         StudentReportService.get_report(counselor_b.user, student)
+
+
+# --- endpoint ---------------------------------------------------------------
+
+
+@pytest.mark.django_db
+def test_report_endpoint_returns_full_shape(client_a, counselor_a, active_year, class_levels):
+    student = factories.StudentFactory(school=counselor_a.school)
+    factories.StudentEnrollmentFactory(
+        student=student, school_year=active_year, class_level=class_levels[0]
+    )
+    factories.StudentEventFactory(student=student, counselor=counselor_a)
+
+    resp = client_a.get(f"/students/{student.id}/report/")
+
+    assert resp.status_code == 200
+    assert resp.data["student"]["full_name"] == student.full_name
+    assert resp.data["school"]["name"] == counselor_a.school.name
+    assert resp.data["counselor"]["full_name"] == counselor_a.full_name
+    assert resp.data["year_filter"] is None
+    assert len(resp.data["enrollments"]) == 1
+    assert len(resp.data["events"]) == 1
+    assert resp.data["documents"] == []
+
+
+@pytest.mark.django_db
+def test_report_endpoint_year_filter(client_a, counselor_a, active_year, class_levels):
+    student = factories.StudentFactory(school=counselor_a.school)
+    factories.StudentEnrollmentFactory(
+        student=student, school_year=active_year, class_level=class_levels[0]
+    )
+    in_range = factories.StudentEventFactory(
+        student=student, counselor=counselor_a, date=_aware(2025, 10, 1)
+    )
+    factories.StudentEventFactory(
+        student=student, counselor=counselor_a, date=_aware(2025, 5, 1)
+    )
+
+    resp = client_a.get(f"/students/{student.id}/report/", {"year": active_year.id})
+
+    assert resp.status_code == 200
+    assert resp.data["year_filter"]["name"] == active_year.name
+    assert [e["id"] for e in resp.data["events"]] == [in_range.id]
+
+
+@pytest.mark.django_db
+def test_report_endpoint_invalid_year_returns_400(client_a, counselor_a):
+    student = factories.StudentFactory(school=counselor_a.school)
+
+    resp = client_a.get(f"/students/{student.id}/report/", {"year": "abc"})
+    assert resp.status_code == 400
+    assert "year" in resp.data
+
+    resp = client_a.get(f"/students/{student.id}/report/", {"year": 999999})
+    assert resp.status_code == 400
+    assert "year" in resp.data
+
+
+@pytest.mark.django_db
+def test_report_endpoint_cross_school_404(client_b, counselor_a):
+    student = factories.StudentFactory(school=counselor_a.school)
+
+    resp = client_b.get(f"/students/{student.id}/report/")
+    assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_report_endpoint_requires_auth(api, counselor_a):
+    student = factories.StudentFactory(school=counselor_a.school)
+
+    resp = api.get(f"/students/{student.id}/report/")
+    assert resp.status_code == 401
+
+
+@pytest.mark.django_db
+def test_report_endpoint_admin_without_counselor_403(admin_client, counselor_a):
+    student = factories.StudentFactory(school=counselor_a.school)
+
+    resp = admin_client.get(f"/students/{student.id}/report/")
+    assert resp.status_code == 403

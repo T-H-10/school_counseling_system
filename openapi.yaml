@@ -292,6 +292,281 @@ paths:
       tags:
       - dashboard
     parameters: []
+  /documents/:
+    get:
+      operationId: documents_list
+      description: ''
+      parameters:
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Document'
+      consumes:
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      tags:
+      - documents
+    post:
+      operationId: documents_create
+      description: ''
+      parameters:
+      - name: category
+        in: formData
+        required: true
+        type: string
+        enum:
+        - general
+        - class
+        - student
+      - name: title
+        in: formData
+        required: true
+        type: string
+        maxLength: 255
+        minLength: 1
+      - name: description
+        in: formData
+        required: false
+        type: string
+        x-nullable: true
+      - name: file
+        in: formData
+        required: true
+        type: file
+      - name: class_level
+        in: formData
+        required: false
+        type: integer
+        x-nullable: true
+      - name: class_number
+        in: formData
+        required: false
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+        x-nullable: true
+      - name: student
+        in: formData
+        required: false
+        type: integer
+        x-nullable: true
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/Document'
+      consumes:
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      tags:
+      - documents
+    parameters: []
+  /documents/{id}/:
+    get:
+      operationId: documents_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Document'
+      consumes:
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      tags:
+      - documents
+    put:
+      operationId: documents_update
+      description: ''
+      parameters:
+      - name: category
+        in: formData
+        required: true
+        type: string
+        enum:
+        - general
+        - class
+        - student
+      - name: title
+        in: formData
+        required: true
+        type: string
+        maxLength: 255
+        minLength: 1
+      - name: description
+        in: formData
+        required: false
+        type: string
+        x-nullable: true
+      - name: file
+        in: formData
+        required: true
+        type: file
+      - name: class_level
+        in: formData
+        required: false
+        type: integer
+        x-nullable: true
+      - name: class_number
+        in: formData
+        required: false
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+        x-nullable: true
+      - name: student
+        in: formData
+        required: false
+        type: integer
+        x-nullable: true
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Document'
+      consumes:
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      tags:
+      - documents
+    patch:
+      operationId: documents_partial_update
+      description: ''
+      parameters:
+      - name: category
+        in: formData
+        required: true
+        type: string
+        enum:
+        - general
+        - class
+        - student
+      - name: title
+        in: formData
+        required: true
+        type: string
+        maxLength: 255
+        minLength: 1
+      - name: description
+        in: formData
+        required: false
+        type: string
+        x-nullable: true
+      - name: file
+        in: formData
+        required: true
+        type: file
+      - name: class_level
+        in: formData
+        required: false
+        type: integer
+        x-nullable: true
+      - name: class_number
+        in: formData
+        required: false
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+        x-nullable: true
+      - name: student
+        in: formData
+        required: false
+        type: integer
+        x-nullable: true
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Document'
+      consumes:
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      tags:
+      - documents
+    delete:
+      operationId: documents_delete
+      description: ''
+      parameters: []
+      responses:
+        '204':
+          description: ''
+      consumes:
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      tags:
+      - documents
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /documents/{id}/content/:
+    get:
+      operationId: documents_content
+      description: Serve the file inline (authenticated, school-scoped). Used for
+        "ˆÙÈÈ‰".
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Document'
+      consumes:
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      tags:
+      - documents
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /documents/{id}/download/:
+    get:
+      operationId: documents_download
+      description: Force-download the file (authenticated, school-scoped). Used for
+        "‰Â¯„‰".
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Document'
+      consumes:
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      tags:
+      - documents
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
   /enrollments/:
     get:
       operationId: enrollments_list
@@ -1014,6 +1289,17 @@ paths:
       description: A unique integer value identifying this school.
       required: true
       type: integer
+  /search/:
+    get:
+      operationId: search_list
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - search
+    parameters: []
   /studentEvents/:
     get:
       operationId: studentEvents_list
@@ -1131,12 +1417,17 @@ paths:
       parameters:
       - name: class_level
         in: query
-        description: ◊©◊õ◊ë◊î
+        description: ˘Î·‰
         required: false
         type: string
       - name: class_number
         in: query
-        description: ◊û◊°◊§◊® ◊õ◊ô◊™◊î
+        description: ÓÒÙ¯ ÎÈ˙‰
+        required: false
+        type: string
+      - name: inactive
+        in: query
+        description: Ï‡ ÙÚÈÏ
         required: false
         type: string
       - name: search
@@ -1203,12 +1494,17 @@ paths:
       parameters:
       - name: class_level
         in: query
-        description: ◊©◊õ◊ë◊î
+        description: ˘Î·‰
         required: false
         type: string
       - name: class_number
         in: query
-        description: ◊û◊°◊§◊® ◊õ◊ô◊™◊î
+        description: ÓÒÙ¯ ÎÈ˙‰
+        required: false
+        type: string
+      - name: inactive
+        in: query
+        description: Ï‡ ÙÚÈÏ
         required: false
         type: string
       - name: search
@@ -1299,6 +1595,21 @@ paths:
         type: string
         maxLength: 20
         x-nullable: true
+      - name: parents_status
+        in: formData
+        required: false
+        type: string
+        enum:
+        - married
+        - divorced
+        - separated
+        - single_parent
+        - widowed
+        - other
+      - name: notes
+        in: formData
+        required: false
+        type: string
       - name: school_year
         in: formData
         required: false
@@ -1380,6 +1691,23 @@ paths:
       in: path
       required: true
       type: string
+  /students/{id}/report/:
+    get:
+      operationId: students_report
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/Student'
+      tags:
+      - students
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
   /students/{id}/timeline/:
     get:
       operationId: students_timeline
@@ -1397,43 +1725,156 @@ paths:
       in: path
       required: true
       type: string
-  /token/:
+  /support/:
+    get:
+      operationId: support_list
+      description: ''
+      parameters:
+      - name: search
+        in: query
+        description: A search term.
+        required: false
+        type: string
+      - name: ordering
+        in: query
+        description: Which field to use when ordering the results.
+        required: false
+        type: string
+      - name: page
+        in: query
+        description: A page number within the paginated result set.
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: ''
+          schema:
+            required:
+            - count
+            - results
+            type: object
+            properties:
+              count:
+                type: integer
+              next:
+                type: string
+                format: uri
+                x-nullable: true
+              previous:
+                type: string
+                format: uri
+                x-nullable: true
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/SupportRequest'
+      tags:
+      - support
     post:
-      operationId: token_create
-      description: |-
-        Takes a set of user credentials and returns an access and refresh JSON web
-        token pair to prove the authentication of those credentials.
+      operationId: support_create
+      description: ''
       parameters:
       - name: data
         in: body
         required: true
         schema:
-          $ref: '#/definitions/TokenObtainPair'
+          $ref: '#/definitions/SupportRequest'
       responses:
         '201':
           description: ''
           schema:
-            $ref: '#/definitions/TokenObtainPair'
+            $ref: '#/definitions/SupportRequest'
+      tags:
+      - support
+    parameters: []
+  /support/{id}/:
+    get:
+      operationId: support_read
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/SupportRequest'
+      tags:
+      - support
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /support/{id}/resolve/:
+    post:
+      operationId: support_resolve
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/SupportRequest'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/SupportRequest'
+      tags:
+      - support
+    parameters:
+    - name: id
+      in: path
+      required: true
+      type: string
+  /token/:
+    post:
+      operationId: token_create
+      description: ''
+      parameters:
+      - name: data
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/CustomTokenObtainPair'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/CustomTokenObtainPair'
+      tags:
+      - token
+    parameters: []
+  /token/logout/:
+    post:
+      operationId: token_logout_create
+      summary: Blacklist the refresh token and tell the browser to drop the cookie.
+      description: |-
+        No authentication required: the access token may already be expired when
+        the user logs out, and the refresh token itself is the credential being
+        revoked. A cross-site POST can't reach the victim's cookie (SameSite=Lax),
+        so the worst an attacker can do here is log themselves out.
+      parameters: []
+      responses:
+        '201':
+          description: ''
       tags:
       - token
     parameters: []
   /token/refresh/:
     post:
       operationId: token_refresh_create
-      description: |-
-        Takes a refresh type JSON web token and returns an access type JSON web
-        token if the refresh token is valid.
+      description: ''
       parameters:
       - name: data
         in: body
         required: true
         schema:
-          $ref: '#/definitions/TokenRefresh'
+          $ref: '#/definitions/CookieTokenRefresh'
       responses:
         '201':
           description: ''
           schema:
-            $ref: '#/definitions/TokenRefresh'
+            $ref: '#/definitions/CookieTokenRefresh'
       tags:
       - token
     parameters: []
@@ -1451,14 +1892,14 @@ definitions:
         title: Name
         type: string
         enum:
-        - ◊ê
-        - ◊ë
-        - ◊í
-        - ◊ì
-        - ◊î
-        - ◊ï
-        - ◊ñ
-        - ◊ó
+        - ‡
+        - ·
+        - ‚
+        - „
+        - ‰
+        - Â
+        - Ê
+        - Á
   Counselor:
     required:
     - username
@@ -1492,6 +1933,89 @@ definitions:
         type: string
         format: date-time
         readOnly: true
+  Document:
+    required:
+    - category
+    - title
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      school:
+        title: School
+        type: integer
+        readOnly: true
+      counselor:
+        title: Counselor
+        type: integer
+        readOnly: true
+      category:
+        title: Category
+        type: string
+        enum:
+        - general
+        - class
+        - student
+      title:
+        title: Title
+        type: string
+        maxLength: 255
+        minLength: 1
+      description:
+        title: Description
+        type: string
+        x-nullable: true
+      file:
+        title: File
+        type: string
+        readOnly: true
+        format: uri
+      file_name:
+        title: File name
+        type: string
+        readOnly: true
+      file_size:
+        title: File size
+        type: string
+        readOnly: true
+      class_level:
+        title: Class level
+        type: integer
+        x-nullable: true
+      class_level_name:
+        title: Class level name
+        type: string
+        readOnly: true
+      class_number:
+        title: Class number
+        type: integer
+        maximum: 9223372036854775807
+        minimum: 0
+        x-nullable: true
+      student:
+        title: Student
+        type: integer
+        x-nullable: true
+      student_name:
+        title: Student name
+        type: string
+        readOnly: true
+      student_id_number:
+        title: Student id number
+        type: string
+        readOnly: true
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+      updated_at:
+        title: Updated at
+        type: string
+        format: date-time
+        readOnly: true
   StudentEnrollment:
     required:
     - student
@@ -1509,9 +2033,20 @@ definitions:
       school_year:
         title: School year
         type: integer
+      school_year_name:
+        title: School year name
+        type: string
+        readOnly: true
+        minLength: 1
       class_level:
         title: Class level
         type: integer
+        x-nullable: true
+      class_level_name:
+        title: Class level name
+        type: string
+        readOnly: true
+        minLength: 1
         x-nullable: true
       class_number:
         title: Class number
@@ -1621,7 +2156,6 @@ definitions:
         title: Presentation url
         type: string
         format: uri
-        maxLength: 200
         x-nullable: true
       assignments:
         type: array
@@ -1793,6 +2327,19 @@ definitions:
         type: string
         maxLength: 20
         x-nullable: true
+      parents_status:
+        title: Parents status
+        type: string
+        enum:
+        - married
+        - divorced
+        - separated
+        - single_parent
+        - widowed
+        - other
+      notes:
+        title: Notes
+        type: string
       school:
         title: School
         type: integer
@@ -1818,6 +2365,14 @@ definitions:
         title: Last event date
         type: string
         readOnly: true
+      is_graduated:
+        title: Is graduated
+        type: string
+        readOnly: true
+      graduation_year:
+        title: Graduation year
+        type: string
+        readOnly: true
       school_year:
         title: School year
         type: integer
@@ -1828,7 +2383,46 @@ definitions:
         title: Class number
         type: integer
         minimum: 1
-  TokenObtainPair:
+  SupportRequest:
+    required:
+    - subject
+    - message
+    type: object
+    properties:
+      id:
+        title: ID
+        type: integer
+        readOnly: true
+      subject:
+        title: Subject
+        type: string
+        maxLength: 200
+        minLength: 1
+      message:
+        title: Message
+        type: string
+        minLength: 1
+      status:
+        title: Status
+        type: string
+        enum:
+        - open
+        - resolved
+        readOnly: true
+      counselor_name:
+        title: Counselor name
+        type: string
+        readOnly: true
+      school_name:
+        title: School name
+        type: string
+        readOnly: true
+      created_at:
+        title: Created at
+        type: string
+        format: date-time
+        readOnly: true
+  CustomTokenObtainPair:
     required:
     - username
     - password
@@ -1842,15 +2436,12 @@ definitions:
         title: Password
         type: string
         minLength: 1
-  TokenRefresh:
-    required:
-    - refresh
+  CookieTokenRefresh:
     type: object
     properties:
       refresh:
         title: Refresh
         type: string
-        minLength: 1
       access:
         title: Access
         type: string
