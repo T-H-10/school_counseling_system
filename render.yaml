@@ -1,0 +1,56 @@
+# Render Blueprint — backend web service + frontend static site.
+# The database is external (Neon PostgreSQL), so there is no `databases:` block.
+services:
+  - type: web
+    name: school-counseling-backend
+    runtime: python
+    plan: free
+    buildCommand: chmod +x build.sh && ./build.sh
+    preDeployCommand: python manage.py migrate --noinput
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2
+    envVars:
+      - key: SECRET_KEY # exact name the code reads — NOT DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS # exact host only — never a .onrender.com wildcard
+        value: "school-counseling-backend.onrender.com"
+      - key: REFRESH_COOKIE_PATH # cookie must match the proxied URL the browser sees
+        value: "/api/token"
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false # https://school-counseling-frontend.onrender.com
+      - key: DATABASE_URL
+        sync: false # Neon connection string, incl. ?sslmode=require
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+
+  - type: web
+    name: school-counseling-frontend
+    runtime: static
+    repo: https://github.com/T-H-10/school_counseling_client # separate repo
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    routes:
+      # Order matters: the API proxy must come before the SPA catch-all,
+      # otherwise index.html swallows every /api request.
+      - type: rewrite
+        source: /api/*
+        destination: https://school-counseling-backend.onrender.com/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: /api

@@ -2,8 +2,9 @@
 
 The access token is returned in the response body (kept in frontend memory
 only); the refresh token never reaches JavaScript. The cookie is scoped to
-``/token`` so the browser sends it only to the auth endpoints (refresh,
-logout) and it stays off every other API request.
+the auth path (``settings.REFRESH_COOKIE_PATH`` — ``/token`` in dev,
+``/api/token`` behind the production proxy) so the browser sends it only to
+the auth endpoints (refresh, logout) and it stays off every other request.
 """
 
 from django.conf import settings
@@ -18,7 +19,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from core.serializers.admin import CookieTokenRefreshSerializer, CustomTokenObtainPairSerializer
 
 REFRESH_COOKIE = "refresh_token"
-REFRESH_COOKIE_PATH = "/token"
 
 
 def _set_refresh_cookie(response, token):
@@ -29,7 +29,7 @@ def _set_refresh_cookie(response, token):
         httponly=True,
         secure=not settings.DEBUG,
         samesite="Lax",
-        path=REFRESH_COOKIE_PATH,
+        path=settings.REFRESH_COOKIE_PATH,
     )
 
 
@@ -80,5 +80,5 @@ class LogoutView(APIView):
             except TokenError:
                 pass  # already expired/blacklisted — nothing left to revoke
         response = Response({"detail": "התנתקת בהצלחה"})
-        response.delete_cookie(REFRESH_COOKIE, path=REFRESH_COOKIE_PATH)
+        response.delete_cookie(REFRESH_COOKIE, path=settings.REFRESH_COOKIE_PATH)
         return response

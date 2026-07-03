@@ -5,9 +5,10 @@ cookie scoped to /token — and rotation/logout must blacklist server-side.
 """
 
 import pytest
+from django.conf import settings
 
 from core.tests.factories import DEFAULT_PASSWORD
-from core.views.auth import REFRESH_COOKIE, REFRESH_COOKIE_PATH
+from core.views.auth import REFRESH_COOKIE
 
 pytestmark = pytest.mark.django_db
 
@@ -26,7 +27,7 @@ def test_login_sets_httponly_cookie_and_omits_refresh_from_body(api, counselor_a
     cookie = resp.cookies[REFRESH_COOKIE]
     assert cookie["httponly"]
     assert cookie["samesite"] == "Lax"
-    assert cookie["path"] == REFRESH_COOKIE_PATH
+    assert cookie["path"] == settings.REFRESH_COOKIE_PATH
     assert cookie.value  # actual token present
 
 

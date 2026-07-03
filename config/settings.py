@@ -14,6 +14,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import dj_database_url
+
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
@@ -57,6 +59,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -115,6 +118,11 @@ REST_FRAMEWORK = {
     ],
 }
 
+# Path the httpOnly refresh cookie is scoped to. In production the frontend
+# static site proxies /api/* to the backend, so the browser sees the auth
+# endpoints under /api/token — the cookie path must match that proxied URL.
+REFRESH_COOKIE_PATH = os.environ.get("REFRESH_COOKIE_PATH", "/token")
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
@@ -140,11 +148,14 @@ SWAGGER_SETTINGS = {
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# Production (Render/Neon) sets DATABASE_URL (keep ?sslmode=require);
+# dev and pytest fall back to local SQLite when it is unset.
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
 
 
@@ -183,6 +194,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# WhiteNoise serves the collected static files (admin CSS/JS) straight from
+# the app in production; media files use FileSystemStorage in dev and are
+# switched to R2 below when R2_ACCOUNT_ID is set.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Media files (user-uploaded documents)
 MEDIA_URL = "/media/"
@@ -192,24 +216,20 @@ MEDIA_ROOT = BASE_DIR / "media"
 DOCUMENT_MAX_UPLOAD_SIZE = int(os.environ.get("DOCUMENT_MAX_UPLOAD_SIZE", str(10 * 1024 * 1024)))
 
 # Cloudflare R2 storage (production). Activated when R2_ACCOUNT_ID env var is set.
-# Local FileSystemStorage is used by default (dev).
+# PRIVATE bucket — files are only ever streamed through the permission-checked
+# document endpoints, never served by direct URL.
 _R2_ACCOUNT_ID = os.environ.get("R2_ACCOUNT_ID", "")
 if _R2_ACCOUNT_ID:
     INSTALLED_APPS += ["storages"]
-    STORAGES = {
-        "default": {
-            "BACKEND": "storages.backends.s3.S3Storage",
-            "OPTIONS": {
-                "endpoint_url": f"https://{_R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
-                "bucket_name": os.environ.get("R2_BUCKET_NAME", ""),
-                "access_key": os.environ.get("R2_ACCESS_KEY_ID", ""),
-                "secret_key": os.environ.get("R2_SECRET_ACCESS_KEY", ""),
-                "region_name": "auto",
-                "default_acl": None,
-            },
-        },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    STORAGES["default"] = {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "endpoint_url": f"https://{_R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
+            "bucket_name": os.environ.get("R2_BUCKET_NAME", ""),
+            "access_key": os.environ.get("R2_ACCESS_KEY_ID", ""),
+            "secret_key": os.environ.get("R2_SECRET_ACCESS_KEY", ""),
+            "region_name": "auto",
+            "default_acl": None,
         },
     }
 

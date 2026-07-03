@@ -1,0 +1,47 @@
+name: Nightly database backup
+
+# Nightly pg_dump of the Neon database into a second, PRIVATE R2 bucket.
+# This is the real backup — Neon's free-tier restore window is only hours.
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   DATABASE_URL                — Neon connection string (with ?sslmode=require)
+#   R2_ACCOUNT_ID               — Cloudflare account id
+#   R2_BACKUP_BUCKET            — name of the backups bucket (NOT the media bucket)
+#   R2_BACKUP_ACCESS_KEY_ID     — R2 API token scoped to the backups bucket only
+#   R2_BACKUP_SECRET_ACCESS_KEY
+
+on:
+  schedule:
+    - cron: "30 0 * * *" # 00:30 UTC ≈ 03:30 Israel time
+  workflow_dispatch: {} # allow manual runs to test the pipeline
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install PostgreSQL 17 client (pg_dump must match Neon's server major)
+        run: |
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y --no-install-recommends postgresql-client-17
+
+      - name: Dump database
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          pg_dump "$DATABASE_URL" --format=custom --no-owner --no-privileges \
+            --file="backup-$(date -u +%Y-%m-%dT%H%M).dump"
+
+      - name: Upload dump to the private R2 backups bucket
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_BACKUP_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_BACKUP_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          # R2 rejects the newer default S3 integrity checksums — only send when required.
+          AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+          AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+        run: |
+          aws s3 cp backup-*.dump \
+            "s3://${{ secrets.R2_BACKUP_BUCKET }}/" \
+            --endpoint-url "https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com"
