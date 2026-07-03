@@ -3,8 +3,12 @@ from core.models import StudentEvent
 
 class StudentTimelineService:
     @staticmethod
-    def get_timeline(student):
+    def get_timeline(student, start=None, end=None):
         events = StudentEvent.objects.filter(student=student)
+        if start:
+            events = events.filter(date__gte=start)
+        if end:
+            events = events.filter(date__lte=end)
 
         timeline = [
             {
@@ -16,6 +20,7 @@ class StudentTimelineService:
                 "agenda": e.agenda,
                 "description": e.description,
                 "event_type": e.event_type,
+                "status": e.status,
             }
             for e in events
         ]

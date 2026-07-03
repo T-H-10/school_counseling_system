@@ -2,18 +2,20 @@ from django.db.models import Prefetch
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 
 from core.filters import StudentFilter
-from core.models import Student, StudentEnrollment
+from core.models import SchoolYear, Student, StudentEnrollment
 from core.permissions import IsCounselor
 from core.serializers import StudentSerializer
 from core.services.student_import_export_service import (
     ExcelImportError,
     StudentImportExportService,
 )
+from core.services.student_report_service import StudentReportService
 from core.services.student_service import StudentService
 from core.services.student_timeline_service import StudentTimelineService
 
@@ -51,6 +53,21 @@ class StudentViewSet(BaseSchoolViewSet):
         student = self.get_object()
         data = StudentTimelineService.get_timeline(student)
         return Response({"student_id": student.id, "timeline": data})
+
+    @action(detail=True, methods=["get"])
+    def report(self, request, pk=None):
+        student = self.get_object()
+
+        school_year = None
+        year_id = request.query_params.get("year")
+        if year_id:
+            try:
+                school_year = SchoolYear.objects.get(pk=year_id)
+            except (SchoolYear.DoesNotExist, ValueError):
+                raise ValidationError({"year": ["שנת לימודים לא נמצאה"]})
+
+        data = StudentReportService.get_report(request.user, student, school_year=school_year)
+        return Response(data)
 
     @action(
         detail=False,
