@@ -134,9 +134,21 @@ def test_year_date_range_boundaries(db):
     assert (local_end.year, local_end.month, local_end.day) == (2026, 8, 31)
 
 
+@pytest.mark.parametrize("name", ["תשפו", 'תשפ"ו', "תשפ״ו", "ה'תשפו"])
+@pytest.mark.django_db
+def test_year_date_range_hebrew_name(db, name):
+    # תשפ״ו = Hebrew year 5786 → school year Sep 2025 – Aug 2026.
+    year = factories.SchoolYearFactory(name=name)
+    start, end = StudentReportService.year_date_range(year)
+    local_start = timezone.localtime(start)
+    local_end = timezone.localtime(end)
+    assert (local_start.year, local_start.month, local_start.day) == (2025, 9, 1)
+    assert (local_end.year, local_end.month, local_end.day) == (2026, 8, 31)
+
+
 @pytest.mark.django_db
 def test_report_invalid_year_name_raises(counselor_a):
-    bad_year = factories.SchoolYearFactory(name="תשפו")
+    bad_year = factories.SchoolYearFactory(name="שנה 2025")
     student = factories.StudentFactory(school=counselor_a.school)
 
     with pytest.raises(ValidationError) as exc:
