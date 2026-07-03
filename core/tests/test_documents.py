@@ -291,6 +291,58 @@ def test_rejects_oversized_file(client_a, settings):
     assert "file" in resp.data
 
 
+def _upload(client, file):
+    return client.post(
+        "/documents/",
+        {"category": "general", "title": "בדיקת תוכן", "file": file},
+        format="multipart",
+    )
+
+
+@pytest.mark.django_db
+def test_rejects_renamed_binary_as_pdf(client_a):
+    """A Windows executable renamed to .pdf must fail the magic-byte check."""
+    fake = SimpleUploadedFile("report.pdf", b"MZ\x90\x00" + b"x" * 64, content_type="application/pdf")
+    resp = _upload(client_a, fake)
+    assert resp.status_code == 400
+    assert "file" in resp.data
+
+
+@pytest.mark.django_db
+def test_rejects_txt_with_nul_bytes(client_a):
+    binary_as_txt = SimpleUploadedFile("notes.txt", b"abc\x00def", content_type="text/plain")
+    resp = _upload(client_a, binary_as_txt)
+    assert resp.status_code == 400
+    assert "file" in resp.data
+
+
+@pytest.mark.django_db
+def test_accepts_real_txt(client_a):
+    txt = SimpleUploadedFile("notes.txt", "שלום עולם\n".encode("utf-8"), content_type="text/plain")
+    resp = _upload(client_a, txt)
+    assert resp.status_code == 201
+
+
+@pytest.mark.django_db
+def test_accepts_zip_signature_docx(client_a):
+    docx = SimpleUploadedFile(
+        "doc.docx",
+        b"PK\x03\x04" + b"x" * 64,
+        content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
+    resp = _upload(client_a, docx)
+    assert resp.status_code == 201
+
+
+@pytest.mark.django_db
+def test_rejects_pdf_bytes_named_docx(client_a):
+    """Content must match the *declared* extension, not just be a known format."""
+    mismatch = SimpleUploadedFile("doc.docx", b"%PDF-1.4 " + b"x" * 64)
+    resp = _upload(client_a, mismatch)
+    assert resp.status_code == 400
+    assert "file" in resp.data
+
+
 # ---------------------------------------------------------------------------
 # School-scoping (cross-tenant isolation)
 # ---------------------------------------------------------------------------

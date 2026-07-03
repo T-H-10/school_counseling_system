@@ -43,7 +43,9 @@ def test_token_obtain_happy_path(api, counselor_a):
     )
     assert resp.status_code == 200
     assert "access" in resp.data
-    assert "refresh" in resp.data
+    # The refresh token is delivered only as an httpOnly cookie, never in the body.
+    assert "refresh" not in resp.data
+    assert resp.cookies["refresh_token"].value
 
 
 @pytest.mark.smoke

@@ -7,3 +7,6 @@ Faker==40.23.0
 
 # OpenAPI schema snapshot validation (manage.py generate_swagger -> openapi.yaml)
 openapi-spec-validator==0.9.0
+
+# Dependency vulnerability scanning (run: pip-audit -r requirements.txt)
+pip-audit==2.10.1

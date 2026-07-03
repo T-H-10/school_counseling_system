@@ -1,3 +1,4 @@
+from django.core.validators import URLValidator
 from rest_framework import serializers
 
 from core.models import ClassLevel, LessonClassAssignment, LessonPlan, SchoolYear
@@ -30,6 +31,14 @@ class LessonClassAssignmentSerializer(serializers.ModelSerializer):
 class LessonPlanSerializer(serializers.ModelSerializer):
     school = serializers.PrimaryKeyRelatedField(read_only=True)
     counselor = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    # http/https only — the URL is rendered as a clickable link in the client.
+    presentation_url = serializers.URLField(
+        required=False,
+        allow_null=True,
+        allow_blank=True,
+        validators=[URLValidator(schemes=["http", "https"])],
+    )
 
     school_year = serializers.PrimaryKeyRelatedField(queryset=SchoolYear.objects.all())
     assignments = LessonClassAssignmentSerializer(many=True, read_only=True)

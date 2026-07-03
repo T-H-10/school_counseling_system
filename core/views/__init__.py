@@ -7,10 +7,10 @@ existing import paths (``from core.views import StudentViewSet``) keep working.
 from .admin import (
     ClassLevelViewSet,
     CounselorViewSet,
-    CustomTokenObtainPairView,
     SchoolViewSet,
     SchoolYearViewSet,
 )
+from .auth import CookieTokenObtainPairView, CookieTokenRefreshView, LogoutView
 from .base import BaseSchoolViewSet
 from .dashboard import DashboardView
 from .document import DocumentViewSet
@@ -32,7 +32,9 @@ __all__ = [
     "ClassLevelViewSet",
     "SchoolYearViewSet",
     "CounselorViewSet",
-    "CustomTokenObtainPairView",
+    "CookieTokenObtainPairView",
+    "CookieTokenRefreshView",
+    "LogoutView",
     "DashboardView",
     "DocumentViewSet",
     "SupportRequestViewSet",

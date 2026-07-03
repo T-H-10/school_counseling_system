@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 
 from core.models import ClassLevel, Counselor, School, SchoolYear
 
@@ -9,7 +10,25 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token["is_staff"] = user.is_staff
+        # The client derives its user object from the token alone (no
+        # localStorage), so the username must travel in the claims.
+        token["username"] = user.username
         return token
+
+
+class CookieTokenRefreshSerializer(TokenRefreshSerializer):
+    """Reads the refresh token from the httpOnly cookie, with body fallback."""
+
+    refresh = serializers.CharField(required=False, allow_blank=True)
+
+    def validate(self, attrs):
+        from core.views.auth import REFRESH_COOKIE
+
+        request = self.context["request"]
+        attrs["refresh"] = attrs.get("refresh") or request.COOKIES.get(REFRESH_COOKIE, "")
+        if not attrs["refresh"]:
+            raise InvalidToken("לא נמצא טוקן רענון")
+        return super().validate(attrs)
 
 
 class SchoolSerializer(serializers.ModelSerializer):

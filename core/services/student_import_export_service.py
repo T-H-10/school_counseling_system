@@ -82,6 +82,14 @@ class StudentImportExportService:
         Raises ``ExcelImportError`` for an unreadable file or missing
         required columns (the view turns these into HTTP 400).
         """
+        # Magic-byte pre-check: a real .xlsx is a ZIP container. Rejecting
+        # renamed binaries here means openpyxl only ever sees ZIP files; the
+        # except below still catches ZIPs that aren't valid Excel inside.
+        head = file.read(4)
+        file.seek(0)
+        if head != b"PK\x03\x04":
+            raise ExcelImportError("קובץ Excel לא תקין. ודא שהקובץ הוא מסוג .xlsx")
+
         try:
             wb = openpyxl.load_workbook(file, read_only=True, data_only=True)
             ws = wb.active

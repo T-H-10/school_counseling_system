@@ -16,6 +16,7 @@ are ready-made shortcuts.
 import pytest
 from core.tests import factories
 from rest_framework.test import APIClient
+from rest_framework.throttling import SimpleRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
@@ -23,6 +24,21 @@ from rest_framework_simplejwt.tokens import RefreshToken
 def _use_locmem_email(settings):
     """Never touch real SMTP during tests; capture mail in memory instead."""
     settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+
+
+@pytest.fixture(autouse=True)
+def _no_throttling(settings, monkeypatch):
+    """Disable rate limiting outside test_throttling.py.
+
+    The locmem cache is shared across the whole pytest process, and all
+    anonymous requests share one IP bucket — without this, unrelated tests
+    would start returning 429 once the suite exceeds the per-minute rates.
+    """
+    settings.REST_FRAMEWORK = {**settings.REST_FRAMEWORK, "DEFAULT_THROTTLE_CLASSES": []}
+    # THROTTLE_RATES was bound at import time, so mutate the dict in place
+    # (a settings override alone would not reach ScopedRateThrottle).
+    monkeypatch.setitem(SimpleRateThrottle.THROTTLE_RATES, "login", None)
+    monkeypatch.setitem(SimpleRateThrottle.THROTTLE_RATES, "token_refresh", None)
 
 
 @pytest.fixture(autouse=True)
