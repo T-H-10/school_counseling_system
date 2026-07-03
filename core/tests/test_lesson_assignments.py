@@ -136,13 +136,11 @@ def test_complete_other_school_assignment_404(
 
 
 @pytest.mark.django_db
-def test_assign_to_other_school_lesson_returns_500(
+def test_assign_to_other_school_lesson_returns_400(
     client_a, school_b, counselor_b, active_year, class_levels
 ):
-    """FINDING (latent bug): the assignment serializer's lesson queryset is global,
-    so a cross-school lesson passes validation and reaches the service, where
-    ensure_same_school raises a builtin PermissionError (not a DRF exception) ->
-    unhandled 500. It should be a 400/403. Documented as current behavior."""
+    """The serializer's lesson queryset is school-scoped, so a cross-school
+    lesson id fails validation like any nonexistent pk."""
     other_lesson = _lesson(school_b, counselor_b, active_year)
     payload = {
         "lesson": other_lesson.id,
@@ -150,6 +148,7 @@ def test_assign_to_other_school_lesson_returns_500(
         "class_number": 1,
     }
 
-    client_a.raise_request_exception = False
     resp = client_a.post("/lessonAssignments/", payload, format="json")
-    assert resp.status_code == 500
+    assert resp.status_code == 400
+    assert "lesson" in resp.data
+    assert not LessonClassAssignment.objects.filter(lesson=other_lesson).exists()

@@ -27,6 +27,16 @@ class LessonClassAssignmentSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["school", "created_at"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Scope the lesson choices to the requester's school so a cross-school
+        # lesson id fails validation (400) instead of reaching the service.
+        request = self.context.get("request")
+        if request and hasattr(request.user, "counselor"):
+            self.fields["lesson"].queryset = LessonPlan.objects.filter(
+                school=request.user.counselor.school
+            )
+
 
 class LessonPlanSerializer(serializers.ModelSerializer):
     school = serializers.PrimaryKeyRelatedField(read_only=True)

@@ -134,17 +134,18 @@ def test_calendar_filters_out_of_range(client_a, school_a, counselor_a, active_y
 
 
 @pytest.mark.django_db
-def test_calendar_invalid_date_param_returns_500(
+def test_calendar_invalid_date_param_returns_400(
     client_a, school_a, counselor_a, active_year, class_levels
 ):
-    """FINDING (latent bug): an unparseable start/end is parsed to None and fed
-    straight into ``planned_date__gte=None``, which Django rejects -> unhandled
-    500. It should be validated to a 400. Documented here as current behavior."""
     lesson = _lesson(school_a, counselor_a, active_year)
     factories.LessonClassAssignmentFactory(
         lesson=lesson, class_level=class_levels[0], planned_date=timezone.now()
     )
 
-    client_a.raise_request_exception = False
     resp = client_a.get("/lessons/calendar/?start=not-a-date")
-    assert resp.status_code == 500
+    assert resp.status_code == 400
+    assert "start" in resp.data
+
+    resp = client_a.get("/lessons/calendar/?end=not-a-date")
+    assert resp.status_code == 400
+    assert "end" in resp.data

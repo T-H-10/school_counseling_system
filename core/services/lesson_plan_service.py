@@ -2,6 +2,17 @@ from core.helpers import ensure_same_school
 from core.models import LessonClassAssignment, LessonPlan, StudentEvent
 from core.services.base import apply_fields
 from django.utils.dateparse import parse_datetime
+from rest_framework.exceptions import ValidationError
+
+
+def _parse_calendar_date(value, field):
+    try:
+        dt = parse_datetime(value)
+    except ValueError:
+        dt = None
+    if dt is None:
+        raise ValidationError({field: "תאריך לא תקין"})
+    return dt
 
 
 class LessonPlanService:
@@ -37,12 +48,12 @@ class LessonPlanService:
         meetings = StudentEvent.objects.filter(counselor=counselor)
 
         if start:
-            start_dt = parse_datetime(start)
+            start_dt = _parse_calendar_date(start, "start")
             assignments = assignments.filter(planned_date__gte=start_dt)
             meetings = meetings.filter(date__gte=start_dt)
 
         if end:
-            end_dt = parse_datetime(end)
+            end_dt = _parse_calendar_date(end, "end")
             assignments = assignments.filter(planned_date__lte=end_dt)
             meetings = meetings.filter(date__lte=end_dt)
 

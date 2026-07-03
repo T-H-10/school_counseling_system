@@ -20,6 +20,10 @@ def custom_exception_handler(exc, context):
     response = drf_exception_handler(exc, context)
     if response is not None:
         return response
+    if isinstance(exc, PermissionError):
+        # ensure_same_school raises a builtin PermissionError; surface it as a
+        # 403 instead of letting it fall through to a 500.
+        return Response({"error": "אין הרשאה"}, status=status.HTTP_403_FORBIDDEN)
     logger.exception("Unhandled exception in %s", context.get("view"), exc_info=exc)
     return Response(
         {"error": "אירעה שגיאה פנימית"},
