@@ -127,6 +127,35 @@ def test_admin_without_counselor_forbidden_on_counselor_endpoints(admin_client, 
     assert admin_client.get(url).status_code == 403
 
 
+# --- Hybrid user (is_staff AND has a Counselor profile) ---------------------
+#
+# Not reachable via the app today (CounselorService.create_counselor always
+# creates a plain, non-staff User; AdminUserFactory never gets a Counselor
+# row) — nothing prevents it at the DB level though, so the rule is decided
+# and locked in here rather than left undefined: hasattr(user, "counselor")
+# wins for counselor-scoped access (the resource is scoped to that school
+# regardless of is_staff), while is_staff independently still grants access
+# to admin-only resources. A hybrid user is therefore allowed on both.
+
+
+@pytest.mark.django_db
+def test_hybrid_admin_counselor_scoped_to_own_school(
+    auth_client, school_a, school_b, counselor_b, active_year, class_levels
+):
+    hybrid_counselor = factories.CounselorFactory(school=school_a, user=factories.AdminUserFactory())
+    client = auth_client(hybrid_counselor)
+
+    _make_objects_in_school(school_a, hybrid_counselor, active_year, class_levels[0])
+    _make_objects_in_school(school_b, counselor_b, active_year, class_levels[0])
+
+    resp = client.get("/students/")
+    assert resp.status_code == 200
+    assert resp.data["count"] == 1  # only school_a's row, not school_b's
+
+    resp = client.get("/schools/")
+    assert resp.status_code == 200
+
+
 # --- Cross-school (tenant) isolation ---------------------------------------
 
 

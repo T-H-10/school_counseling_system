@@ -6,6 +6,7 @@ keep working.
 """
 
 from .admin import (
+    ArchiveEntrySerializer,
     ClassLevelSerializer,
     CounselorSerializer,
     SchoolSerializer,
@@ -28,6 +29,7 @@ __all__ = [
     "ClassLevelSerializer",
     "SchoolYearSerializer",
     "CounselorSerializer",
+    "ArchiveEntrySerializer",
     "StudentSerializer",
     "StudentEnrollmentSerializer",
     "StudentEventSerializer",

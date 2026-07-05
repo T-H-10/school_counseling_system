@@ -25,6 +25,7 @@ def test_admin_token_has_is_staff_true():
     assert resp.status_code == 200
     payload = _decode_payload(resp.data["access"])
     assert payload["is_staff"] is True
+    assert payload["has_counselor"] is False
 
 
 @pytest.mark.django_db
@@ -37,3 +38,21 @@ def test_counselor_token_has_is_staff_false():
     assert resp.status_code == 200
     payload = _decode_payload(resp.data["access"])
     assert payload["is_staff"] is False
+    assert payload["has_counselor"] is True
+
+
+@pytest.mark.django_db
+def test_hybrid_token_has_is_staff_and_has_counselor_true():
+    """A user who is both is_staff and has a Counselor row (not reachable via
+    the app today, but not prevented at the DB level either) gets both claims
+    set — the client uses this to show both the admin and counselor nav."""
+    hybrid_counselor = CounselorFactory(user=AdminUserFactory())
+    client = APIClient()
+    resp = client.post(
+        "/token/",
+        {"username": hybrid_counselor.user.username, "password": DEFAULT_PASSWORD},
+    )
+    assert resp.status_code == 200
+    payload = _decode_payload(resp.data["access"])
+    assert payload["is_staff"] is True
+    assert payload["has_counselor"] is True

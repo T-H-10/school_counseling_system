@@ -13,6 +13,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # The client derives its user object from the token alone (no
         # localStorage), so the username must travel in the claims.
         token["username"] = user.username
+        # Lets the client tell a pure admin (is_staff, no Counselor row) apart
+        # from a hybrid admin+counselor user, who should see both nav areas.
+        token["has_counselor"] = hasattr(user, "counselor")
         return token
 
 
@@ -63,3 +66,20 @@ class CounselorSerializer(serializers.ModelSerializer):
         model = Counselor
         fields = ["id", "username", "password", "full_name", "school", "created_at"]
         read_only_fields = ["created_at"]
+
+
+class ArchiveEntrySerializer(serializers.Serializer):
+    """Uniform shape for a soft-deleted row of any of the 5 archivable
+    entities — ArchiveService.serialize_list/serialize_one build the dicts
+    this renders, since the 5 underlying models have no shared base
+    serializer (a ModelSerializer wouldn't work across heterogeneous models).
+    """
+
+    id = serializers.IntegerField()
+    entity_type = serializers.CharField()
+    display_label = serializers.CharField()
+    school_name = serializers.CharField()
+    deleted_at = serializers.DateTimeField()
+    created_at = serializers.DateTimeField()
+    is_restorable = serializers.BooleanField()
+    blocked_reason = serializers.CharField(allow_null=True)

@@ -1,6 +1,7 @@
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    AdminArchiveViewSet,
     ClassLevelViewSet,
     CounselorViewSet,
     DocumentViewSet,
@@ -26,5 +27,6 @@ router.register(r"schoolYears", SchoolYearViewSet, basename="schoolYear")
 router.register(r"counselors", CounselorViewSet, basename="counselor")
 router.register(r"documents", DocumentViewSet, basename="document")
 router.register(r"support", SupportRequestViewSet, basename="support")
+router.register(r"archive", AdminArchiveViewSet, basename="archive")
 
 urlpatterns = router.urls

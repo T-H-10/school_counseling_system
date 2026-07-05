@@ -5,6 +5,7 @@ existing import paths (``from core.views import StudentViewSet``) keep working.
 """
 
 from .admin import (
+    AdminArchiveViewSet,
     ClassLevelViewSet,
     CounselorViewSet,
     SchoolViewSet,
@@ -32,6 +33,7 @@ __all__ = [
     "ClassLevelViewSet",
     "SchoolYearViewSet",
     "CounselorViewSet",
+    "AdminArchiveViewSet",
     "CookieTokenObtainPairView",
     "CookieTokenRefreshView",
     "LogoutView",
