@@ -24,6 +24,10 @@ class SchoolViewSet(ModelViewSet):
     permission_classes = [IsAdminUser]
     queryset = School.objects.all()
     serializer_class = SchoolSerializer
+    # Admin school management has no pagination UI and expects the full list
+    # (a district's school count is bounded, unlike Students) — global
+    # PageNumberPagination would silently hide schools past page_size=20.
+    pagination_class = None
 
     def perform_create(self, serializer):
         school = SchoolService.create_school(serializer.validated_data)
@@ -79,6 +83,9 @@ class CounselorViewSet(ModelViewSet):
     permission_classes = [IsAdminUser]
     queryset = Counselor.objects.all()
     serializer_class = CounselorSerializer
+    # Same rationale as SchoolViewSet — the admin counselors table has no
+    # pagination UI and expects the full list.
+    pagination_class = None
 
     def perform_create(self, serializer):
         counselor = CounselorService.create_counselor(serializer.validated_data)

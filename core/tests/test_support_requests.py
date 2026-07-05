@@ -62,7 +62,9 @@ def test_admin_can_list_all_requests(admin_client, counselor_a, counselor_b, sch
     SupportRequestFactory(counselor=counselor_b, school=school_b)
     resp = admin_client.get(URL_LIST)
     assert resp.status_code == 200
-    assert resp.data["count"] == 2
+    # Unpaginated: the admin support page filters client-side via tabs over
+    # the whole list, with no pagination UI.
+    assert len(resp.data) == 2
 
 
 @pytest.mark.django_db

@@ -12,6 +12,10 @@ from core.services.support_request_service import SupportRequestService
 class SupportRequestViewSet(ModelViewSet):
     serializer_class = SupportRequestSerializer
     http_method_names = ["get", "post", "head", "options"]
+    # The admin support page filters client-side via tabs (open/resolved/all)
+    # over the whole list, with no pagination UI — global PageNumberPagination
+    # would silently hide requests past page_size=20.
+    pagination_class = None
 
     def get_permissions(self):
         if self.action == "create":

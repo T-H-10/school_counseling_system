@@ -7,7 +7,12 @@ from core.services.base import apply_fields, create_excluding
 class SchoolYearService:
     @staticmethod
     def create_school_year(data):
-        return create_excluding(SchoolYear, data)
+        should_activate = bool(data.get("is_active"))
+        year = create_excluding(SchoolYear, {**data, "is_active": False})
+        if should_activate:
+            SchoolYearService.activate_year(year.id)
+            year.refresh_from_db()
+        return year
 
     @staticmethod
     def update_school_year(year, data):

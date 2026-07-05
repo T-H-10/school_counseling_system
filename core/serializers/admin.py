@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 
@@ -39,6 +40,19 @@ class SchoolSerializer(serializers.ModelSerializer):
         model = School
         fields = "__all__"
         read_only_fields = ["created_at"]
+        # DRF's auto-generated UniqueValidator falls back to its English
+        # message template ("school with this institution code already
+        # exists"), only partially translated by Django's i18n — override
+        # with a clean Hebrew message.
+        extra_kwargs = {
+            "institution_code": {
+                "validators": [
+                    UniqueValidator(
+                        queryset=School.objects.all(), message="קוד מוסד כבר קיים"
+                    )
+                ]
+            }
+        }
 
 
 class ClassLevelSerializer(serializers.ModelSerializer):
@@ -66,6 +80,15 @@ class CounselorSerializer(serializers.ModelSerializer):
         model = Counselor
         fields = ["id", "username", "password", "full_name", "school", "created_at"]
         read_only_fields = ["created_at"]
+
+    def to_representation(self, instance):
+        # `username` is write_only above (it's input for creating the linked
+        # User, not a Counselor model field), so DRF drops it from output by
+        # default — add it back from the linked User for list/retrieve/create
+        # responses.
+        data = super().to_representation(instance)
+        data["username"] = instance.user.username
+        return data
 
 
 class ArchiveEntrySerializer(serializers.Serializer):

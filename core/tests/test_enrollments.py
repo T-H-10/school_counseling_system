@@ -393,6 +393,21 @@ def test_activate_year_deactivates_others(admin_client, active_year):
 
 
 @pytest.mark.django_db
+def test_create_active_year_deactivates_others(admin_client, active_year):
+    """POST is_active=True on a new year atomically deactivates all other years."""
+    resp = admin_client.post(
+        "/schoolYears/", {"name": "2026-2027", "is_active": True}, format="json"
+    )
+    assert resp.status_code == 201
+
+    from core.models import SchoolYear as SY
+    active_years = SY.objects.filter(is_active=True)
+    assert active_years.count() == 1
+    assert active_years.first().id == resp.data["id"]
+    assert active_years.first().id != active_year.id
+
+
+@pytest.mark.django_db
 def test_db_constraint_rejects_two_active_years(db):
     """The DB partial unique index prevents two rows with is_active=True."""
     from django.db import IntegrityError
