@@ -18,6 +18,17 @@ class Student(BaseModel):
         ("other",         "אחר"),
     ]
 
+    GENDER_CHOICES = [
+        ("male",   "זכר"),
+        ("female", "נקבה"),
+    ]
+
+    FOLLOW_UP_CHOICES = [
+        ("none",       "רגיל"),
+        ("monitoring", "במעקב"),
+        ("at_risk",    "בסיכון"),
+    ]
+
     school = models.ForeignKey(School, on_delete=models.CASCADE, related_name="students")
 
     full_name = models.CharField(max_length=150)
@@ -35,6 +46,18 @@ class Student(BaseModel):
         max_length=20, choices=PARENTS_STATUS_CHOICES, blank=True, default=""
     )
     notes = models.TextField(blank=True, default="")
+
+    birth_date = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True, default="")
+
+    guardian_name = models.CharField(max_length=100, blank=True, default="")
+    guardian_relation = models.CharField(max_length=50, blank=True, default="")
+    guardian_phone = models.CharField(max_length=20, blank=True, default="")
+
+    external_care = models.TextField(blank=True, default="")
+    follow_up_level = models.CharField(
+        max_length=20, choices=FOLLOW_UP_CHOICES, default="none"
+    )
 
     def __str__(self):
         return self.full_name

@@ -98,6 +98,11 @@ class StudentSerializer(serializers.ModelSerializer):
             validate_phone(value)
         return value
 
+    def validate_guardian_phone(self, value):
+        if value:
+            validate_phone(value)
+        return value
+
     def validate(self, data):
         if not self.instance:  # creation — enrollment fields are mandatory
             errors = {}
@@ -121,6 +126,13 @@ class StudentSerializer(serializers.ModelSerializer):
             "father_phone",
             "parents_status",
             "notes",
+            "birth_date",
+            "gender",
+            "guardian_name",
+            "guardian_relation",
+            "guardian_phone",
+            "external_care",
+            "follow_up_level",
             "school",
             "created_at",
             "current_class_level",

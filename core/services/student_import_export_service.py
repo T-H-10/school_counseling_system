@@ -6,6 +6,7 @@ the same Hebrew validation messages, and the same result shape are produced.
 HTTP concerns (status codes, file responses) stay in the view.
 """
 
+import datetime
 import io
 
 import openpyxl
@@ -28,6 +29,21 @@ _PARENTS_STATUS_HEBREW_TO_VALUE = {
 }
 _PARENTS_STATUS_VALUE_TO_HEBREW = {v: k for k, v in _PARENTS_STATUS_HEBREW_TO_VALUE.items()}
 
+# Mirrors Student.GENDER_CHOICES — update both together if choices change.
+_GENDER_HEBREW_TO_VALUE = {
+    "זכר": "male",
+    "נקבה": "female",
+}
+_GENDER_VALUE_TO_HEBREW = {v: k for k, v in _GENDER_HEBREW_TO_VALUE.items()}
+
+# Mirrors Student.FOLLOW_UP_CHOICES — update both together if choices change.
+_FOLLOW_UP_HEBREW_TO_VALUE = {
+    "רגיל": "none",
+    "במעקב": "monitoring",
+    "בסיכון": "at_risk",
+}
+_FOLLOW_UP_VALUE_TO_HEBREW = {v: k for k, v in _FOLLOW_UP_HEBREW_TO_VALUE.items()}
+
 COL_MAP = {
     "שם מלא": "full_name",
     "מספר זהות": "id_number",
@@ -41,6 +57,13 @@ COL_MAP = {
     "כתובת": "address",
     "מצב משפחתי": "parents_status",
     "הערות": "notes",
+    "תאריך לידה": "birth_date",
+    "מגדר": "gender",
+    "שם אפוטרופוס": "guardian_name",
+    "קרבת אפוטרופוס": "guardian_relation",
+    "טלפון אפוטרופוס": "guardian_phone",
+    "גורמים מטפלים": "external_care",
+    "רמת מעקב": "follow_up_level",
 }
 REQUIRED_COLS = {
     "full_name",
@@ -70,6 +93,13 @@ EXPORT_HEADERS = [
     "כתובת",
     "מצב משפחתי",
     "הערות",
+    "תאריך לידה",
+    "מגדר",
+    "שם אפוטרופוס",
+    "קרבת אפוטרופוס",
+    "טלפון אפוטרופוס",
+    "גורמים מטפלים",
+    "רמת מעקב",
 ]
 
 
@@ -123,6 +153,17 @@ class StudentImportExportService:
                 str(int(val)) if isinstance(val, float) and val.is_integer() else str(val).strip()
             )
 
+        def cell_date(row, field):
+            idx = col_indices.get(field)
+            if idx is None or idx >= len(row) or row[idx] is None:
+                return None
+            val = row[idx]
+            if isinstance(val, datetime.datetime):
+                return val.date().isoformat()
+            if isinstance(val, datetime.date):
+                return val.isoformat()
+            return str(val).strip()
+
         parsed = []
         pre_errors = []
 
@@ -171,6 +212,38 @@ class StudentImportExportService:
                 else:
                     parents_status = resolved
 
+            gender_raw = cell(row, "gender")
+            gender = ""
+            if gender_raw:
+                resolved = _GENDER_HEBREW_TO_VALUE.get(gender_raw)
+                if resolved is None:
+                    valid = "، ".join(_GENDER_HEBREW_TO_VALUE)
+                    row_errors.append(f'מגדר "{gender_raw}" אינו חוקי. ערכים אפשריים: {valid}')
+                else:
+                    gender = resolved
+
+            follow_up_raw = cell(row, "follow_up_level")
+            follow_up_level = "none"
+            if follow_up_raw:
+                resolved = _FOLLOW_UP_HEBREW_TO_VALUE.get(follow_up_raw)
+                if resolved is None:
+                    valid = "، ".join(_FOLLOW_UP_HEBREW_TO_VALUE)
+                    row_errors.append(
+                        f'רמת מעקב "{follow_up_raw}" אינה חוקית. ערכים אפשריים: {valid}'
+                    )
+                else:
+                    follow_up_level = resolved
+
+            birth_date_raw = cell_date(row, "birth_date")
+            birth_date = None
+            if birth_date_raw:
+                try:
+                    birth_date = datetime.date.fromisoformat(birth_date_raw)
+                except ValueError:
+                    row_errors.append(
+                        f'תאריך לידה "{birth_date_raw}" אינו תקין. פורמט נדרש: YYYY-MM-DD'
+                    )
+
             if row_errors:
                 pre_errors.append({"row": row_num, "message": " | ".join(row_errors)})
                 continue
@@ -185,6 +258,13 @@ class StudentImportExportService:
                 "father_phone": cell(row, "father_phone"),
                 "parents_status": parents_status,
                 "notes": cell(row, "notes") or "",
+                "birth_date": birth_date,
+                "gender": gender,
+                "guardian_name": cell(row, "guardian_name") or "",
+                "guardian_relation": cell(row, "guardian_relation") or "",
+                "guardian_phone": cell(row, "guardian_phone") or "",
+                "external_care": cell(row, "external_care") or "",
+                "follow_up_level": follow_up_level,
                 "class_number": class_number,
                 "class_level": class_level,
                 "school_year": school_year,
@@ -224,6 +304,13 @@ class StudentImportExportService:
                     student.address or "",
                     _PARENTS_STATUS_VALUE_TO_HEBREW.get(student.parents_status, ""),
                     student.notes or "",
+                    student.birth_date.isoformat() if student.birth_date else "",
+                    _GENDER_VALUE_TO_HEBREW.get(student.gender, ""),
+                    student.guardian_name or "",
+                    student.guardian_relation or "",
+                    student.guardian_phone or "",
+                    student.external_care or "",
+                    _FOLLOW_UP_VALUE_TO_HEBREW.get(student.follow_up_level, ""),
                 ]
             )
 

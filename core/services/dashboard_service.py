@@ -75,7 +75,11 @@ class DashboardService:
         at_risk_90 = (
             Student.objects.filter(school=counselor.school)
             .annotate(last_event=Max("events__date", filter=Q(events__counselor=counselor)))
-            .filter(Q(last_event__isnull=True) | Q(last_event__lt=cutoff_90))
+            .filter(
+                Q(last_event__isnull=True)
+                | Q(last_event__lt=cutoff_90)
+                | Q(follow_up_level="at_risk")
+            )
             .distinct()
         )
 
