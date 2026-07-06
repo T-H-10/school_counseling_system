@@ -40,6 +40,20 @@ def test_create_request_sends_email(client_a, settings):
 
 
 @pytest.mark.django_db
+def test_create_request_survives_email_failure(client_a, counselor_a, monkeypatch):
+    """A failed notification email must not 500 the counselor: the request is
+    already persisted, so the send is best-effort and its failure is swallowed."""
+
+    def _boom(*args, **kwargs):
+        raise Exception("smtp down")
+
+    monkeypatch.setattr("core.services.support_request_service.send_mail", _boom)
+    resp = client_a.post(URL_LIST, {"subject": "בעיה", "message": "תוכן"})
+    assert resp.status_code == 201
+    assert SupportRequest.objects.filter(school=counselor_a.school).count() == 1
+
+
+@pytest.mark.django_db
 def test_new_request_has_open_status(client_a):
     resp = client_a.post(URL_LIST, {"subject": "שאלה", "message": "?"})
     assert resp.data["status"] == SupportRequest.STATUS_OPEN
