@@ -64,7 +64,7 @@ def validate_document_file(f):
 
 def validate_phone(value):
     if not re.match(r"^05\d{8}$", value):
-        raise ValidationError("Invalid phone number")
+        raise ValidationError("מספר טלפון לא תקין")
 
 
 def validate_id_number(value):
@@ -79,6 +79,16 @@ def validate_id_number(value):
         raise ValidationError("מספר תעודת זהות לא תקין")
 
 
+# Names may contain Hebrew or Latin letters, spaces, and the punctuation real
+# names use (hyphen for בן-גוריון, geresh/apostrophe for ג'ורג', period for
+# initials) — but not digits or other symbols.
+_NAME_RE = re.compile(r"^[A-Za-zא-ת׳״\s'.\-]+$")
+
+
 def validate_name(value):
-    if len(value) < 2:
-        raise ValidationError("Name too short")
+    if len(value.strip()) < 2:
+        raise ValidationError("השם חייב לכלול לפחות 2 תווים")
+    if len(value) > 150:
+        raise ValidationError("השם ארוך מדי (מקסימום 150 תווים)")
+    if not _NAME_RE.match(value):
+        raise ValidationError("השם מכיל תווים לא חוקיים")
