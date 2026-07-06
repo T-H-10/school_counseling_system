@@ -59,6 +59,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    # Compresses API JSON (dashboard/calendar payloads) at the app level, so
+    # responses are small on slow school connections regardless of whether
+    # the hosting proxy compresses. Skips already-compressed bodies (e.g.
+    # WhiteNoise's pre-gzipped statics, xlsx exports) and responses < 200
+    # bytes; Django mitigates BREACH with random gzip padding.
+    "django.middleware.gzip.GZipMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
