@@ -21,6 +21,7 @@ from core.views import (
     DashboardView,
     GlobalSearchView,
     LogoutView,
+    health_check,
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -43,6 +44,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path("healthz/", health_check),
     path("admin/", admin.site.urls),
     path("", include("core.urls")),
     path("dashboard/", DashboardView.as_view()),
