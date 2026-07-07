@@ -1,0 +1,65 @@
+name: CI
+
+# Runs the backend test suite (the safety net for delete/cascade and other
+# data-integrity changes) plus a dependency vulnerability scan, on every push
+# and pull request. Tests use the SQLite fallback (no DATABASE_URL), matching
+# how the suite runs locally; DEBUG=True gives settings.py a dev SECRET_KEY.
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests + lint
+    runs-on: ubuntu-latest
+    env:
+      DEBUG: "True" # SQLite fallback + dev SECRET_KEY; no prod secrets in CI
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-test.txt
+
+      # Informational for now: the codebase is not yet ruff-clean. Kept
+      # non-blocking so it surfaces new issues without a mass reformat; flip
+      # to blocking once the existing lint/format debt is cleared.
+      - name: Ruff lint (informational)
+        continue-on-error: true
+        run: ruff check .
+
+      - name: Run tests
+        run: pytest --cov=core --cov-report=term-missing
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install pip-audit
+        run: pip install pip-audit==2.10.1
+
+      - name: Audit backend dependencies
+        run: pip-audit -r requirements.txt
