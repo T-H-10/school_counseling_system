@@ -114,7 +114,16 @@ def test_create_short_name_rejected(client_a, active_year, class_levels):
     resp = client_a.post("/students/", payload, format="json")
 
     assert resp.status_code == 400
-    assert "Name too short" in resp.data["full_name"]
+    assert "השם חייב לכלול לפחות 2 תווים" in resp.data["full_name"]
+
+
+@pytest.mark.django_db
+def test_create_name_with_invalid_characters_rejected(client_a, active_year, class_levels):
+    payload = _valid_payload(active_year, class_levels[0], full_name="דנה123")
+    resp = client_a.post("/students/", payload, format="json")
+
+    assert resp.status_code == 400
+    assert "השם מכיל תווים לא חוקיים" in resp.data["full_name"]
 
 
 @pytest.mark.django_db
@@ -124,7 +133,7 @@ def test_create_invalid_phone_rejected(client_a, active_year, class_levels, fiel
     resp = client_a.post("/students/", payload, format="json")
 
     assert resp.status_code == 400
-    assert "Invalid phone number" in resp.data[field]
+    assert "מספר טלפון לא תקין" in resp.data[field]
 
 
 # --- Required-on-create enrollment fields ----------------------------------
