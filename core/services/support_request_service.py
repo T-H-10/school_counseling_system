@@ -1,7 +1,11 @@
+import logging
+
 from django.conf import settings
 from django.core.mail import send_mail
 
 from core.models import SupportRequest
+
+logger = logging.getLogger(__name__)
 
 
 class SupportRequestService:
@@ -20,7 +24,14 @@ class SupportRequestService:
             f"בית ספר: {counselor.school.name}\n\n"
             f"{request.message}"
         )
-        send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [settings.ADMIN_EMAIL])
+        # The request is already persisted — a failed admin-notification email
+        # must not surface to the counselor as a 500. Best-effort send + log.
+        try:
+            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [settings.ADMIN_EMAIL])
+        except Exception:
+            logger.exception(
+                "Failed to send support-request notification email (request id=%s)", request.id
+            )
         return request
 
     @staticmethod
