@@ -27,6 +27,21 @@ load_dotenv(BASE_DIR / ".env")
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
+# Deployment profile — one switch that derives sensible per-mode defaults for
+# the database, media backend, email transport, and background scheduler. Every
+# individual setting below still honours its own env-var override, so a specific
+# install can deviate from its mode defaults. Feature code never reads this;
+# all mode branching stays inside this settings module.
+DEPLOYMENT_MODE = os.environ.get("DEPLOYMENT_MODE", "cloud").strip().lower()
+_VALID_DEPLOYMENT_MODES = {"desktop", "cloud", "hybrid"}
+if DEPLOYMENT_MODE not in _VALID_DEPLOYMENT_MODES:
+    raise ImproperlyConfigured(
+        "DEPLOYMENT_MODE must be one of "
+        f"{sorted(_VALID_DEPLOYMENT_MODES)}, got {DEPLOYMENT_MODE!r}"
+    )
+# Desktop and hybrid run on-box (fully/partly local); cloud is centrally hosted.
+IS_LOCAL_MODE = DEPLOYMENT_MODE in {"desktop", "hybrid"}
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "")
 if not SECRET_KEY:
     if DEBUG:
@@ -154,8 +169,9 @@ SWAGGER_SETTINGS = {
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# Production (Render/Neon) sets DATABASE_URL (keep ?sslmode=require);
-# dev and pytest fall back to local SQLite when it is unset.
+# DB engine follows the deployment mode via DATABASE_URL: cloud sets it to
+# Neon PostgreSQL (keep ?sslmode=require); desktop/hybrid, dev and pytest leave
+# it unset and fall back to on-box SQLite.
 DATABASES = {
     "default": dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -221,11 +237,15 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Maximum upload size for documents (bytes). Override via env var.
 DOCUMENT_MAX_UPLOAD_SIZE = int(os.environ.get("DOCUMENT_MAX_UPLOAD_SIZE", str(10 * 1024 * 1024)))
 
-# Cloudflare R2 storage (production). Activated when R2_ACCOUNT_ID env var is set.
+# Media/document storage adapter. Django's STORAGES["default"] IS the storage
+# interface every FileField / `default_storage` call routes through, so swapping
+# the backend here changes storage for all feature code without touching it.
+# Cloud and hybrid use the Cloudflare R2 object store when configured; desktop
+# always keeps documents on the local filesystem.
 # PRIVATE bucket — files are only ever streamed through the permission-checked
 # document endpoints, never served by direct URL.
 _R2_ACCOUNT_ID = os.environ.get("R2_ACCOUNT_ID", "")
-if _R2_ACCOUNT_ID:
+if _R2_ACCOUNT_ID and DEPLOYMENT_MODE != "desktop":
     INSTALLED_APPS += ["storages"]
     STORAGES["default"] = {
         "BACKEND": "storages.backends.s3.S3Storage",
@@ -240,7 +260,6 @@ if _R2_ACCOUNT_ID:
     }
 
 # Email
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
@@ -248,6 +267,21 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", EMAIL_HOST_USER)
+
+# Transport: cloud sends real mail via SMTP; desktop/hybrid default to the
+# console backend so the reminder job never blocks on missing SMTP creds.
+# Providing EMAIL_HOST_USER (or EMAIL_BACKEND) opts a local install into SMTP.
+_default_email_backend = (
+    "django.core.mail.backends.smtp.EmailBackend"
+    if DEPLOYMENT_MODE == "cloud" or EMAIL_HOST_USER
+    else "django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", _default_email_backend)
+
+# Background reminder scheduler. core/apps.py only starts it under `runserver`
+# (so pytest and gunicorn workers never do); this flag lets any mode force it
+# off — e.g. RUN_SCHEDULER=0 on a replica — without touching feature code.
+RUN_SCHEDULER = os.environ.get("RUN_SCHEDULER", "1") != "0"
 
 # Security headers (always on; harmless in dev)
 SECURE_CONTENT_TYPE_NOSNIFF = True

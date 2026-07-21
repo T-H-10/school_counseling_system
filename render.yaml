@@ -10,6 +10,8 @@ services:
     envVars:
       - key: SECRET_KEY # exact name the code reads — NOT DJANGO_SECRET_KEY
         generateValue: true
+      - key: DEPLOYMENT_MODE # centrally hosted profile (SMTP + R2 + Neon defaults)
+        value: "cloud"
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS # exact host only — never a .onrender.com wildcard
