@@ -8,7 +8,21 @@ class CoreConfig(AppConfig):
     name = "core"
 
     def ready(self):
-        if getattr(settings, "RUN_SCHEDULER", True) and "runserver" in sys.argv:
+        if "runserver" not in sys.argv:
+            return
+
+        # Desktop/hybrid have no separate build/deploy step to run `migrate`
+        # (cloud does this in build.sh), so bring the DB up to date here,
+        # before the server starts accepting requests. Two independently
+        # idempotent steps — schema migration, then reference-data init —
+        # never seed inside a migration.
+        if settings.IS_LOCAL_MODE:
+            from django.core.management import call_command
+
+            call_command("migrate", interactive=False)
+            call_command("setup_infrastructure")
+
+        if getattr(settings, "RUN_SCHEDULER", True):
             from core import scheduler as sched
 
             sched.start()
