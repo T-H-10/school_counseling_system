@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -41,6 +42,32 @@ if DEPLOYMENT_MODE not in _VALID_DEPLOYMENT_MODES:
     )
 # Desktop and hybrid run on-box (fully/partly local); cloud is centrally hosted.
 IS_LOCAL_MODE = DEPLOYMENT_MODE in {"desktop", "hybrid"}
+
+# Per-user runtime data directory (desktop/hybrid only). Every runtime-generated
+# file — the SQLite DB, uploaded media, logs, backups, temp files — lives under
+# one OS-standard, per-user root, kept outside the app bundle so reinstalling
+# or upgrading the app never touches user data. Override the root explicitly
+# via DESKTOP_DATA_DIR (e.g. to point at a scratch directory while testing).
+# Cloud never uses this: DATA_DIR stays None and every path below falls back
+# to its original BASE_DIR-relative default, so cloud behavior is unchanged.
+
+
+def _default_desktop_data_dir() -> Path:
+    app_name = "EduCare"
+    if sys.platform == "win32":
+        root = os.environ.get("APPDATA") or str(Path.home() / "AppData" / "Roaming")
+    elif sys.platform == "darwin":
+        root = str(Path.home() / "Library" / "Application Support")
+    else:
+        root = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
+    return Path(root) / app_name
+
+
+DATA_DIR = None
+if IS_LOCAL_MODE:
+    DATA_DIR = Path(os.environ.get("DESKTOP_DATA_DIR") or _default_desktop_data_dir())
+    for _subdir in ("media", "logs", "backups", "tmp"):
+        (DATA_DIR / _subdir).mkdir(parents=True, exist_ok=True)
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "")
 if not SECRET_KEY:
@@ -170,11 +197,13 @@ SWAGGER_SETTINGS = {
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 # DB engine follows the deployment mode via DATABASE_URL: cloud sets it to
-# Neon PostgreSQL (keep ?sslmode=require); desktop/hybrid, dev and pytest leave
-# it unset and fall back to on-box SQLite.
+# Neon PostgreSQL (keep ?sslmode=require). Desktop/hybrid, dev and pytest leave
+# it unset and fall back to on-box SQLite — under DATA_DIR in local modes
+# (see the per-user data directory block above), or BASE_DIR otherwise.
+_default_sqlite_path = (DATA_DIR if DATA_DIR else BASE_DIR) / "db.sqlite3"
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        default=f"sqlite:///{_default_sqlite_path}",
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -230,9 +259,16 @@ STORAGES = {
     },
 }
 
-# Media files (user-uploaded documents)
+# Media files (user-uploaded documents). Local modes keep them under the
+# per-user data directory (DATA_DIR); cloud keeps the original BASE_DIR path
+# (irrelevant once R2 is configured, but still used as the local fallback).
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = (DATA_DIR / "media") if DATA_DIR else (BASE_DIR / "media")
+
+# Backups (Step 5) and scratch/temp files. Only meaningful in local modes —
+# cloud has no writable local disk to rely on, so these stay None there.
+BACKUP_DIR = (DATA_DIR / "backups") if DATA_DIR else None
+TEMP_DIR = (DATA_DIR / "tmp") if DATA_DIR else None
 
 # Maximum upload size for documents (bytes). Override via env var.
 DOCUMENT_MAX_UPLOAD_SIZE = int(os.environ.get("DOCUMENT_MAX_UPLOAD_SIZE", str(10 * 1024 * 1024)))
@@ -312,3 +348,16 @@ LOGGING = {
         "django.security": {"level": "WARNING"},
     },
 }
+
+# Local modes also log to a rotating file under the per-user data directory,
+# so logs survive/are inspectable outside the console (e.g. a windowed desktop
+# app with no visible terminal).
+if DATA_DIR:
+    LOGGING["handlers"]["file"] = {
+        "class": "logging.handlers.RotatingFileHandler",
+        "filename": str(DATA_DIR / "logs" / "app.log"),
+        "maxBytes": 5 * 1024 * 1024,
+        "backupCount": 3,
+        "formatter": "simple",
+    }
+    LOGGING["root"]["handlers"].append("file")
