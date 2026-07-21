@@ -43,6 +43,11 @@ if DEPLOYMENT_MODE not in _VALID_DEPLOYMENT_MODES:
 # Desktop and hybrid run on-box (fully/partly local); cloud is centrally hosted.
 IS_LOCAL_MODE = DEPLOYMENT_MODE in {"desktop", "hybrid"}
 
+# Recorded in every backup manifest (Step 5) for future-compatibility checks
+# on restore. Bump manually on release; env override lets a build pipeline
+# stamp a real version without touching source.
+APP_VERSION = os.environ.get("APP_VERSION", "0.1.0")
+
 # Per-user runtime data directory (desktop/hybrid only). Every runtime-generated
 # file — the SQLite DB, uploaded media, logs, backups, temp files — lives under
 # one OS-standard, per-user root, kept outside the app bundle so reinstalling

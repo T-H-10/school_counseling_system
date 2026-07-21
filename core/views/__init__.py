@@ -12,6 +12,7 @@ from .admin import (
     SchoolYearViewSet,
 )
 from .auth import CookieTokenObtainPairView, CookieTokenRefreshView, LogoutView
+from .backup import BackupViewSet
 from .base import BaseSchoolViewSet
 from .dashboard import DashboardView
 from .document import DocumentViewSet
@@ -35,6 +36,7 @@ __all__ = [
     "SchoolYearViewSet",
     "CounselorViewSet",
     "AdminArchiveViewSet",
+    "BackupViewSet",
     "CookieTokenObtainPairView",
     "CookieTokenRefreshView",
     "LogoutView",

@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.exceptions import InvalidToken
@@ -17,6 +18,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Lets the client tell a pure admin (is_staff, no Counselor row) apart
         # from a hybrid admin+counselor user, who should see both nav areas.
         token["has_counselor"] = hasattr(user, "counselor")
+        # Lets the admin UI show/hide the desktop/hybrid-only backup screen
+        # (the /backup/ API route itself is also gated server-side).
+        token["deployment_mode"] = settings.DEPLOYMENT_MODE
         return token
 
 
