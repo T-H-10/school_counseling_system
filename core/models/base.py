@@ -30,6 +30,7 @@ class BaseManager(models.Manager):
 
 class BaseModel(SoftDeleteModel):
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     objects = BaseManager()
     all_objects = models.Manager()
