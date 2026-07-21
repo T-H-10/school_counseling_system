@@ -27,7 +27,11 @@ def _set_refresh_cookie(response, token):
         token,
         max_age=int(jwt_settings.REFRESH_TOKEN_LIFETIME.total_seconds()),
         httponly=True,
-        secure=not settings.DEBUG,
+        # Cloud is DEBUG=False behind HTTPS -> Secure. Desktop/hybrid may also
+        # run with DEBUG=False but serve loopback HTTP with no TLS, where a
+        # Secure cookie would never be sent back — settings.SECURE_COOKIES
+        # accounts for that (see config/settings.py).
+        secure=settings.SECURE_COOKIES,
         samesite="Lax",
         path=settings.REFRESH_COOKIE_PATH,
     )

@@ -179,9 +179,16 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
+# Local modes are typically opened via either http://localhost:5173 or
+# http://127.0.0.1:5173 (loopback) depending on how the dev server/bundled
+# app is launched — allow both by default so neither breaks CORS. Cloud's
+# default is unchanged.
+_default_cors_origins = (
+    "http://localhost:5173,http://127.0.0.1:5173" if IS_LOCAL_MODE else "http://localhost:5173"
+)
 CORS_ALLOWED_ORIGINS = [
     o.strip()
-    for o in os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+    for o in os.environ.get("CORS_ALLOWED_ORIGINS", _default_cors_origins).split(",")
     if o.strip()
 ]
 # Required so the browser sends/stores the httpOnly refresh cookie on /token/ calls.
@@ -324,8 +331,14 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
 X_FRAME_OPTIONS = "DENY"
 
-# HTTPS-only hardening — active only in production (DEBUG=False)
-if not DEBUG:
+# HTTPS-only hardening — active only when actually served over TLS. Cloud is
+# production behind HTTPS, so DEBUG=False there means "harden". Desktop/hybrid
+# can also run with DEBUG=False (a packaged, production-like build) but are
+# served over plain HTTP on the loopback interface (127.0.0.1) with no TLS
+# terminator in front, so forcing HTTPS redirects/secure cookies there would
+# break auth entirely — gate hardening on `not IS_LOCAL_MODE` too.
+SECURE_COOKIES = not DEBUG and not IS_LOCAL_MODE
+if SECURE_COOKIES:
     SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_HSTS_SECONDS = 31536000
